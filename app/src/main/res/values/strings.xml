@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">P2Photo</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="notRegistered"><u>Not a member? Sign up now.</u></string>
+</resources>
