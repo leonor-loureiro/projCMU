@@ -4,4 +4,9 @@
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="notRegistered"><u>Not a member? Sign up now.</u></string>
+    <string name="invalidCredentials">Invalid credentials. Please try again.</string>
+    <string name="create_account">Create account</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="already_registered"><u>Already registered? Log in.</u></string>
+    <string name="register">Register</string>
 </resources>

@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.LoginActivity">
+    tools:context=".activities.RegisterActivity">
 
-   <TextView
-       android:id="@+id/appName"
+    <TextView
+        android:id="@+id/appName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/guidelineTop"
@@ -16,17 +16,16 @@
         android:text="@string/app_name"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="50sp"
-       android:textStyle="bold"/>
+        android:textStyle="bold"/>
 
     <TextView
-        android:id="@+id/login"
+        android:id="@+id/register"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/appName"
         app:layout_constraintStart_toEndOf="@id/guidelineLeft"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
-        android:text="@string/login"
-
+        android:text="@string/create_account"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="35sp"/>
 
@@ -40,51 +39,65 @@
         android:inputType="text"
         android:layout_marginTop="30dp"
         app:layout_constraintWidth_percent="0.8"
-        app:layout_constraintTop_toBottomOf="@id/login"
+        app:layout_constraintTop_toBottomOf="@id/register"
         app:layout_constraintStart_toEndOf="@id/guidelineLeft"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"/>
 
 
-   <EditText
-       android:id="@+id/password"
-       android:layout_width="0dp"
-       android:layout_height="wrap_content"
-       android:background="@drawable/user_input"
-       android:hint="@string/password"
-       android:textSize="23sp"
-       android:inputType="textPassword"
-       android:layout_marginTop="25dp"
-       app:layout_constraintWidth_percent="0.8"
-       app:layout_constraintTop_toBottomOf="@id/username"
-       app:layout_constraintStart_toEndOf="@id/guidelineLeft"
-       app:layout_constraintEnd_toStartOf="@id/guidelineRight"/>
-
-    <Button
-        android:id="@+id/loginButton"
+    <EditText
+        android:id="@+id/password"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintWidth_percent="0.6"
-        android:background="@color/colorPrimaryDark"
-        android:text="@string/login"
-        android:textColor="@color/baseLight"
-        android:layout_marginTop="30dp"
-        android:padding="10dp"
+        android:background="@drawable/user_input"
+        android:hint="@string/password"
         android:textSize="23sp"
-        android:onClick="login"
+        android:inputType="textPassword"
+        android:layout_marginTop="25dp"
+        app:layout_constraintWidth_percent="0.8"
+        app:layout_constraintTop_toBottomOf="@id/username"
+        app:layout_constraintStart_toEndOf="@id/guidelineLeft"
+        app:layout_constraintEnd_toStartOf="@id/guidelineRight"/>
+
+    <EditText
+        android:id="@+id/password2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/user_input"
+        android:hint="@string/confirm_password"
+        android:textSize="23sp"
+        android:inputType="textPassword"
+        android:layout_marginTop="25dp"
+        app:layout_constraintWidth_percent="0.8"
         app:layout_constraintTop_toBottomOf="@id/password"
         app:layout_constraintStart_toEndOf="@id/guidelineLeft"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"/>
 
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.6"
+        android:background="@color/colorPrimaryDark"
+        android:text="@string/register"
+        android:textColor="@color/baseLight"
+        android:layout_marginTop="30dp"
+        android:padding="10dp"
+        android:textSize="23sp"
+        android:onClick="register"
+        app:layout_constraintTop_toBottomOf="@id/password2"
+        app:layout_constraintStart_toEndOf="@id/guidelineLeft"
+        app:layout_constraintEnd_toStartOf="@id/guidelineRight"/>
+
     <TextView
-        android:id="@+id/notRegistered"
+        android:id="@+id/alreadyRegistered"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/notRegistered"
+        android:text="@string/already_registered"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="20sp"
         android:layout_marginTop="20dp"
-        android:onClick="startRegisterActivity"
-        app:layout_constraintTop_toBottomOf="@id/loginButton"
+        android:onClick="startLoginActivity"
+        app:layout_constraintTop_toBottomOf="@id/registerButton"
         app:layout_constraintStart_toEndOf="@id/guidelineLeft"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"/>
 
