@@ -39,8 +39,10 @@ public class LoginActivity extends AppCompatActivity {
 
         }else {
             //TODO: login operation
-            //Removes login activity from activity stack
-            finish();
+            Intent intent = new Intent(this, ListAlbums.class);
+            //Clears the activity stack
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         }
     }
 

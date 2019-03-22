@@ -70,7 +70,8 @@
         app:layout_constraintWidth_percent="0.8"
         app:layout_constraintTop_toBottomOf="@id/password"
         app:layout_constraintStart_toEndOf="@id/guidelineLeft"
-        app:layout_constraintEnd_toStartOf="@id/guidelineRight"/>
+        app:layout_constraintEnd_toStartOf="@id/guidelineRight"
+        android:imeOptions="actionDone"/>
 
     <Button
         android:id="@+id/registerButton"
@@ -108,14 +109,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.1" />
+        app:layout_constraintGuide_percent="0.15" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guidelineBottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.9" />
+        app:layout_constraintGuide_percent="0.85" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guidelineLeft"

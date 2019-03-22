@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 
+import java.util.List;
+
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
@@ -46,8 +48,10 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        //Removes activity from activity stack
-        finish();
+        Intent intent = new Intent(this, ListAlbums.class);
+        //Clears the activity stack
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     public void startLoginActivity(View view) {
