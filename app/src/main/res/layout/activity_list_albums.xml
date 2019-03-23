@@ -20,7 +20,7 @@
     <ListView
         android:id="@+id/folders_list"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         >
     </ListView>
@@ -33,10 +33,10 @@
         android:padding="10dp"
         android:textColor="@color/baseLight"
         android:minWidth="150dp"
-        app:icon="@drawable/ic_camera_alt_white_24dp"
+        app:icon="@drawable/baseline_camera_alt_white_24"
         app:cornerRadius="16dp"
         app:iconTint="@color/baseLight"
-        android:backgroundTint="@color/baseMedium"
+        android:backgroundTint="@color/baseMediumDark"
         android:textAppearance="?android:textAppearanceLarge"
         app:layout_constraintBottom_toTopOf="@id/add"
         app:layout_constraintEnd_toEndOf="parent"
@@ -53,10 +53,10 @@
         android:padding="10dp"
         android:textColor="@color/baseLight"
         android:minWidth="150dp"
-        app:icon="@drawable/ic_share_white_24dp"
+        app:icon="@drawable/baseline_share_white_24"
         app:cornerRadius="16dp"
         app:iconTint="@color/baseLight"
-        android:backgroundTint="@color/baseMedium"
+        android:backgroundTint="@color/baseMediumDark"
         android:textAppearance="?android:textAppearanceLarge"
         android:layout_marginBottom="70dp"
         app:layout_constraintBottom_toTopOf="@id/add"
@@ -66,26 +66,6 @@
         android:layout_height="wrap_content"
         android:visibility="invisible"/>
 
-<!--
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/addPhoto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="20dp"
-        app:srcCompat="@android:drawable/ic_menu_camera" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/share"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="20dp"
-        app:fabSize="normal"
-        app:srcCompat="@android:drawable/ic_menu_share" /> -->
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add"
@@ -96,7 +76,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@color/colorPrimaryDark"
         android:layout_margin="20dp"
-        app:srcCompat="@drawable/ic_add_white_36dp" />
+        app:srcCompat="@drawable/baseline_add_white_36" />
 
 
 
