@@ -57,6 +57,7 @@
         app:cornerRadius="16dp"
         app:iconTint="@color/baseLight"
         android:backgroundTint="@color/baseMediumDark"
+        android:onClick="adduser"
         android:textAppearance="?android:textAppearanceLarge"
         android:layout_marginBottom="70dp"
         app:layout_constraintBottom_toTopOf="@id/add"
