@@ -1,6 +1,8 @@
 package pt.ulisboa.tecnico.cmov.p2photo.data;
 
-public class Album {
+import java.io.Serializable;
+
+public class Album implements Serializable{
     String name;
     String url;
 

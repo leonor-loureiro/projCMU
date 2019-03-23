@@ -1,15 +1,18 @@
 package pt.ulisboa.tecnico.cmov.p2photo.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.button.MaterialButton;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -25,11 +28,6 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 
 public class ListAlbums extends AppCompatActivity {
 
-    MaterialButton shareButton;
-    MaterialButton addPhotoButton;
-    FloatingActionButton addButton;
-    boolean actionButtonExpanded = false;
-
     ListAlbumsAdapter adapter;
     ListView listView;
 
@@ -41,21 +39,6 @@ public class ListAlbums extends AppCompatActivity {
         //Set the toolbar as the ActionBar for this window
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        //Action buttons menu animation
-        shareButton = findViewById(R.id.share);
-        addPhotoButton = findViewById(R.id.add_photo);
-        addButton = findViewById(R.id.add);
-
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(actionButtonExpanded)
-                    closeActionMenu();
-                else
-                    openActionMenu();
-            }
-        });
 
         List<Album> albums = new ArrayList<>();
         getAlbums(albums);
@@ -69,13 +52,11 @@ public class ListAlbums extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Album album = (Album) adapter.getItem(i);
-                //TODO add go to list photos of album
-                Toast.makeText(ListAlbums.this, "Open album " + album.getName(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(ListAlbums.this, ListPhotos.class);
+                intent.putExtra("album", album);
+                startActivity(intent);
             }
         });
-
-
-
     }
 
     private void getAlbums(List<Album> albums) {
@@ -86,19 +67,6 @@ public class ListAlbums extends AppCompatActivity {
         albums.add(new Album("Album 4", "url4"));
     }
 
-    private void closeActionMenu() {
-        actionButtonExpanded = false;
-        shareButton.setVisibility(View.INVISIBLE);
-        shareButton.animate().translationY(0);
-        addPhotoButton.setVisibility(View.INVISIBLE);
-    }
-
-    private void openActionMenu() {
-        actionButtonExpanded = true;
-        addPhotoButton.setVisibility(View.VISIBLE);
-        shareButton.animate().translationY(-getResources().getDimension(R.dimen.standard_70));
-        shareButton.setVisibility(View.VISIBLE);
-    }
 
     // Inflates the action bar with the menu options
     @Override
@@ -120,10 +88,44 @@ public class ListAlbums extends AppCompatActivity {
         }, null);
     }
 
-    public void adduser(View view) {
-        Intent intent = new Intent(ListAlbums.this, AddUserActivity.class);
-        //Clears the activity stack
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+    public void createAlbum(View view){
+        Log.i("Albums", "createAlbum");
+        AlertDialog alertDialog = new AlertDialog.Builder(ListAlbums.this).create();
+        alertDialog.setTitle(getString(R.string.create_album));
+
+        //Add field to insert album name
+        final EditText input = new EditText(ListAlbums.this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+
+
+        //Set listener for button yes
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String name = input.getText().toString().trim();
+                        if(name.equals("")){
+                            Utils.openWarningBox(ListAlbums.this, null,"Invalid album name");
+                            return;
+                        }
+                        createNewAlbum(name);
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+
     }
+
+    private void createNewAlbum(String name) {
+        //TODO move this to post execute network request
+        Album album = new Album(name, "url_" + name);
+        adapter.add(album);
+        adapter.notifyDataSetChanged();
+        Toast.makeText(this, "Album " + name + "created successfully.", Toast.LENGTH_SHORT).show();
+    }
+
+
 }

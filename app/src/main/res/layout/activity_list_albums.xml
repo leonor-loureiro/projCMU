@@ -25,47 +25,7 @@
         >
     </ListView>
 
-    <android.support.design.button.MaterialButton
-        style="@style/Widget.MaterialComponents.Button"
-        android:id="@+id/add_photo"
-        android:text="@string/add_photo"
-        android:layout_margin="20dp"
-        android:padding="10dp"
-        android:textColor="@color/baseLight"
-        android:minWidth="150dp"
-        app:icon="@drawable/baseline_camera_alt_white_24"
-        app:cornerRadius="16dp"
-        app:iconTint="@color/baseLight"
-        android:backgroundTint="@color/baseMediumDark"
-        android:textAppearance="?android:textAppearanceLarge"
-        app:layout_constraintBottom_toTopOf="@id/add"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"/>
 
-    <android.support.design.button.MaterialButton
-        style="@style/Widget.MaterialComponents.Button"
-        android:id="@+id/share"
-        android:text="@string/share"
-        android:layout_margin="20dp"
-        android:padding="10dp"
-        android:textColor="@color/baseLight"
-        android:minWidth="150dp"
-        app:icon="@drawable/baseline_share_white_24"
-        app:cornerRadius="16dp"
-        app:iconTint="@color/baseLight"
-        android:backgroundTint="@color/baseMediumDark"
-        android:onClick="adduser"
-        android:textAppearance="?android:textAppearanceLarge"
-        android:layout_marginBottom="70dp"
-        app:layout_constraintBottom_toTopOf="@id/add"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"/>
 
 
     <android.support.design.widget.FloatingActionButton
@@ -77,7 +37,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@color/colorPrimaryDark"
         android:layout_margin="20dp"
-        app:srcCompat="@drawable/baseline_add_white_36" />
+        app:srcCompat="@drawable/baseline_add_white_36"
+        android:onClick="createAlbum"/>
 
 
 

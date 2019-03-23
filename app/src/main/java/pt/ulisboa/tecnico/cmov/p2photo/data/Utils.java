@@ -86,12 +86,4 @@ public class Utils {
                 });
         alertDialog.show();
     }
-
-    /*new Callable<Void>() {
-        public Void call() {
-            myParamMethod();
-            return null;
-        }
-    }*/
-
 }
