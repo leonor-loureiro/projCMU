@@ -56,6 +56,7 @@
         app:icon="@drawable/ic_share_white_24dp"
         app:cornerRadius="16dp"
         app:iconTint="@color/baseLight"
+        android:onClick="adduser"
         android:backgroundTint="@color/baseMedium"
         android:textAppearance="?android:textAppearanceLarge"
         android:layout_marginBottom="70dp"

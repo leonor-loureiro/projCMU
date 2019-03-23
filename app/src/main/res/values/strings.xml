@@ -102,4 +102,6 @@
     <string name="logout">Logout</string>
     <string name="add_photo">Add photo</string>
     <string name="share">Add user</string>
+    <string name="members">Members:</string>
+    <string name="AllUsers">All users:</string>
 </resources>
