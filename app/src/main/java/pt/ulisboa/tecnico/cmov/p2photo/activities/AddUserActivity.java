@@ -31,15 +31,27 @@ public class AddUserActivity extends AppCompatActivity {
 
         ListView Members = (ListView)findViewById(R.id.members);
 
-        String[] membersS =new String[]{"Leonor","Andre","Sebastiao"};
+        String[] membersS =new String[]{"Leonor","Andre","Sebastiao","OMEGAXD","Pepega","Poggers","4Head"};
 
         ArrayList<String> members = new ArrayList<String>();
 
         members.addAll(Arrays.asList(membersS));
 
-        ArrayAdapter listAdapter = new ArrayAdapter<String>(this,R.layout.add_user_row,members);
+        ArrayAdapter listAdapter = new ArrayAdapter<String>(this,R.layout.member_row,members);
 
         Members.setAdapter(listAdapter);
+
+        ListView AllUsers = (ListView)findViewById(R.id.allusers);
+
+        String[] allusers =new String[]{"Leonor","Andre","Sebastiao"};
+
+        ArrayList<String> alluserS = new ArrayList<String>();
+
+        alluserS.addAll(Arrays.asList(allusers));
+
+        ArrayAdapter allUserslistAdapter = new ArrayAdapter<String>(this,R.layout.add_user_row,alluserS);
+
+        AllUsers.setAdapter(allUserslistAdapter);
 
     }
 
