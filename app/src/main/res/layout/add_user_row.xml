@@ -2,17 +2,47 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/mediumLight">
+    android:layout_height="wrap_content">
+
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_account_circle_white_36"
+        android:visibility="visible"
+        android:padding="15dp"
+        android:tint="@color/baseMediumDark"/>
+
 
 
     <TextView
-        android:id="@+id/addrowtext"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/membername"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
         android:padding="10dp"
-        android:textSize="22sp" >
-    </TextView>
+        android:text="Name"
+        android:textSize="22sp"
+        />
+
+       <Space
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_weight="0.05" >
+    </Space>
+
+    <Button
+        android:id="@+id/adduserbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:layout_gravity="center_vertical"
+        android:text="add"
+        android:layout_marginRight="10dp"/>
+
+
+
 
 
 </LinearLayout>

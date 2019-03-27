@@ -9,15 +9,23 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
+import pt.ulisboa.tecnico.cmov.p2photo.data.MembersAdapter;
 
 public class AddUserActivity extends AppCompatActivity {
 
 
     ArrayList <String> listUsers = new ArrayList<String>();
 
-    ArrayAdapter<String> adapter;
+    MembersAdapter adapter;
+
+    MembersAdapter adapterU;
+
+    ListView listView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,29 +37,38 @@ public class AddUserActivity extends AppCompatActivity {
         toolbar.setTitle("Add User");
         setSupportActionBar(toolbar);
 
-        ListView Members = (ListView)findViewById(R.id.members);
 
-        String[] membersS =new String[]{"Leonor","Andre","Sebastiao","OMEGAXD","Pepega","Poggers","4Head"};
+        List<Member> members = new ArrayList<>();
 
-        ArrayList<String> members = new ArrayList<String>();
+        getMembers(members);
 
-        members.addAll(Arrays.asList(membersS));
+        adapter = new MembersAdapter(this,members,R.layout.member_row);
 
-        ArrayAdapter listAdapter = new ArrayAdapter<String>(this,R.layout.member_row,members);
+        listView = findViewById(R.id.members);
 
-        Members.setAdapter(listAdapter);
+        listView.setAdapter(adapter);
 
-        ListView AllUsers = (ListView)findViewById(R.id.allusers);
+        List<Member> memberstoadd = new ArrayList<>();
 
-        String[] allusers =new String[]{"Leonor","Andre","Sebastiao"};
+        getMembers(memberstoadd);
 
-        ArrayList<String> alluserS = new ArrayList<String>();
+        adapterU = new MembersAdapter(this,memberstoadd,R.layout.add_user_row);
 
-        alluserS.addAll(Arrays.asList(allusers));
+        listView = findViewById(R.id.allusers);
 
-        ArrayAdapter allUserslistAdapter = new ArrayAdapter<String>(this,R.layout.add_user_row,alluserS);
+        listView.setAdapter(adapterU);
 
-        AllUsers.setAdapter(allUserslistAdapter);
+
+
+    }
+
+    private void getMembers(List<Member> members) {
+
+        members.add(new Member("Sebastiao"));
+        members.add(new Member("Leonor"));
+        members.add(new Member("Andre"));
+        members.add(new Member("OMEGAXD"));
+        members.add(new Member("POGGERS"));
 
     }
 
