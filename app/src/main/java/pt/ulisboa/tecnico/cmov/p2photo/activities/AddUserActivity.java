@@ -34,7 +34,7 @@ public class AddUserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_user);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("Add User");
+        toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
 

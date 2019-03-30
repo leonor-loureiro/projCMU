@@ -18,4 +18,5 @@
     <string name="members">Members:</string>
     <string name="AllUsers">All users:</string>
     <string name="home">Home</string>
+    <string name ="addusers">Add Users</string>
 </resources>

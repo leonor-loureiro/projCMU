@@ -16,7 +16,41 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:titleTextColor="@color/baseLight"></android.support.v7.widget.Toolbar>
+        app:titleTextColor="@color/baseLight">
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="?attr/actionBarSize"
+            android:orientation="horizontal"
+            android:showDividers="end">
+
+            <Button
+                android:id="@+id/toolbar_save"
+                style="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle"
+                android:layout_width="27dp"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimaryDark"
+                android:drawableLeft="@drawable/baseline_clear_black_18dp"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimaryDark"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:paddingLeft="18dp"
+                android:text="@string/addusers"
+                android:textColor="@color/baseLight"
+                android:textSize="24sp"
+                android:visibility="visible"
+                app:titleTextColor="@color/baseLight" />
+
+
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
 
     <SearchView
         android:id="@+id/searchView"
