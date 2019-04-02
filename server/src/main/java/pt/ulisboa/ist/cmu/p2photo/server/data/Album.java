@@ -1,5 +1,8 @@
 package pt.ulisboa.ist.cmu.p2photo.server.data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This class represents a P2Photo album
  */
@@ -7,13 +10,13 @@ public class Album {
 
     //Album name
     private String name;
-    //Album catalog url
-    private String url;
+    //Group membership metadata: url for the catalog file of each member
+    private Map<String, String> groupMembership = new HashMap<>();
 
 
-    public Album(String name, String url) {
+    public Album(String name, String username, String catalogURL) {
         this.name = name;
-        this.url = url;
+        addMember(username, catalogURL);
     }
 
     public String getName() {
@@ -24,11 +27,11 @@ public class Album {
         this.name = name;
     }
 
-    public String getUrl() {
-        return url;
+    public Map<String, String> getGroupMembership() {
+        return groupMembership;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void addMember(String username, String catalogURL){
+        this.groupMembership.put(username, catalogURL);
     }
 }
