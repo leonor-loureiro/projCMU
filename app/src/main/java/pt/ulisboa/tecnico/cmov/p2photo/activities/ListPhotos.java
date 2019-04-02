@@ -41,6 +41,7 @@ public class ListPhotos extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_photos);
 
+
         //Get album object
         Intent intent = getIntent();
         album = (Album) intent.getSerializableExtra("album");

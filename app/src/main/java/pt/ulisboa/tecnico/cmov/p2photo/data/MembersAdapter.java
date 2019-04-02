@@ -6,13 +6,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 
-public class MembersAdapter extends ArrayAdapter<Member>{
+public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
     private List<Member> members;
     private Context mContext;
     private int ID;
@@ -51,5 +54,51 @@ public class MembersAdapter extends ArrayAdapter<Member>{
         return itemView;
 
 
+    }
+
+    @Override
+    public Filter getFilter() {
+        Filter filter = new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+                List<Member> FilteredArrayMembers = new ArrayList<Member>();
+
+                // perform your search here using the searchConstraint String.
+
+                constraint = constraint.toString().toLowerCase();
+                for (int i = 0; i < members.size(); i++) {
+                    String dataNames = members.get(i).getName();
+                    if (dataNames.toLowerCase().startsWith(constraint.toString())){
+                        Log.d("text",constraint.toString());
+                        FilteredArrayMembers.add(members.get(i));
+                    }
+                }
+
+                results.count = FilteredArrayMembers.size();
+                results.values = FilteredArrayMembers;
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+
+                if (results.count == 0) {
+                    notifyDataSetInvalidated();
+                } else {
+                    members = (List<Member>) results.values;
+                    notifyDataSetChanged();
+                }
+                for (int i = 0; i < members.size(); i++) {
+                    String dataNames = members.get(i).getName();
+                    if (dataNames.toLowerCase().startsWith(constraint.toString())) {
+                        Log.d("text", members.get(i).getName());
+                    }
+                }
+            }
+        };
+
+        return filter;
     }
 }
