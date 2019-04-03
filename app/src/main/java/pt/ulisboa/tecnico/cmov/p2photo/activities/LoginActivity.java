@@ -2,18 +2,32 @@ package pt.ulisboa.tecnico.cmov.p2photo.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.Task;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
+
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
+import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleSignInHelper;
 
 public class LoginActivity extends AppCompatActivity {
 
     EditText usernameET;
     EditText passwordET;
+
+    private GoogleSignInHelper signInHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +37,9 @@ public class LoginActivity extends AppCompatActivity {
 
         usernameET = findViewById(R.id.username);
         passwordET = findViewById(R.id.password);
+
+        signInHelper = new GoogleSignInHelper(this);
+
 
     }
 
@@ -39,15 +56,28 @@ public class LoginActivity extends AppCompatActivity {
 
         }else {
             //TODO: login operation
-            Intent intent = new Intent(this, ListAlbums.class);
-            //Clears the activity stack
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            //Perform google sign in to get drive permissions
+            //Launch app's first screen once it's successfully logged in
+            signInHelper.googleSignIn();
         }
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == GoogleSignInHelper.RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            signInHelper.handleSignInResult(task);
+        }
+    }
+
 
     public void startRegisterActivity(View view) {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
+
+
+
 }
