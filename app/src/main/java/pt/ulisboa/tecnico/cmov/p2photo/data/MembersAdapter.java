@@ -24,7 +24,10 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
         super(context, R.layout.member_row, data);
         Log.i("Members", "Start");
 
-        members= data;
+        members = new ArrayList<>();
+        for(int i = 0;i < data.size();i++){
+            members.add(data.get(i));
+        }
         mContext = context;
         ID = id;
         Log.i("Members", data.size() + "");
@@ -47,7 +50,6 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
             itemView = convertView;
         }
 
-        //Set album name
         TextView memberName = (TextView) itemView.findViewById(R.id.membername);
         memberName.setText(member.getName());
 
@@ -69,6 +71,7 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
                 constraint = constraint.toString().toLowerCase();
                 for (int i = 0; i < members.size(); i++) {
                     String dataNames = members.get(i).getName();
+                    Log.d("name",members.get(i).getName());
                     if (dataNames.toLowerCase().startsWith(constraint.toString())){
                         Log.d("text",constraint.toString());
                         FilteredArrayMembers.add(members.get(i));
@@ -85,17 +88,15 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
             protected void publishResults(CharSequence constraint, FilterResults results) {
 
                 if (results.count == 0) {
+                    clear();
                     notifyDataSetInvalidated();
+
                 } else {
-                    members = (List<Member>) results.values;
+                    clear();
+                    addAll((List<Member>)results.values);
                     notifyDataSetChanged();
                 }
-                for (int i = 0; i < members.size(); i++) {
-                    String dataNames = members.get(i).getName();
-                    if (dataNames.toLowerCase().startsWith(constraint.toString())) {
-                        Log.d("text", members.get(i).getName());
-                    }
-                }
+                Log.d("membersize",members.size() + "");
             }
         };
 

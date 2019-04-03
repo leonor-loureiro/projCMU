@@ -95,7 +95,7 @@ public class AddUserActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                AddUserActivity.this.adapter.getFilter().filter(s);
+                AddUserActivity.this.adapterU.getFilter().filter(s);
             }
 
             @Override
