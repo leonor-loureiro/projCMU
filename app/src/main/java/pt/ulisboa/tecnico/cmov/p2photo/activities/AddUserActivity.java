@@ -1,11 +1,22 @@
 package pt.ulisboa.tecnico.cmov.p2photo.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Filterable;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +35,12 @@ public class AddUserActivity extends AppCompatActivity {
 
     MembersAdapter adapterU;
 
-    ListView listView;
+    ListView listViewMembers;
+
+    ListView listViewAllUsers;
+
+    private EditText filterText;
+
 
 
     @Override
@@ -44,9 +60,9 @@ public class AddUserActivity extends AppCompatActivity {
 
         adapter = new MembersAdapter(this,members,R.layout.member_row);
 
-        listView = findViewById(R.id.members);
+        listViewMembers = findViewById(R.id.members);
 
-        listView.setAdapter(adapter);
+        listViewMembers.setAdapter(adapter);
 
         List<Member> memberstoadd = new ArrayList<>();
 
@@ -54,13 +70,44 @@ public class AddUserActivity extends AppCompatActivity {
 
         adapterU = new MembersAdapter(this,memberstoadd,R.layout.add_user_row);
 
-        listView = findViewById(R.id.allusers);
+        listViewAllUsers= findViewById(R.id.allusers);
 
-        listView.setAdapter(adapterU);
+        listViewAllUsers.setAdapter(adapterU);
+
+
+        int id = findViewById(R.id.searchView).getContext()
+                .getResources()
+                .getIdentifier("android:id/search_src_text", null, null);
+
+        filterText = findViewById(R.id.searchView).findViewById(id);
+
+        listViewMembers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getApplicationContext(), "Position " + position, Toast.LENGTH_LONG).show();
+            }
+        });
+        filterText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                AddUserActivity.this.adapterU.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
 
 
     }
+
 
     private void getMembers(List<Member> members) {
 
@@ -72,4 +119,7 @@ public class AddUserActivity extends AppCompatActivity {
 
     }
 
+    public void goBackToAlbums(View view) {
+        finish();
+    }
 }

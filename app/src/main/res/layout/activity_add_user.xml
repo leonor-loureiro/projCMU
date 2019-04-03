@@ -32,7 +32,8 @@
                 android:layout_height="match_parent"
                 android:background="@color/colorPrimaryDark"
                 android:drawableLeft="@drawable/baseline_clear_black_18dp"
-                android:gravity="center_vertical" />
+                android:gravity="center_vertical"
+                android:onClick="goBackToAlbums"/>
 
             <TextView
                 android:id="@+id/toolbar_title"
@@ -58,13 +59,15 @@
         android:layout_height="wrap_content"
         app:layout_constraintWidth_percent="0.9"
 
+
         android:layout_marginTop="8dp"
         android:background="@color/baseMedium"
         android:orientation="horizontal"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:hint="Search User"/>
 
 
     <TextView
