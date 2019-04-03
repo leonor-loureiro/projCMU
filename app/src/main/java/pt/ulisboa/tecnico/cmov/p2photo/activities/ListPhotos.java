@@ -1,6 +1,10 @@
 package pt.ulisboa.tecnico.cmov.p2photo.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +17,7 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -28,6 +33,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
  */
 public class ListPhotos extends AppCompatActivity {
 
+    private static final int GALLERY = 1327;
     MaterialButton shareButton;
     MaterialButton addPhotoButton;
     FloatingActionButton addButton;
@@ -55,7 +61,7 @@ public class ListPhotos extends AppCompatActivity {
         album_name.setText(album.getName());
 
         List<Photo> photos = new ArrayList<>();
-        getAlbumPhotos(photos);
+        //getAlbumPhotos(photos);
 
         //Set the adapter for the photos grid view
         GridView gridView = findViewById(R.id.photos_grid);
@@ -151,5 +157,35 @@ public class ListPhotos extends AppCompatActivity {
     public void startListAlbums(MenuItem item) {
         Intent intent = new Intent(this, ListAlbums.class);
         startActivity(intent);
+    }
+
+    /**
+     * Adds a photo from user's photo gallery
+     * @param view
+     */
+    public void onClickAddPhoto(View view) {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        startActivityForResult(galleryIntent, GALLERY);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // receives photo from gallery
+        if (requestCode == GALLERY) {
+            if (data != null) {
+                Uri photoPath = data.getData();
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoPath);
+                    adapter.addPhoto(new Photo("", bitmap));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
     }
 }

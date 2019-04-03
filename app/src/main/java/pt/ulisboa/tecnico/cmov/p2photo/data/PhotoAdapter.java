@@ -37,6 +37,11 @@ public class PhotoAdapter extends BaseAdapter {
         return 0;
     }
 
+    public void addPhoto(Photo photo){
+        photos.add(photo);
+        notifyDataSetChanged();
+    }
+
     @Override
     public View getView(int i, View convertView, ViewGroup viewGroup) {
         Photo photo = (Photo) getItem(i);
@@ -48,8 +53,8 @@ public class PhotoAdapter extends BaseAdapter {
         }
 
         final ImageView imageView = convertView.findViewById(R.id.image);
-        //imageView.setImageBitmap(photo.getBitmap());
-        imageView.setImageResource(android.R.drawable.ic_menu_gallery);
+        imageView.setImageBitmap(photo.getBitmap());
+        //imageView.setImageResource(android.R.drawable.ic_menu_gallery);
 
         return convertView;
     }
