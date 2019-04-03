@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.p2photo.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,12 +10,7 @@ import android.widget.EditText;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
@@ -64,12 +60,16 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == GoogleSignInHelper.RC_SIGN_IN) {
+        if(requestCode == GoogleSignInHelper.REQUEST_CODE_SIGN_IN &&
+                resultCode == Activity.RESULT_OK) {
+
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             signInHelper.handleSignInResult(task);
         }
+
+        super.onActivityResult(requestCode, resultCode, data);
+
     }
 
 

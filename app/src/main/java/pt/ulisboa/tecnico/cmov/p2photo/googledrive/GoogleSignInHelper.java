@@ -26,9 +26,8 @@ import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbums;
  */
 public class GoogleSignInHelper {
 
-    public static final int RC_SIGN_IN = 100;
+    public static final int REQUEST_CODE_SIGN_IN = 100;
     private Activity activity;
-    private GoogleSignInClient mGoogleSignInClient;
 
 
 
@@ -41,29 +40,23 @@ public class GoogleSignInHelper {
      * if not, performs the google sign and request permissions for the google drive
      */
     public void googleSignIn() {
-
-        //Check if the user is already sign-in
+        //Check if exists an already signed-in user
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(activity);
-        if(account != null) {
-            Log.i("Google Sign In", "User already signed in");
+        if(account != null){
             createCredential(account);
-            startMainActivity();
             return;
         }
+        //Configure sign-in to request permission to the google drive
+        GoogleSignInOptions signInOptions =
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestEmail()
+                        .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
+                        .build();
+        GoogleSignInClient googleClient = GoogleSignIn.getClient(activity, signInOptions);
 
+        // The result of the sign-in Intent is handled in onActivityResult.
+        activity.startActivityForResult(googleClient.getSignInIntent(), REQUEST_CODE_SIGN_IN);
 
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestScopes(new Scope("https://www.googleapis.com/auth/drive"))
-                .build();
-
-        // Build a GoogleSignInClient with the options specified by gso.
-        mGoogleSignInClient = GoogleSignIn.getClient(activity, gso);
-
-        //Perform google Sign In
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        activity.startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
 
@@ -74,9 +67,8 @@ public class GoogleSignInHelper {
         try {
             Log.i("Google Sign In", "sign in sucessfully performed");
             GoogleSignInAccount account = task.getResult(ApiException.class);
+            Log.i("Google", account.getEmail());
             createCredential(account);
-            startMainActivity();
-
 
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
@@ -86,11 +78,11 @@ public class GoogleSignInHelper {
 
 
     /**
-     * Creates a credential that will allows us to access google drive
+     * Uses the signed-in account to sign in on Google Drive
      * @param account google account
      * @return google drive credential
      */
-    public Drive createCredential(GoogleSignInAccount account) {
+    private void createCredential(GoogleSignInAccount account) {
 
         Log.d("Google", "create credential");
 
@@ -99,12 +91,43 @@ public class GoogleSignInHelper {
                         activity, Collections.singleton(DriveScopes.DRIVE_FILE));
         credential.setSelectedAccount(account.getAccount());
 
-        return new Drive.Builder(
+        Drive driveService =  new Drive.Builder(
                 AndroidHttp.newCompatibleTransport(),
                 new GsonFactory(),
                 credential)
                 .setApplicationName("P2Photo")
                 .build();
+
+        GoogleDriveHelper helper = new GoogleDriveHelper(driveService);
+        //Todo: save GoogleDriveHelper in global state
+
+
+        /*helper.createAlbumSlice("Test").addOnCompleteListener(
+                new OnCompleteListener<Pair<String, String>>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Pair<String, String>> task) {
+                        final Pair<String, String> fileInfo = task.getResult();
+                        List<String> contents = new ArrayList<String>();
+                        contents.add("AAAA");
+                        contents.add("BBBB");
+                        contents.add("CCCC");
+                        helper.updateFile(fileInfo.first, contents ).addOnSuccessListener(
+                                new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.i("Drive", "Update on success listener");
+                                        try {
+                                            helper.downloadFile(fileInfo.second);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                        );
+                    }
+                }
+        );*/
+        startMainActivity();
     }
 
     /**
