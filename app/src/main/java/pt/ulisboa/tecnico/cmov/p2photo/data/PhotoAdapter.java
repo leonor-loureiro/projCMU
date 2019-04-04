@@ -40,6 +40,8 @@ public class PhotoAdapter extends BaseAdapter {
     public void addPhoto(Photo photo){
         photos.add(photo);
         notifyDataSetChanged();
+        Log.i("Drive", "AddPhoto");
+
     }
 
     @Override

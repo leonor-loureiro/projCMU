@@ -1,14 +1,25 @@
 package pt.ulisboa.tecnico.cmov.p2photo.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Album implements Serializable{
     String name;
-    String url;
+    List<String> groupMembership;
+    String fileID;
 
-    public Album(String name, String url) {
+    public Album(String name, String fileID) {
         this.name = name;
-        this.url = url;
+        this.fileID = fileID;
+    }
+
+    public String getFileID() {
+        return fileID;
+    }
+
+    public void setFileID(String fileID) {
+        this.fileID = fileID;
     }
 
     public String getName() {
@@ -19,11 +30,11 @@ public class Album implements Serializable{
         this.name = name;
     }
 
-    public String getUrl() {
-        return url;
+    public List<String> getGroupMembership() {
+        return groupMembership;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setGroupMembership(List<String> groupMembership) {
+        this.groupMembership = groupMembership;
     }
 }

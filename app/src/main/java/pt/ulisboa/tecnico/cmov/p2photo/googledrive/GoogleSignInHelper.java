@@ -19,7 +19,8 @@ import com.google.api.services.drive.DriveScopes;
 
 import java.util.Collections;
 
-import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbums;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbumsActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 
 /**
  * This class is responsible for handling the google login
@@ -28,11 +29,12 @@ public class GoogleSignInHelper {
 
     public static final int REQUEST_CODE_SIGN_IN = 100;
     private Activity activity;
-
+    private GlobalVariables globalVariables;
 
 
     public GoogleSignInHelper(Activity activity) {
         this.activity = activity;
+        this.globalVariables = (GlobalVariables)activity.getApplicationContext();
     }
 
     /**
@@ -85,6 +87,8 @@ public class GoogleSignInHelper {
     private void createCredential(GoogleSignInAccount account) {
 
         Log.d("Google", "create credential");
+        //Set google account
+        globalVariables.setAccount(account);
 
         GoogleAccountCredential credential =
                 GoogleAccountCredential.usingOAuth2(
@@ -98,11 +102,28 @@ public class GoogleSignInHelper {
                 .setApplicationName("P2Photo")
                 .build();
 
-        GoogleDriveHelper helper = new GoogleDriveHelper(driveService);
-        //Todo: save GoogleDriveHelper in global state
+        //Set google drive service
+        globalVariables.setDriveService(driveService);
 
+        //Set the google drive handler
+        globalVariables.setGoogleDriveHandler(new GoogleDriveHandler(driveService));
 
-        /*helper.createAlbumSlice("Test").addOnCompleteListener(
+        startMainActivity();
+    }
+
+    /**
+     * Starts the app's main activity
+     * @see ListAlbumsActivity
+     */
+    private void startMainActivity() {
+        //Start first activity
+        Intent intent = new Intent(activity, ListAlbumsActivity.class);
+        //Clears the activity stack
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activity.startActivity(intent);
+    }
+
+     /*helper.createAlbumSlice("Test").addOnCompleteListener(
                 new OnCompleteListener<Pair<String, String>>() {
                     @Override
                     public void onComplete(@NonNull Task<Pair<String, String>> task) {
@@ -127,21 +148,4 @@ public class GoogleSignInHelper {
                     }
                 }
         );*/
-        startMainActivity();
-    }
-
-    /**
-     * Starts the app's main activity
-     * @see ListAlbums
-     */
-    private void startMainActivity() {
-        //Start first activity
-        Intent intent = new Intent(activity, ListAlbums.class);
-        //Clears the activity stack
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        activity.startActivity(intent);
-    }
-
-
-
 }
