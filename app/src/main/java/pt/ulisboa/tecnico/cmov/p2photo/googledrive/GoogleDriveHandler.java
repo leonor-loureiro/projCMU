@@ -26,8 +26,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import pt.ulisboa.tecnico.cmov.p2photo.googledrive.exception.GoogleDriveException;
-
 /**
  * This class implements all the google drive file operations
  */
