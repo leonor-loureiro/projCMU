@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.Task;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
@@ -61,8 +63,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
-        if(requestCode == GoogleSignInHelper.REQUEST_CODE_SIGN_IN &&
-                resultCode == Activity.RESULT_OK) {
+        Log.i("Google", "onActivityResult" + CommonStatusCodes.getStatusCodeString(resultCode));
+        if(requestCode == GoogleSignInHelper.REQUEST_CODE_SIGN_IN) {
 
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             signInHelper.handleSignInResult(task);
