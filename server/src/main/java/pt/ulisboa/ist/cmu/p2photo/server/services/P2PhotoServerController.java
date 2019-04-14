@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
@@ -21,7 +22,7 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/register")
-    public ResponseEntity<String> register(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String> register(@RequestParam Map<String, String> credentials) {
 
         // Extract params
         String username = credentials.get("username");
@@ -34,11 +35,14 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String> login(@RequestParam Map<String, String> credentials) {
 
         //Extract params
         String username = credentials.get("username");
         String password = credentials.get("password");
+
+        System.out.println(credentials.get("username"));
+        System.out.println(credentials.get("password"));
 
         // generate login token
         String token = P2PhotoServerInterface.getInstance().login(username, password);
@@ -47,7 +51,7 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/getallusers")
-    public ResponseEntity<String[]> getAllUsers(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String[]> getAllUsers(@RequestParam Map<String, String> credentials) {
 
         //Extract params
         String username = credentials.get("username");
@@ -62,7 +66,7 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/getGroupMembership")
-    public ResponseEntity<String> getGroupMembership(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String> getGroupMembership(@RequestParam Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
@@ -73,7 +77,7 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/getUsers")
-    public ResponseEntity<String> getUsers(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String> getUsers(@RequestParam Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
@@ -84,7 +88,7 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/getUserAlbums")
-    public ResponseEntity<String> getUserAlbums(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String> getUserAlbums(@RequestParam Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
@@ -103,7 +107,7 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/shareAlbum")
-    public ResponseEntity<String> shareAlbum(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String> shareAlbum(@RequestParam Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username1 = credentials.get("username1");
@@ -127,7 +131,7 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/createAlbum")
-    public ResponseEntity<String> createAlbum(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String> createAlbum(@RequestParam Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
