@@ -18,6 +18,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleSignInHelper;
+import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -54,6 +55,7 @@ public class LoginActivity extends AppCompatActivity {
 
         }else {
             //TODO: login operation
+            ServerAPI.getInstance().login(username,password);
             //Perform google sign in to get drive permissions
             //Launch app's first screen once it's successfully logged in
             signInHelper.googleSignIn();
