@@ -14,6 +14,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
@@ -46,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
      * This function is responsible for performin the login operation
      * @param view
      */
-    public void login(View view) {
+    public void login(View view) throws IOException {
         String username = usernameET.getText().toString();
         String password = passwordET.getText().toString();
 
@@ -55,10 +58,10 @@ public class LoginActivity extends AppCompatActivity {
 
         }else {
             //TODO: login operation
-            ServerAPI.getInstance().login(username,password);
+            ServerAPI.getInstance().login(this.getApplicationContext(),username,password);
             //Perform google sign in to get drive permissions
             //Launch app's first screen once it's successfully logged in
-            signInHelper.googleSignIn();
+            //signInHelper.googleSignIn();
         }
     }
 

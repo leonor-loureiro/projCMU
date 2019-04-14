@@ -5,6 +5,7 @@ import pt.ulisboa.ist.cmu.p2photo.server.data.User;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,9 @@ public class P2PhotoServerInterface {
      * @return the login token
      */
     public String register(String username, String password) {
+
+        users.add(new User(username, password));
+
         //TODO: properly generate token
         return "TOKEEEEEN";
     }
@@ -76,9 +80,9 @@ public class P2PhotoServerInterface {
      * @param albumName the name id of the album
      * @return the list of all members
      */
-    public Map<String, String> getGroupMembership(String username, String albumName) {
+    public Map<String, String> getGroupMembership(String username, String albumName) throws UserNotExistsException, AlbumNotFoundException {
 
-        return null;
+        return findAlbum(username, albumName).getGroupMembership();
     }
 
 
@@ -114,10 +118,9 @@ public class P2PhotoServerInterface {
      * @throws AlbumNotFoundException if album does not exist
      */
     public void shareAlbum(String username, String albumName, String username2, String url) throws UserNotExistsException, AlbumNotFoundException {
-        User user = findUser(username);
         //Check if user2 exists
         findUser(username2);
-        Album album = findAlbum(user, albumName);
+        Album album = findAlbum(username, albumName);
         album.addMember(username2, url);
 
     }
@@ -151,16 +154,34 @@ public class P2PhotoServerInterface {
 
     /**
      * This method returns a user's album with the given album name
-     * @param user the user owning the album
+     * @param username the name of the user owning the album
      * @param albumName the name of the album
      * @return the album
      * @throws AlbumNotFoundException if the album wasn't found
      */
-    private Album findAlbum(User user, String albumName) throws AlbumNotFoundException {
+    private Album findAlbum(String username, String albumName) throws AlbumNotFoundException, UserNotExistsException {
+        User user = findUser(username);
+
         for(Album album : user.getAlbums()){
             if(album.getName().equals(albumName))
                 return album;
         }
         throw new AlbumNotFoundException(albumName);
+    }
+
+
+    /**
+     * @param username the name of the use whose albums will be found
+     * @return the list of album names
+     */
+    public List<String> getUserAlbumsNames(String username) throws UserNotExistsException {
+        ArrayList<String> list = new ArrayList<>();
+        List <Album> albums = getUserAlbums(username);
+
+        for (Album album : albums) {
+            list.add(album.getName());
+        }
+
+        return list;
     }
 }
