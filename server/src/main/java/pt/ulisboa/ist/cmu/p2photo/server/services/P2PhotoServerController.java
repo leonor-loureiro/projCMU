@@ -69,8 +69,6 @@ public class P2PhotoServerController {
 
         //TODO: Verify token
 
-
-
         return null;
     }
 
@@ -81,8 +79,6 @@ public class P2PhotoServerController {
         String username = credentials.get("username");
 
         //TODO: Verify token
-
-
 
         return null;
     }
