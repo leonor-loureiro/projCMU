@@ -54,6 +54,9 @@ public class P2PhotoServerInterface {
      * @return the login token
      */
     public String register(String username, String password) {
+
+        users.add(new User(username, password));
+
         //TODO: properly generate token
         return "TOKEEEEEN";
     }

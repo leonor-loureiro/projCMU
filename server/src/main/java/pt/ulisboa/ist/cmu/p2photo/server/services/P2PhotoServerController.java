@@ -50,20 +50,6 @@ public class P2PhotoServerController {
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/getallusers")
-    public ResponseEntity<String[]> getAllUsers(@RequestParam Map<String, String> credentials) {
-
-        //Extract params
-        String username = credentials.get("username");
-        String token = credentials.get("token");
-
-        //TODO: Verify Token
-
-
-        String[] users = P2PhotoServerInterface.getInstance().getUsers().toArray(new String[0]);
-
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
 
     @RequestMapping(value = "/getGroupMembership")
     public ResponseEntity<String> getGroupMembership(@RequestParam Map<String, String> credentials) {
@@ -77,14 +63,15 @@ public class P2PhotoServerController {
     }
 
     @RequestMapping(value = "/getUsers")
-    public ResponseEntity<String> getUsers(@RequestParam Map<String, String> credentials) {
+    public ResponseEntity<String[]> getUsers(@RequestParam Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
 
         //TODO: Verify token
+        String[] users = P2PhotoServerInterface.getInstance().getUsers().toArray(new String[0]);
 
-        return null;
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/getUserAlbums")
