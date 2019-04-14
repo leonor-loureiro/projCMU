@@ -1,15 +1,25 @@
 package pt.ulisboa.tecnico.cmov.p2photo.serverapi;
 
+import android.util.Log;
+
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.Map;
 
+import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 
 public class ServerAPI {
 
     // Emulator accessing pc's localhost
-    private String url = "10.0.2.2/";
+    private String url = "http://10.0.2.2:8080/server/";
 
     private String port = "8080";
 
@@ -51,9 +61,34 @@ public class ServerAPI {
 
     public boolean login(String username, String password){
 
-        //TODO: set token with return from login
+        RequestParams rp = new RequestParams();
+        rp.add("username", username); rp.add("password", password);
 
-        return false;
+        HttpUtils.post("login", rp, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                // If the response is JSONObject instead of expected JSONArray
+                Log.d("asd", "---------------- this is response : " + response);
+                try {
+                    JSONObject serverResp = new JSONObject(response.toString());
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+                // Pull out the first event on the public timeline
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                Log.i("failed","pepehands");
+            }
+        });
+        return true;
     }
 
     public Map<String, String> getGroupMembership() {
@@ -90,5 +125,7 @@ public class ServerAPI {
 
         return false;
     }
+
+
 
 }
