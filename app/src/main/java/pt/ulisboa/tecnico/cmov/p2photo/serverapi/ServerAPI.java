@@ -1,7 +1,10 @@
 package pt.ulisboa.tecnico.cmov.p2photo.serverapi;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
@@ -9,10 +12,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.StringEntity;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 
@@ -59,12 +67,21 @@ public class ServerAPI {
         return false;
     }
 
-    public boolean login(String username, String password){
+    public boolean login(Context applicationContext, String username, String password) throws IOException {
 
-        RequestParams rp = new RequestParams();
-        rp.add("username", username); rp.add("password", password);
 
-        HttpUtils.post("login", rp, new JsonHttpResponseHandler() {
+        JsonFactory jsonFactory = new JsonFactory();
+        Writer writer=new StringWriter();
+        JsonGenerator g= jsonFactory.createJsonGenerator(writer);
+        g.writeStartObject();
+        g.writeStringField("username",username);
+        g.writeStringField("password",password);
+        g.writeEndObject();
+        g.close();
+
+        String json = writer.toString();
+
+        HttpUtils.post(applicationContext,"login", "",new StringEntity(json), new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 // If the response is JSONObject instead of expected JSONArray
@@ -72,7 +89,6 @@ public class ServerAPI {
                 try {
                     JSONObject serverResp = new JSONObject(response.toString());
                 } catch (JSONException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }

@@ -14,6 +14,10 @@ public class User {
     // User's albums
     private List<Album> albums;
 
+    public User(String username) {
+        this.username = username;
+    }
+
     public User(String username, String password) {
         this.username = username;
         this.password = password;
