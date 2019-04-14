@@ -1,6 +1,8 @@
 package pt.ulisboa.ist.cmu.p2photo.server.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,4 +36,9 @@ public class Album {
     public void addMember(String username, String catalogURL){
         this.groupMembership.put(username, catalogURL);
     }
+
+    public List<String> getMembers(){
+        return new ArrayList<>(groupMembership.keySet());
+    }
+
 }

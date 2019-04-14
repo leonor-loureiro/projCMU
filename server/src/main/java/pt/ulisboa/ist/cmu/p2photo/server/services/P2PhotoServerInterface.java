@@ -16,9 +16,24 @@ public class P2PhotoServerInterface {
 
     private List<User> users = new ArrayList<>();
 
+    private List<Album> albums = new ArrayList<>();
 
-    // stop unwanted instances
-    private P2PhotoServerInterface(){}
+
+    public List<Album> getAlbums() {
+        return albums;
+    }
+
+    public void setAlbums(List<Album> albums) {
+        this.albums = albums;
+    }
+
+
+    /**
+     * Stop unintended instations
+     */
+   private P2PhotoServerInterface(){
+
+   }
 
 
     /**
@@ -62,6 +77,7 @@ public class P2PhotoServerInterface {
      * @return the list of all members
      */
     public Map<String, String> getGroupMembership(String username, String albumName) {
+
         return null;
     }
 
@@ -94,8 +110,8 @@ public class P2PhotoServerInterface {
      * @param username user who owns the album
      * @param albumName name of the album thats beins shared
      * @param username2 user to be added to album
-     * @throws UserNotExistsException
-     * @throws AlbumNotFoundException
+     * @throws UserNotExistsException if user does not exist
+     * @throws AlbumNotFoundException if album does not exist
      */
     public void shareAlbum(String username, String albumName, String username2, String url) throws UserNotExistsException, AlbumNotFoundException {
         User user = findUser(username);

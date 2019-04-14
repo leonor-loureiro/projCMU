@@ -3,11 +3,14 @@ package pt.ulisboa.tecnico.cmov.p2photo.googledrive;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
@@ -28,6 +31,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 public class GoogleSignInHelper {
 
     public static final int REQUEST_CODE_SIGN_IN = 100;
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 2404;
     private Activity activity;
     private GlobalVariables globalVariables;
 
@@ -42,6 +46,10 @@ public class GoogleSignInHelper {
      * if not, performs the google sign and request permissions for the google drive
      */
     public void googleSignIn() {
+
+        if(!checkGooglePlayServices()){
+            return;
+        }
         //Check if exists an already signed-in user
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(activity);
         if(account != null){
@@ -74,7 +82,8 @@ public class GoogleSignInHelper {
 
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
-            Log.w("SignInResult", "signInResult:failed code=" + e.getStatusCode());
+            Log.d("SignInResult", "signInResult:failed code=" + e.getStatusCode());
+            Toast.makeText(activity, "Google sign in failed.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -86,7 +95,6 @@ public class GoogleSignInHelper {
      */
     private void createCredential(GoogleSignInAccount account) {
 
-        Log.d("Google", "create credential");
         //Set google account
         globalVariables.setAccount(account);
 
@@ -123,29 +131,23 @@ public class GoogleSignInHelper {
         activity.startActivity(intent);
     }
 
-     /*helper.createAlbumSlice("Test").addOnCompleteListener(
-                new OnCompleteListener<Pair<String, String>>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Pair<String, String>> task) {
-                        final Pair<String, String> fileInfo = task.getResult();
-                        List<String> contents = new ArrayList<String>();
-                        contents.add("AAAA");
-                        contents.add("BBBB");
-                        contents.add("CCCC");
-                        helper.updateFile(fileInfo.first, contents ).addOnSuccessListener(
-                                new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.i("Drive", "Update on success listener");
-                                        try {
-                                            helper.downloadFile(fileInfo.second);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                        );
-                    }
-                }
-        );*/
+    private boolean checkGooglePlayServices(){
+        Log.i("Google", "CheckGooglePlayServices");
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(activity);
+
+
+        if(resultCode != ConnectionResult.SUCCESS){
+            if(googleApiAvailability.isUserResolvableError(resultCode)){
+                googleApiAvailability.getErrorDialog(activity, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+                return false;
+            }else{
+                Toast.makeText(activity, "Device is not supported.", Toast.LENGTH_SHORT).show();
+                Log.i("GooglePlayServices", "Device is not supported");
+                return false;
+            }
+        }
+        return true;
+    }
 }
