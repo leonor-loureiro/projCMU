@@ -42,8 +42,10 @@ public class P2PhotoServerInterface {
      * @return the singleton instance
      */
     public static P2PhotoServerInterface getInstance(){
-        if(instance == null)
+        if(instance == null){
             instance = new P2PhotoServerInterface();
+            //TODO: load serielized list if it exists;
+        }
         return instance;
     }
 
@@ -119,10 +121,13 @@ public class P2PhotoServerInterface {
      */
     public void shareAlbum(String username, String albumName, String username2, String url) throws UserNotExistsException, AlbumNotFoundException {
         //Check if user2 exists
-        findUser(username2);
+        User user2 = findUser(username2);
+
         Album album = findAlbum(username, albumName);
+
         album.addMember(username2, url);
 
+        user2.addAlbum(album);
     }
 
 
@@ -183,5 +188,13 @@ public class P2PhotoServerInterface {
         }
 
         return list;
+    }
+
+
+    /**
+     * Update stored list
+     */
+    public void updateInformation(){
+        
     }
 }
