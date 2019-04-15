@@ -22,16 +22,21 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
+import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 
 public class ListAlbumsActivity extends AppCompatActivity {
@@ -40,10 +45,15 @@ public class ListAlbumsActivity extends AppCompatActivity {
     ListView listView;
     GoogleDriveHandler driveHandler;
 
+    private GlobalVariables globalVariables;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_albums);
+        this.globalVariables = (GlobalVariables)getApplicationContext();
+
+
 
         //Set the toolbar as the ActionBar for this window
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -64,7 +74,10 @@ public class ListAlbumsActivity extends AppCompatActivity {
             }
         });
 
+
         driveHandler = ((GlobalVariables) getApplicationContext()).getGoogleDriveHandler();
+
+
     }
 
     private void openAlbum(int i) {
@@ -77,14 +90,19 @@ public class ListAlbumsActivity extends AppCompatActivity {
 
     /**
      * Send the server request to retrieve the list of the user albums
-     * @param albums store the albums
+     * @param albums
      */
     private void getAlbums(List<Album> albums) {
-        //Dummy albums
-        albums.add(new Album("Album 1", null));
-        albums.add(new Album("Album 2", null));
-        albums.add(new Album("Album 3", null));
-        albums.add(new Album("Album 4", null));
+
+            //TODO: login operation
+        try {
+            albums = ServerAPI.getInstance().getUserAlbums(this.getApplicationContext(),globalVariables.getUser().getName(),globalVariables.getToken());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        ;
     }
 
 
@@ -153,7 +171,7 @@ public class ListAlbumsActivity extends AppCompatActivity {
      * Informs the server that a new album was created and adds the new album to the display
      * @param name album name
      */
-    private void createNewAlbum(String name) {
+    private void createNewAlbum(final String name) {
         final String albumName = name;
         final Task<Pair<String,String>> task = driveHandler.createAlbumSlice(name);
 
@@ -174,6 +192,14 @@ public class ListAlbumsActivity extends AppCompatActivity {
                         "Album " + albumName + " created successfully.",
                         Toast.LENGTH_SHORT)
                         .show();
+
+                try {
+                    ServerAPI.getInstance().createAlbum(getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(),name,result.second,result.first);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -181,12 +207,15 @@ public class ListAlbumsActivity extends AppCompatActivity {
         task.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
                 Toast.makeText(ListAlbumsActivity.this,
                         "Failed to create album " + albumName + ".",
                         Toast.LENGTH_SHORT)
                         .show();
             }
         });
+
+
     }
 
 

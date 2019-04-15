@@ -14,11 +14,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONException;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
+import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleSignInHelper;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
@@ -29,6 +33,8 @@ public class LoginActivity extends AppCompatActivity {
     EditText passwordET;
 
     private GoogleSignInHelper signInHelper;
+
+    private GlobalVariables globalVariables;
 
 
     @Override
@@ -42,6 +48,8 @@ public class LoginActivity extends AppCompatActivity {
 
         signInHelper = new GoogleSignInHelper(this);
 
+        this.globalVariables = (GlobalVariables)getApplicationContext();
+
 
     }
 
@@ -49,20 +57,40 @@ public class LoginActivity extends AppCompatActivity {
      * This function is responsible for performin the login operation
      * @param view
      */
-    public void login(View view) throws IOException {
+    public void login(View view){
+
+
         String username = usernameET.getText().toString();
         String password = passwordET.getText().toString();
+        String result = "";
+
 
         if(!username.matches(Constants.USERNAME_REGEX) || !password.matches(Constants.PASSWORD_REGEX)){
             Utils.openWarningBox(this,  getString(R.string.invalidCredentials), null);
 
         }else {
             //TODO: login operation
-            ServerAPI.getInstance().login(this.getApplicationContext(),username,password);
+            try {
+                result = ServerAPI.getInstance().login(getApplicationContext(), username, password);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if(result.equals("")) {
+                // retry login multithreaded
+            }
+
             //Perform google sign in to get drive permissions
             //Launch app's first screen once it's successfully logged in
-            //signInHelper.googleSignIn();
+            signInHelper.googleSignIn();
+            globalVariables.setToken(result);
+            globalVariables.setUser(new Member(username));
+
+
         }
+        Log.i("result",result);
     }
 
     @Override

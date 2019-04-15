@@ -108,7 +108,6 @@ public class AddUserActivity extends AppCompatActivity {
 
     }
 
-
     private void getMembers(List<Member> members) {
 
         members.add(new Member("Sebastiao"));
@@ -121,5 +120,8 @@ public class AddUserActivity extends AppCompatActivity {
 
     public void goBackToAlbums(View view) {
         finish();
+    }
+
+    public void addUser(View view) {
     }
 }

@@ -11,10 +11,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleSignInHelper;
+import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -53,6 +58,8 @@ public class RegisterActivity extends AppCompatActivity {
         String password = passwordET.getText().toString();
         String confirmPassword = confirmPasswordET.getText().toString();
 
+        String result = "";
+
         //Check if credentials are valid formats
         if(!username.matches(Constants.USERNAME_REGEX) ||
                 !password.matches(Constants.PASSWORD_REGEX) || !confirmPassword.matches(Constants.PASSWORD_REGEX)) {
@@ -66,9 +73,20 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        try {
+            result = ServerAPI.getInstance().register(this.getApplicationContext(), username, password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if(result.equals("")) {
+            // retry login multithreaded
+        }
         //Perform google sign in to get drive permissions
         //Launch app's first screen once it's successfully logged in
-        signInHelper.googleSignIn();
+        //signInHelper.googleSignIn();
 
     }
 

@@ -115,7 +115,6 @@ public class GoogleSignInHelper {
 
         //Set the google drive handler
         globalVariables.setGoogleDriveHandler(new GoogleDriveHandler(driveService));
-
         startMainActivity();
     }
 

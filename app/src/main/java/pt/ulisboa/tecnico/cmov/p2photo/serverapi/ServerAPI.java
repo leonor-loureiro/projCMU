@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +37,7 @@ public class ServerAPI {
 
     private static String loginToken;
 
+    private String response;
     // singleton
     private static ServerAPI instance = null;
 
@@ -58,36 +61,50 @@ public class ServerAPI {
     }
 
 
-    public boolean register(String username, String password){
+    public String register(Context applicationContext, String username, String password) throws IOException, JSONException {
 
+        response = "";
+        HashMap<String,String> params = new HashMap<>();
 
-        //TODO: set token with return from register
+        params.put("username",username);
+        params.put("password",password);
+        String json = generateJson(params);
 
+        HttpUtils.post(applicationContext,"register", new StringEntity(json), new JsonHttpResponseHandler() {
 
-        return false;
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) { try {
+                response = new JSONObject(response.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+
+            }
+        });
+
+        Log.i("response",response);
+        return response;
     }
 
-    public boolean login(Context applicationContext, String username, String password) throws IOException {
+    public String login(Context applicationContext, String username, String password) throws IOException, JSONException {
 
 
-        JsonFactory jsonFactory = new JsonFactory();
-        Writer writer=new StringWriter();
-        JsonGenerator g= jsonFactory.createJsonGenerator(writer);
-        g.writeStartObject();
-        g.writeStringField("username",username);
-        g.writeStringField("password",password);
-        g.writeEndObject();
-        g.close();
+        response = "";
+        HashMap<String,String> params = new HashMap<>();
 
-        String json = writer.toString();
+        params.put("username",username);
+        params.put("password",password);
+        String json = generateJson(params);
 
-        HttpUtils.post(applicationContext,"login", "",new StringEntity(json), new JsonHttpResponseHandler() {
+        HttpUtils.post(applicationContext,"login", new StringEntity(json), new JsonHttpResponseHandler() {
+
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                // If the response is JSONObject instead of expected JSONArray
-                Log.d("asd", "---------------- this is response : " + response);
-                try {
-                    JSONObject serverResp = new JSONObject(response.toString());
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) { try {
+                    response = new JSONObject(response.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -95,17 +112,19 @@ public class ServerAPI {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
-                // Pull out the first event on the public timeline
 
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Log.i("failed","pepehands");
+
             }
         });
-        return true;
+
+        Log.i("response",response);
+        return response;
     }
+
 
     public Map<String, String> getGroupMembership() {
 
@@ -126,22 +145,107 @@ public class ServerAPI {
     /**
      * Lists all the albums belonging to the user
      * @return list of all user's album
+     * @param applicationContext
+     * @param token
      */
-    public List<Album> getUserAlbums() {
+    public List<Album> getUserAlbums(Context applicationContext, String username, String token) throws IOException, JSONException {
 
-        return null;
+        response = "";
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("token",token);
+        params.put("username", username);
+
+        String json = generateJson(params);
+
+        HttpUtils.get(applicationContext, "getUserAlbums",  new StringEntity(json), new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    response = new JSONObject(response.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+
+            }
+        });
+
+        Log.i("response", "xd" + response);
+
+        return transformResponse(response);
+
     }
+
+    private List<Album> transformResponse(String response) {
+        ArrayList<Album> albums = new ArrayList<>();
+
+        return albums;
+
+    }
+
 
     public void shareAlbum() {
 
 
     }
 
-    public boolean createAlbum() {
+    public String createAlbum(Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
 
-        return false;
+        response = "";
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("token",token);
+        params.put("username", username);
+        params.put("name",name);
+        params.put("url",url);
+        params.put("fileID",fileID);
+        String json = generateJson(params);
+
+        HttpUtils.post(applicationContext, "createAlbum",  new StringEntity(json), new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    response = new JSONObject(response.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+
+            }
+        });
+
+        Log.i("response", response);
+
+        return response;
     }
 
+    private String generateJson(Map<String,String> params) throws IOException, JSONException {
 
+        JSONObject jsonObject = new JSONObject();
+        for(Map.Entry<String,String> entry : params.entrySet())
+            jsonObject.put(entry.getKey(),entry.getValue());
+
+        return jsonObject.toString();
+
+    }
 
 }

@@ -1,6 +1,7 @@
 package pt.ulisboa.ist.cmu.p2photo.server.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public class User implements Serializable {
     // Hashed password
     private String password;
     // User's albums
-    private List<Album> albums;
+    private List<Album> albums = new ArrayList<Album>();
 
     public User(String username) {
         this.username = username;

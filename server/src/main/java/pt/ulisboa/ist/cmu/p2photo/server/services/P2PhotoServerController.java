@@ -30,6 +30,7 @@ public class P2PhotoServerController {
     @RequestMapping(value = "/register")
     public ResponseEntity<String> register(@RequestBody Map<String, String> credentials) {
 
+        System.out.println  ("Got Register");
         // Extract params
         String username = credentials.get("username");
         String password = credentials.get("password");
@@ -158,6 +159,7 @@ public class P2PhotoServerController {
         // get albums
         try {
             String[] albumNames = P2PhotoServerManager.getInstance().getUserAlbumsNames(username).toArray(new String[0]);
+            System.out.println(albumNames.length);
             return new ResponseEntity<>(albumNames, HttpStatus.OK);
 
         } catch (UserNotExistsException e) {

@@ -9,6 +9,12 @@ import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 
 public class GlobalVariables extends Application {
 
+    //TODO alguem que tenha o login funcional mude isto
+    private Member user;
+
+    //TODO alguem que tenha o login funcional mude isto
+
+    private String token;
     //Google Account
     private GoogleSignInAccount account;
     //Google Drive Account
@@ -38,5 +44,21 @@ public class GlobalVariables extends Application {
 
     public void setGoogleDriveHandler(GoogleDriveHandler googleDriveHandler) {
         this.googleDriveHandler = googleDriveHandler;
+    }
+
+    public Member getUser() {
+        return user;
+    }
+
+    public void setUser(Member user) {
+        this.user = user;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

@@ -39,6 +39,7 @@
         android:visibility="visible"
         android:layout_gravity="center_vertical"
         android:text="add"
+        android:onClick="addUser"
         android:layout_marginRight="10dp"/>
 
 

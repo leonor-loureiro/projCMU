@@ -146,7 +146,7 @@ public class ListPhotosActivity extends AppCompatActivity {
      * This function starts the activity responsible for adding a new user
      * @param view
      */
-    public void addUser(View view) {
+    public void addUserScreen(View view) {
         Intent intent = new Intent(ListPhotosActivity.this, AddUserActivity.class);
         startActivity(intent);
     }
