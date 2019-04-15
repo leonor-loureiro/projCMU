@@ -189,7 +189,7 @@ public class P2PhotoServerManager {
      * @param albumName album unique identifier
      * @throws UserNotExistsException if user doesn't exist
      */
-    public void createAlbum(String username, String albumName, String url, String fileID) throws UserNotExistsException {
+    public void createAlbum(String username, String albumName, String url, String fileID) throws UserNotExistsException, AlbumNotFoundException {
 
         printInfo("Creating album for " + username);
         User user = findUser(username);

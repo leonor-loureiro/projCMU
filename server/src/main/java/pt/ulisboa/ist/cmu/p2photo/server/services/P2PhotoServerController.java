@@ -228,7 +228,11 @@ public class P2PhotoServerController {
 
         // Create Album
         try {
-            P2PhotoServerManager.getInstance().createAlbum(username, albumName, url, fileID);
+            try {
+                P2PhotoServerManager.getInstance().createAlbum(username, albumName, url, fileID);
+            } catch (AlbumNotFoundException e) {
+                e.printStackTrace();
+            }
             return new ResponseEntity<>("Success", HttpStatus.OK);
         } catch (UserNotExistsException e) {
             e.printStackTrace();
