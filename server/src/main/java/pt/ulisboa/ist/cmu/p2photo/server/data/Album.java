@@ -10,15 +10,21 @@ import java.util.Map;
  */
 public class Album {
 
-    //Album name
+    // Album name
     private String name;
-    //Group membership metadata: url for the catalog file of each member
+    // Group membership metadata: url for the catalog file of each member
     private Map<String, String> groupMembership = new HashMap<>();
+    // The file ID for each user
+    private Map<String, String> fileIDs = new HashMap<>();
 
 
-    public Album(String name, String username, String catalogURL) {
+    public Map<String, String> getFileIDs() {
+        return fileIDs;
+    }
+
+    public Album(String name, String username, String catalogURL, String fileID) {
         this.name = name;
-        addMember(username, catalogURL);
+        addMember(username, catalogURL, fileID);
     }
 
     public String getName() {
@@ -33,12 +39,15 @@ public class Album {
         return groupMembership;
     }
 
-    public void addMember(String username, String catalogURL){
+    public void addMember(String username, String catalogURL, String fileID){
         this.groupMembership.put(username, catalogURL);
+        this.fileIDs.put(username, fileID);
     }
 
-    public List<String> getMembers(){
-        return new ArrayList<>(groupMembership.keySet());
+
+    public void updateForUser(String username, String url, String fileID){
+        this.groupMembership.replace(username, url);
+        this.fileIDs.replace(username, fileID);
     }
 
 }
