@@ -161,22 +161,14 @@ public class ServerAPI {
         HttpUtils.get(applicationContext, "getUserAlbums",  new StringEntity(json), new JsonHttpResponseHandler() {
 
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    response = new JSONObject(response.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                    Log.i("valueof", response.toString());
 
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-
+                Log.i("failure","failure");
             }
         });
 

@@ -5,10 +5,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyExistsException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -158,9 +161,14 @@ public class P2PhotoServerController {
 
         // get albums
         try {
-            String[] albumNames = P2PhotoServerManager.getInstance().getUserAlbumsNames(username).toArray(new String[0]);
-            System.out.println(albumNames.length);
-            return new ResponseEntity<>(albumNames, HttpStatus.OK);
+            List<String> albumNames =  P2PhotoServerManager.getInstance().getUserAlbumsNames(username);
+
+            String[] albumsNamesToSend = new String[albumNames.size()];
+            for(int i = 0;i < albumNames.size();i++) {
+                System.out.println(albumNames.get(i));
+                albumsNamesToSend[i] = albumNames.get(i);
+            }
+            return new ResponseEntity<>(albumsNamesToSend, HttpStatus.OK);
 
         } catch (UserNotExistsException e) {
             e.printStackTrace();
