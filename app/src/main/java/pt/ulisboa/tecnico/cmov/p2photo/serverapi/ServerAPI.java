@@ -198,7 +198,7 @@ public class ServerAPI {
 
         params.put("token",token);
         params.put("username", username);
-        params.put("name",name);
+        params.put("albumName",name);
         params.put("url",url);
         params.put("fileID",fileID);
         String json = generateJson(params);
