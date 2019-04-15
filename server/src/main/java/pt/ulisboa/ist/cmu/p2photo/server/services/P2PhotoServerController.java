@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
+import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyExistsException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
 
 import java.util.Map;
@@ -34,9 +35,15 @@ public class P2PhotoServerController {
         String password = credentials.get("password");
 
         // generate login token
-        String token = P2PhotoServerManager.getInstance().register(username, password);
+        String token = null;
+        try {
+            token = P2PhotoServerManager.getInstance().register(username, password);
+            return new ResponseEntity<>(token, HttpStatus.OK);
+        } catch (UserAlreadyExistsException e) {
+            e.printStackTrace();
+        }
 
-        return new ResponseEntity<>(token, HttpStatus.OK);
+        return new ResponseEntity<>("User " + username + " already exists.", HttpStatus.BAD_REQUEST);
     }
 
 
@@ -67,7 +74,7 @@ public class P2PhotoServerController {
      * finds all the members and their urls
      *
      * @param credentials must contain token, username, albumName
-     * @return
+     * @return map with all the members and their links
      */
     @RequestMapping(value = "/getGroupMembership")
     public ResponseEntity<Map<String, String>> getGroupMembership(@RequestBody Map<String, String> credentials) {
@@ -80,6 +87,32 @@ public class P2PhotoServerController {
 
         try {
             return new ResponseEntity<>(P2PhotoServerManager.getInstance().getGroupMembership(username, albumName), HttpStatus.OK);
+
+        } catch (UserNotExistsException | AlbumNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
+
+    /**
+     * finds the fileID of the album
+     *
+     * @param credentials must contain token, username, albumName
+     * @return the ID of the file of the user's catalog
+     */
+    @RequestMapping(value = "/getFileID")
+    public ResponseEntity<String> getFileID(@RequestBody Map<String, String> credentials) {
+
+        String token = credentials.get("token");
+        String username = credentials.get("username");
+        String albumName = credentials.get("albumName");
+
+        //TODO: Verify token
+
+        try {
+            return new ResponseEntity<>(P2PhotoServerManager.getInstance().getFileID(username, albumName), HttpStatus.OK);
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
             e.printStackTrace();
@@ -170,7 +203,7 @@ public class P2PhotoServerController {
      * Creates an album with the given link and file id for the given user
      *
      * @param credentials token, username, albumName, url, fileID
-     * @return success if the operatiojn is successful
+     * @return success if the operation is successful
      */
     @RequestMapping(value = "/createAlbum")
     public ResponseEntity<String> createAlbum(@RequestBody Map<String, String> credentials) {
@@ -225,5 +258,7 @@ public class P2PhotoServerController {
 
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
+
+
 
 }

@@ -1,11 +1,12 @@
 package pt.ulisboa.ist.cmu.p2photo.server.data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * This class represent a P2Photo user
  */
-public class User {
+public class User implements Serializable {
 
     // Username
     private String username;

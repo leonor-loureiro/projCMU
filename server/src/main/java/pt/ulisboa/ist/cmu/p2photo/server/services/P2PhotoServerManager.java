@@ -3,8 +3,10 @@ package pt.ulisboa.ist.cmu.p2photo.server.services;
 import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
 import pt.ulisboa.ist.cmu.p2photo.server.data.User;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
+import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyExistsException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,11 @@ public class P2PhotoServerManager {
      * Stop unintended instances
      */
    private P2PhotoServerManager(){
-
+       try {
+           users = AtomicFileManager.getUserList();
+       } catch (IOException | ClassNotFoundException e) {
+           e.printStackTrace();
+       }
    }
 
 
@@ -47,7 +53,6 @@ public class P2PhotoServerManager {
     public static P2PhotoServerManager getInstance(){
         if(instance == null){
             instance = new P2PhotoServerManager();
-            //TODO: load serialized list if it exists;
         }
         return instance;
     }
@@ -60,7 +65,12 @@ public class P2PhotoServerManager {
      * @param password the secret password
      * @return the login token
      */
-    public String register(String username, String password) {
+    public String register(String username, String password) throws UserAlreadyExistsException {
+
+        printInfo("Registering " + username);
+
+        if(userExists(username))
+            throw new UserAlreadyExistsException(username);
 
         users.add(new User(username, password));
 
@@ -80,6 +90,7 @@ public class P2PhotoServerManager {
      * @return the token
      */
     public String login(String username, String password) {
+        printInfo("Logging in user " + username);
         //TODO: properly generate token
         return "TOKENNN";
     }
@@ -92,7 +103,7 @@ public class P2PhotoServerManager {
      * @return the list of all members
      */
     public Map<String, String> getGroupMembership(String username, String albumName) throws UserNotExistsException, AlbumNotFoundException {
-
+        printInfo("getting members of album " + albumName);
         return findAlbum(username, albumName).getGroupMembership();
     }
 
@@ -101,6 +112,8 @@ public class P2PhotoServerManager {
      * @return the list of all users of this service
      */
     public List<String> getUsers() {
+        printInfo("Getting all users.");
+
         List<String> userIds = new ArrayList<>();
         for (User user: users)
             userIds.add(user.getUsername());
@@ -115,6 +128,8 @@ public class P2PhotoServerManager {
      * @throws UserNotExistsException if the user does not exist
      */
     public List<Album> getUserAlbums(String username) throws UserNotExistsException {
+        printInfo("getting album all albums of user " + username);
+
         User user = findUser(username);
         return user.getAlbums();
     }
@@ -135,6 +150,8 @@ public class P2PhotoServerManager {
         Album album = findAlbum(username, albumName);
         album.updateForUser(username, url, fileID);
         updateInformation();
+
+        printInfo("Updating album info of user " + username);
     }
 
 
@@ -160,6 +177,8 @@ public class P2PhotoServerManager {
         user2.addAlbum(album);
 
         updateInformation();
+
+        printInfo("Sharing album of " + username + " with " + username2);
     }
 
 
@@ -172,6 +191,7 @@ public class P2PhotoServerManager {
      */
     public void createAlbum(String username, String albumName, String url, String fileID) throws UserNotExistsException {
 
+        printInfo("Creating album for " + username);
         User user = findUser(username);
         user.addAlbum(new Album(albumName, username, url, fileID));
         updateInformation();
@@ -222,6 +242,8 @@ public class P2PhotoServerManager {
             list.add(album.getName());
         }
 
+        printInfo("getting names of all album of user " + username);
+
         return list;
     }
 
@@ -231,5 +253,38 @@ public class P2PhotoServerManager {
      */
     public void updateInformation(){
 
+        try {
+            AtomicFileManager.atomicWriteObjectToFile(users);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        printInfo("Updating storage...");
+    }
+
+
+    /**
+     * Finds the fileId corresponding to the user-album
+     * @param username the name of the user
+     * @param albumName the name of the album
+     * @return the fileID representing the user's album catalog file ID
+     * @throws UserNotExistsException If the user does not exist
+     * @throws AlbumNotFoundException If the Album name does not exist
+     */
+    public String getFileID(String username, String albumName) throws UserNotExistsException, AlbumNotFoundException {
+
+        Album album = findAlbum(username, albumName);
+
+        printInfo("Getting file ID for " + username);
+        return album.findFileID(username);
+    }
+
+
+    /**
+     * User for debug purposes
+     * @param info information to be displayed
+     */
+    public void printInfo(String info){
+        System.out.println(info);
     }
 }

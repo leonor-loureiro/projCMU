@@ -1,5 +1,6 @@
 package pt.ulisboa.ist.cmu.p2photo.server.data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.Map;
 /**
  * This class represents a P2Photo album
  */
-public class Album {
+public class Album implements Serializable {
 
     // Album name
     private String name;
@@ -50,4 +51,7 @@ public class Album {
         this.fileIDs.replace(username, fileID);
     }
 
+    public String findFileID(String username) {
+        return fileIDs.get(username);
+    }
 }
