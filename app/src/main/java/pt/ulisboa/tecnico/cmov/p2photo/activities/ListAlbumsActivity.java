@@ -25,6 +25,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,24 +98,32 @@ public class ListAlbumsActivity extends AppCompatActivity {
      */
     private void getAlbums(List<Album> albums) {
 
-            //TODO: login operation
         try {
-            ServerAPI.getInstance().getUserAlbums(this.getApplicationContext(),globalVariables.getUser().getName(),globalVariables.getToken(),new JsonHttpResponseHandler() {
+            ServerAPI.getInstance().getUserAlbums(
+                    this.getApplicationContext(),
+                    globalVariables.getUser().getName(),
+                    globalVariables.getToken(),
+                    new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                            Log.i("valueof", response.toString());
+                            try {
+                                transformResults(response);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                    Log.i("valueof", response.toString());
-                    try {
-                        transformResults(response);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            Log.i("Get Albums", "failed = " + throwable.getMessage());
+                            Toast.makeText(ListAlbumsActivity.this,
+                                    ListAlbumsActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_albums),
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    });
+        }catch (IOException | JSONException e) {
             e.printStackTrace();
         }
 

@@ -19,4 +19,5 @@
     <string name="AllUsers">All users:</string>
     <string name="home">Home</string>
     <string name ="addusers">Add Users</string>
+    <string name="failed_get_albums">Failed to get albums.</string>
 </resources>
