@@ -21,7 +21,9 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
@@ -96,13 +99,31 @@ public class ListAlbumsActivity extends AppCompatActivity {
 
             //TODO: login operation
         try {
-            albums = ServerAPI.getInstance().getUserAlbums(this.getApplicationContext(),globalVariables.getUser().getName(),globalVariables.getToken());
+            ServerAPI.getInstance().getUserAlbums(this.getApplicationContext(),globalVariables.getUser().getName(),globalVariables.getToken(),new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                    Log.i("valueof", response.toString());
+                    try {
+                        transformResults(response);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
         ;
+    }
+
+    private void transformResults(JSONArray response) throws JSONException {
+        for(int i = 0;i < response.length();i++){
+            adapter.add(new Album((String)response.get(i)));
+        }
     }
 
 

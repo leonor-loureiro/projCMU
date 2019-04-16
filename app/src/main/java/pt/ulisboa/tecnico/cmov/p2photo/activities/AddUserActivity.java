@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
+import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.MembersAdapter;
 
@@ -41,6 +43,9 @@ public class AddUserActivity extends AppCompatActivity {
 
     private EditText filterText;
 
+    private Album album;
+
+    private GlobalVariables globalVariables;
 
 
     @Override
@@ -54,11 +59,16 @@ public class AddUserActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
+
+        this.globalVariables = (GlobalVariables)getApplicationContext();
+
+        //Get album object
+        Intent intent = getIntent();
+        album = (Album) intent.getSerializableExtra("album");
         List<Member> members = new ArrayList<>();
 
-        getMembers(members);
 
-        adapter = new MembersAdapter(this,members,R.layout.member_row);
+        adapter = new MembersAdapter(this,members,R.layout.member_row,album.getName(),null);
 
         listViewMembers = findViewById(R.id.members);
 
@@ -68,7 +78,7 @@ public class AddUserActivity extends AppCompatActivity {
 
         getMembers(memberstoadd);
 
-        adapterU = new MembersAdapter(this,memberstoadd,R.layout.add_user_row);
+        adapterU = new MembersAdapter(this,memberstoadd,R.layout.add_user_row,album.getName(),adapter);
 
         listViewAllUsers= findViewById(R.id.allusers);
 
@@ -81,12 +91,6 @@ public class AddUserActivity extends AppCompatActivity {
 
         filterText = findViewById(R.id.searchView).findViewById(id);
 
-        listViewMembers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getApplicationContext(), "Position " + position, Toast.LENGTH_LONG).show();
-            }
-        });
         filterText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -122,6 +126,5 @@ public class AddUserActivity extends AppCompatActivity {
         finish();
     }
 
-    public void addUser(View view) {
-    }
+
 }

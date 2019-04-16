@@ -17,4 +17,17 @@ public class    Member implements Serializable{
         this.name = name;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Member){
+            return  ((Member)obj).getName().equals(this.name);
+        }
+        return false;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
+}
 }

@@ -5,22 +5,36 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
+    private MembersAdapter currentMemberAdapter;
     private List<Member> members;
     private Context mContext;
     private int ID;
+    private GlobalVariables globalVariables;
+    private String album;
 
-    public MembersAdapter(Context context, List<Member> data,int id) {
+    public MembersAdapter(Context context, List<Member> data, int id, String album, MembersAdapter adapter) {
         super(context, R.layout.member_row, data);
         Log.i("Members", "Start");
 
@@ -31,12 +45,22 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
         mContext = context;
         ID = id;
         Log.i("Members", data.size() + "");
+
+        this.globalVariables = (GlobalVariables) context.getApplicationContext();
+
+        this.album = album;
+
+        this.currentMemberAdapter = adapter;
+    }
+
+    public List<Member> getMembers() {
+        return members;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         //Get album data
-        Member member = getItem(position);
+        final Member member = getItem(position);
 
         //Get inflater service
         LayoutInflater inflater = (LayoutInflater) mContext
@@ -53,10 +77,57 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
         TextView memberName = (TextView) itemView.findViewById(R.id.membername);
         memberName.setText(member.getName());
 
+        final Button addButton =  itemView.findViewById(R.id.adduserbutton);
+
+
+        if(addButton != null) {
+            if(currentMemberAdapter.contains(member))
+                addButton.setEnabled(false);
+            else {
+                addButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        addUserHandle(member, addButton);
+                    }
+                });
+            }
+        }
+        
+        
+
         return itemView;
 
 
     }
+
+    private void addUserHandle(final Member member, final Button addUserButton) {
+        try {
+            if(!currentMemberAdapter.contains(member))
+                ServerAPI.getInstance().shareAlbum(mContext,globalVariables.getToken(),globalVariables.getUser().getName(),member.getName(),album,new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                    Log.i("success","success");
+                    currentMemberAdapter.add(member);
+                    addUserButton.setEnabled(false);
+
+                }
+
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void add(Member member){
+        super.add(member);
+        members.add(member);
+        notifyDataSetChanged();
+    }
+
 
     @Override
     public Filter getFilter() {
@@ -101,5 +172,13 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
         };
 
         return filter;
+    }
+
+    public boolean contains(Member member){
+        for(Member m : members ) {
+            if (m.equals(member))
+                return true;
+        }
+        return false;
     }
 }

@@ -3,27 +3,19 @@ package pt.ulisboa.tecnico.cmov.p2photo.serverapi;
 import android.content.Context;
 import android.util.Log;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
-import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 
 public class ServerAPI {
@@ -37,7 +29,6 @@ public class ServerAPI {
 
     private static String loginToken;
 
-    private String response;
     // singleton
     private static ServerAPI instance = null;
 
@@ -61,9 +52,8 @@ public class ServerAPI {
     }
 
 
-    public String register(Context applicationContext, String username, String password) throws IOException, JSONException {
+    public void register(Context applicationContext, String username, String password) throws IOException, JSONException {
 
-        response = "";
         HashMap<String,String> params = new HashMap<>();
 
         params.put("username",username);
@@ -73,27 +63,17 @@ public class ServerAPI {
         HttpUtils.post(applicationContext,"register", new StringEntity(json), new JsonHttpResponseHandler() {
 
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) { try {
-                response = new JSONObject(response.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
             }
+
         });
 
-        Log.i("response",response);
-        return response;
     }
 
-    public String login(Context applicationContext, String username, String password) throws IOException, JSONException {
+    public void login(Context applicationContext, String username, String password) throws IOException, JSONException {
 
 
-        response = "";
         HashMap<String,String> params = new HashMap<>();
 
         params.put("username",username);
@@ -103,26 +83,12 @@ public class ServerAPI {
         HttpUtils.post(applicationContext,"login", new StringEntity(json), new JsonHttpResponseHandler() {
 
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) { try {
-                    response = new JSONObject(response.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
             }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-
-            }
         });
 
-        Log.i("response",response);
-        return response;
     }
 
 
@@ -147,10 +113,10 @@ public class ServerAPI {
      * @return list of all user's album
      * @param applicationContext
      * @param token
+     * @param requestHandler
      */
-    public List<Album> getUserAlbums(Context applicationContext, String username, String token) throws IOException, JSONException {
+    public void getUserAlbums(Context applicationContext, String username, String token, JsonHttpResponseHandler requestHandler) throws IOException, JSONException {
 
-        response = "";
         HashMap<String, String> params = new HashMap<>();
 
         params.put("token",token);
@@ -158,42 +124,29 @@ public class ServerAPI {
 
         String json = generateJson(params);
 
-        HttpUtils.get(applicationContext, "getUserAlbums",  new StringEntity(json), new JsonHttpResponseHandler() {
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                    Log.i("valueof", response.toString());
-
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Log.i("failure","failure");
-            }
-        });
-
-        Log.i("response", "xd" + response);
-
-        return transformResponse(response);
-
-    }
-
-    private List<Album> transformResponse(String response) {
-        ArrayList<Album> albums = new ArrayList<>();
-
-        return albums;
+        HttpUtils.get(applicationContext, "getUserAlbums",  new StringEntity(json),requestHandler);
 
     }
 
 
-    public void shareAlbum() {
+    public void shareAlbum(Context applicationContext,String token, String username1, String username2, String albumName,JsonHttpResponseHandler requestHandler) throws IOException, JSONException {
+
+
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("token",token);
+        params.put("username1", username1);
+        params.put("username2", username2);
+        params.put("albumName",albumName);
+        String json = generateJson(params);
+
+        HttpUtils.post(applicationContext,"shareAlbum",new StringEntity(json),requestHandler);
 
 
     }
 
-    public String createAlbum(Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
+    public void createAlbum(Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
 
-        response = "";
         HashMap<String, String> params = new HashMap<>();
 
         params.put("token",token);
@@ -207,30 +160,15 @@ public class ServerAPI {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    response = new JSONObject(response.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
 
             }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
 
-            }
         });
 
-        Log.i("response", response);
-
-        return response;
     }
 
-    private String generateJson(Map<String,String> params) throws IOException, JSONException {
+    private String generateJson(Map<String,String> params) throws JSONException {
 
         JSONObject jsonObject = new JSONObject();
         for(Map.Entry<String,String> entry : params.entrySet())

@@ -148,6 +148,7 @@ public class ListPhotosActivity extends AppCompatActivity {
      */
     public void addUserScreen(View view) {
         Intent intent = new Intent(ListPhotosActivity.this, AddUserActivity.class);
+        intent.putExtra("album",album);
         startActivity(intent);
     }
 

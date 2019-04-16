@@ -74,16 +74,13 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         try {
-            result = ServerAPI.getInstance().register(this.getApplicationContext(), username, password);
+            ServerAPI.getInstance().register(this.getApplicationContext(), username, password);
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if(result.equals("")) {
-            // retry login multithreaded
-        }
         //Perform google sign in to get drive permissions
         //Launch app's first screen once it's successfully logged in
         //signInHelper.googleSignIn();

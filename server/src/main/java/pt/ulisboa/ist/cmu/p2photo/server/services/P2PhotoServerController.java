@@ -31,7 +31,7 @@ public class P2PhotoServerController {
      * @return a login token in case of success
      */
     @RequestMapping(value = "/register")
-    public ResponseEntity<String> register(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String[]> register(@RequestBody Map<String, String> credentials) {
 
         System.out.println  ("Got Register");
         // Extract params
@@ -39,15 +39,19 @@ public class P2PhotoServerController {
         String password = credentials.get("password");
 
         // generate login token
+        String[] stringtoreturn = null;
         String token = null;
         try {
+            stringtoreturn = new String[1];
             token = P2PhotoServerManager.getInstance().register(username, password);
-            return new ResponseEntity<>(token, HttpStatus.OK);
+            stringtoreturn[0] = token;
+            return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
         } catch (UserAlreadyExistsException e) {
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>("User " + username + " already exists.", HttpStatus.BAD_REQUEST);
+        stringtoreturn[1] = "User " + username + " already exists.";
+        return new ResponseEntity<>(stringtoreturn, HttpStatus.BAD_REQUEST);
     }
 
 
@@ -58,7 +62,7 @@ public class P2PhotoServerController {
      * @return login token in case of success
      */
     @RequestMapping(value = "/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String[]> login(@RequestBody Map<String, String> credentials) {
 
         //Extract params
         String username = credentials.get("username");
@@ -69,8 +73,10 @@ public class P2PhotoServerController {
 
         // generate login token
         String token = P2PhotoServerManager.getInstance().login(username, password);
+        String[] stringtoreturn = new String[1];
 
-        return new ResponseEntity<>(token, HttpStatus.OK);
+        stringtoreturn[0] = token;
+        return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
     }
 
 
@@ -186,7 +192,7 @@ public class P2PhotoServerController {
      * @return Success if share album is successful
      */
     @RequestMapping(value = "/shareAlbum")
-    public ResponseEntity<String> shareAlbum(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String[]> shareAlbum(@RequestBody Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username1 = credentials.get("username1");
@@ -195,11 +201,13 @@ public class P2PhotoServerController {
 
         //TODO: Verify token
 
+        String [] stringtoreturn = new String[1];
 
         // Share Album
         try {
+            stringtoreturn[0] = "Sucess";
             P2PhotoServerManager.getInstance().shareAlbum(username1, albumName, username2);
-            return new ResponseEntity<>("Success", HttpStatus.OK);
+            return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
             e.printStackTrace();
@@ -216,7 +224,7 @@ public class P2PhotoServerController {
      * @return success if the operation is successful
      */
     @RequestMapping(value = "/createAlbum")
-    public ResponseEntity<String> createAlbum(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String[]> createAlbum(@RequestBody Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
@@ -226,14 +234,16 @@ public class P2PhotoServerController {
 
         //TODO: Verify token
 
+        String [] stringtoreturn = new String[1];
         // Create Album
         try {
             try {
+                stringtoreturn[0] = "Sucess";
                 P2PhotoServerManager.getInstance().createAlbum(username, albumName, url, fileID);
             } catch (AlbumNotFoundException e) {
                 e.printStackTrace();
             }
-            return new ResponseEntity<>("Success", HttpStatus.OK);
+            return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
         } catch (UserNotExistsException e) {
             e.printStackTrace();
         }
@@ -251,7 +261,7 @@ public class P2PhotoServerController {
      * @return success if it was successful
      */
     @RequestMapping(value = "/updateAlbum")
-    public ResponseEntity<String> updateAlbum(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String[]> updateAlbum(@RequestBody Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
@@ -261,10 +271,12 @@ public class P2PhotoServerController {
 
         //TODO: Verify token
 
+        String[] stringtosend = new String[1];
         // Update Album
         try {
+            stringtosend[0] = "Sucess";
             P2PhotoServerManager.getInstance().updateAlbum(username, albumName, url, fileID);
-            return new ResponseEntity<>("Success", HttpStatus.OK);
+            return new ResponseEntity<>(stringtosend, HttpStatus.OK);
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
             e.printStackTrace();

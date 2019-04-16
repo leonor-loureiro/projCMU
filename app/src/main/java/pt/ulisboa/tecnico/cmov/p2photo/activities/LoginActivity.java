@@ -62,7 +62,6 @@ public class LoginActivity extends AppCompatActivity {
 
         String username = usernameET.getText().toString();
         String password = passwordET.getText().toString();
-        String result = "";
 
 
         if(!username.matches(Constants.USERNAME_REGEX) || !password.matches(Constants.PASSWORD_REGEX)){
@@ -71,26 +70,21 @@ public class LoginActivity extends AppCompatActivity {
         }else {
             //TODO: login operation
             try {
-                result = ServerAPI.getInstance().login(getApplicationContext(), username, password);
+                ServerAPI.getInstance().login(getApplicationContext(), username, password);
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            if(result.equals("")) {
-                // retry login multithreaded
-            }
-
             //Perform google sign in to get drive permissions
             //Launch app's first screen once it's successfully logged in
             signInHelper.googleSignIn();
-            globalVariables.setToken(result);
+            globalVariables.setToken("TOKEN");
             globalVariables.setUser(new Member(username));
 
 
         }
-        Log.i("result",result);
     }
 
     @Override

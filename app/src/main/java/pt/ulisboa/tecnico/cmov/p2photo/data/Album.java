@@ -14,6 +14,10 @@ public class Album implements Serializable{
         this.fileID = fileID;
     }
 
+    public Album(String name) {
+        this.name = name;
+    }
+
     public String getFileID() {
         return fileID;
     }
