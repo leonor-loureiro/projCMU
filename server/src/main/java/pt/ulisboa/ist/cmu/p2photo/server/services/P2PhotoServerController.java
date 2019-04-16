@@ -208,7 +208,7 @@ public class P2PhotoServerController {
 
         // Share Album
         try {
-            stringtoreturn[0] = "Sucess";
+            stringtoreturn[0] = "Success";
             P2PhotoServerManager.getInstance().shareAlbum(username1, albumName, username2);
             return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
 
@@ -241,7 +241,7 @@ public class P2PhotoServerController {
         // Create Album
         try {
             try {
-                stringtoreturn[0] = "Sucess";
+                stringtoreturn[0] = "Success";
                 P2PhotoServerManager.getInstance().createAlbum(username, albumName, url, fileID);
             } catch (AlbumNotFoundException e) {
                 e.printStackTrace();
@@ -277,7 +277,7 @@ public class P2PhotoServerController {
         String[] stringtosend = new String[1];
         // Update Album
         try {
-            stringtosend[0] = "Sucess";
+            stringtosend[0] = "Success";
             P2PhotoServerManager.getInstance().updateAlbum(username, albumName, url, fileID);
             return new ResponseEntity<>(stringtosend, HttpStatus.OK);
 

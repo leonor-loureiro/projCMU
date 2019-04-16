@@ -85,7 +85,7 @@ public class ServerAPI {
     }
 
 
-    public Map<String, String> getGroupMembership(Context applicationContext, String token, String name, String albumName, JsonHttpResponseHandler jsonHttpResponseHandler) throws JSONException, UnsupportedEncodingException {
+    public void getGroupMembership(Context applicationContext, String token, String name, String albumName, JsonHttpResponseHandler jsonHttpResponseHandler) throws JSONException, UnsupportedEncodingException {
 
         HashMap<String, String> params = new HashMap<>();
 
@@ -97,7 +97,6 @@ public class ServerAPI {
 
         HttpUtils.get(applicationContext, "getGroupMembership",  new StringEntity(json),jsonHttpResponseHandler);
 
-        return null;
     }
 
     /**
@@ -170,6 +169,29 @@ public class ServerAPI {
         String json = generateJson(params);
 
         HttpUtils.post(applicationContext, "createAlbum",  new StringEntity(json), new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+            }
+
+
+        });
+
+    }
+
+    public void updateAlbum(Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
+
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("token",token);
+        params.put("username", username);
+        params.put("albumName",name);
+        params.put("url",url);
+        params.put("fileID",fileID);
+        String json = generateJson(params);
+
+        HttpUtils.post(applicationContext, "updateAlbum",  new StringEntity(json), new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

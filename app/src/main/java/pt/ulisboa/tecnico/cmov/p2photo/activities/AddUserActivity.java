@@ -160,9 +160,13 @@ public class AddUserActivity extends AppCompatActivity {
 
         String link;
         String currentUser = globalVariables.getUser().getName();
+
+
         for(int i = 0;i < response.names().length();i++){
-            if(currentUser.equals((String)response.names().get(i)))
+            if(currentUser.equals((String)response.names().get(i))){
+
                 continue;
+            }
             adapter.add(new Member((String) response.names().get(i)));
             link = response.getString(response.names().getString(i));
 

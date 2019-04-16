@@ -75,7 +75,7 @@ public class GoogleSignInHelper {
      */
     public void handleSignInResult(Task<GoogleSignInAccount> task) {
         try {
-            Log.i("Google Sign In", "sign in sucessfully performed");
+            Log.i("Google Sign In", "sign in successfully performed");
             GoogleSignInAccount account = task.getResult(ApiException.class);
             Log.i("Google", account.getEmail());
             createCredential(account);

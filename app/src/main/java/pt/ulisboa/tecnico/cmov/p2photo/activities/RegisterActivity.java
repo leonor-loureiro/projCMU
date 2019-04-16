@@ -22,6 +22,8 @@ import java.io.IOException;
 import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
+import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleSignInHelper;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
@@ -34,6 +36,9 @@ public class RegisterActivity extends AppCompatActivity {
     EditText confirmPasswordET;
     private GoogleSignInHelper signInHelper;
 
+
+    private GlobalVariables globalVariables;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +49,9 @@ public class RegisterActivity extends AppCompatActivity {
         confirmPasswordET = findViewById(R.id.password2);
 
         signInHelper = new GoogleSignInHelper(this);
+
+
+        this.globalVariables = (GlobalVariables)getApplicationContext();
 
 
     }
@@ -59,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void register(View view) {
-        String username = usernameET.getText().toString();
+        final String username = usernameET.getText().toString();
         String password = passwordET.getText().toString();
         String confirmPassword = confirmPasswordET.getText().toString();
 
@@ -82,11 +90,16 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 
+
+                        globalVariables.setToken("TOKEN");
+                        globalVariables.setUser(new Member(username));
+
                         Toast.makeText(RegisterActivity.this,
                                 "Register successfuly",
                                 Toast.LENGTH_SHORT)
                                 .show();
                         signInHelper.googleSignIn();
+
 
                 }
 
