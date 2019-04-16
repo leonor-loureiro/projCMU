@@ -117,7 +117,7 @@ public class ListAlbumsActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        ;
+
     }
 
     private void transformResults(JSONArray response) throws JSONException {
@@ -214,6 +214,7 @@ public class ListAlbumsActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT)
                         .show();
 
+                Log.i("link",result.second);
                 try {
                     ServerAPI.getInstance().createAlbum(getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(),name,result.second,result.first);
                 } catch (IOException e) {

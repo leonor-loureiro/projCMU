@@ -4,17 +4,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
 
+import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
@@ -58,8 +63,6 @@ public class RegisterActivity extends AppCompatActivity {
         String password = passwordET.getText().toString();
         String confirmPassword = confirmPasswordET.getText().toString();
 
-        String result = "";
-
         //Check if credentials are valid formats
         if(!username.matches(Constants.USERNAME_REGEX) ||
                 !password.matches(Constants.PASSWORD_REGEX) || !confirmPassword.matches(Constants.PASSWORD_REGEX)) {
@@ -74,16 +77,39 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         try {
-            ServerAPI.getInstance().register(this.getApplicationContext(), username, password);
-        } catch (JSONException e) {
-            e.printStackTrace();
+            ServerAPI.getInstance().register(this.getApplicationContext(), username, password,new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+
+                        Toast.makeText(RegisterActivity.this,
+                                "Register successfuly",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                        signInHelper.googleSignIn();
+
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers,Throwable throwable,JSONArray response) {
+                    if(statusCode == 400){
+                        Toast.makeText(RegisterActivity.this,
+                                "User with that name already exists.",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
         //Perform google sign in to get drive permissions
         //Launch app's first screen once it's successfully logged in
-        //signInHelper.googleSignIn();
 
     }
 

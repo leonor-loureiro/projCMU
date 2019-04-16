@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Album implements Serializable{
     String name;
-    List<String> groupMembership;
+    List<String> groupMembership = new ArrayList<>();
     String fileID;
 
     public Album(String name, String fileID) {
@@ -41,4 +41,5 @@ public class Album implements Serializable{
     public void setGroupMembership(List<String> groupMembership) {
         this.groupMembership = groupMembership;
     }
+
 }

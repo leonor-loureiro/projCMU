@@ -11,6 +11,7 @@ import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyExistsException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class P2PhotoServerController {
             e.printStackTrace();
         }
 
-        stringtoreturn[1] = "User " + username + " already exists.";
+        stringtoreturn[0] = "User " + username + " already exists.";
         return new ResponseEntity<>(stringtoreturn, HttpStatus.BAD_REQUEST);
     }
 
@@ -102,7 +103,7 @@ public class P2PhotoServerController {
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new HashMap<String,String>(), HttpStatus.BAD_REQUEST);
     }
 
 
@@ -113,7 +114,7 @@ public class P2PhotoServerController {
      * @return the ID of the file of the user's catalog
      */
     @RequestMapping(value = "/getFileID")
-    public ResponseEntity<String> getFileID(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<String[]> getFileID(@RequestBody Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
@@ -122,7 +123,9 @@ public class P2PhotoServerController {
         //TODO: Verify token
 
         try {
-            return new ResponseEntity<>(P2PhotoServerManager.getInstance().getFileID(username, albumName), HttpStatus.OK);
+            String[] stringtoreturn = new String[1];
+            stringtoreturn[0] = P2PhotoServerManager.getInstance().getFileID(username, albumName);
+            return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
             e.printStackTrace();

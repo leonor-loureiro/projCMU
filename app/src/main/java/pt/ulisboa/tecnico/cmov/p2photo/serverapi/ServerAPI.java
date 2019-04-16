@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,6 @@ public class ServerAPI {
 
     private String port = "8080";
 
-    private String username;
 
     private static String loginToken;
 
@@ -52,7 +52,7 @@ public class ServerAPI {
     }
 
 
-    public void register(Context applicationContext, String username, String password) throws IOException, JSONException {
+    public void register(Context applicationContext, String username, String password,JsonHttpResponseHandler responseHandler) throws IOException, JSONException {
 
         HashMap<String,String> params = new HashMap<>();
 
@@ -60,14 +60,7 @@ public class ServerAPI {
         params.put("password",password);
         String json = generateJson(params);
 
-        HttpUtils.post(applicationContext,"register", new StringEntity(json), new JsonHttpResponseHandler() {
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-
-            }
-
-        });
+        HttpUtils.post(applicationContext,"register", new StringEntity(json), responseHandler);
 
     }
 
@@ -92,20 +85,40 @@ public class ServerAPI {
     }
 
 
-    public Map<String, String> getGroupMembership() {
+    public Map<String, String> getGroupMembership(Context applicationContext, String token, String name, String albumName, JsonHttpResponseHandler jsonHttpResponseHandler) throws JSONException, UnsupportedEncodingException {
 
+        HashMap<String, String> params = new HashMap<>();
 
+        params.put("token",token);
+        params.put("username", name);
+        params.put("albumName",albumName);
+
+        String json = generateJson(params);
+
+        HttpUtils.get(applicationContext, "getGroupMembership",  new StringEntity(json),jsonHttpResponseHandler);
 
         return null;
     }
 
     /**
      * @return list of all members of the P2Pservice
+     * @param applicationContext
+     * @param token
+     * @param username
+     * @param jsonHttpResponseHandler
      */
-    public List<Member> getUsers() {
+    public void getUsers(Context applicationContext, String token, String username, JsonHttpResponseHandler jsonHttpResponseHandler) throws UnsupportedEncodingException, JSONException {
 
-        //TODO: parse usernames into Members
-        return null;
+
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("token",token);
+        params.put("username", username);
+
+        String json = generateJson(params);
+
+        HttpUtils.get(applicationContext, "getUsers",  new StringEntity(json), jsonHttpResponseHandler);
+
     }
 
     /**
@@ -168,6 +181,17 @@ public class ServerAPI {
 
     }
 
+    public void getFileID(Context applicationContext, String token, String username, String albumName, JsonHttpResponseHandler jsonHttpResponseHandler) throws JSONException, UnsupportedEncodingException {
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("token",token);
+        params.put("username", username);
+        params.put("albumName",albumName);
+        String json = generateJson(params);
+
+        HttpUtils.get(applicationContext, "getFileID",  new StringEntity(json),jsonHttpResponseHandler);
+    }
+
     private String generateJson(Map<String,String> params) throws JSONException {
 
         JSONObject jsonObject = new JSONObject();
@@ -177,5 +201,6 @@ public class ServerAPI {
         return jsonObject.toString();
 
     }
+
 
 }

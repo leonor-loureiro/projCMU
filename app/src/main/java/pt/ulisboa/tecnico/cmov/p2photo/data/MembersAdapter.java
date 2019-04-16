@@ -181,4 +181,9 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
         }
         return false;
     }
+
+    public void removeAll(List<Member> currentAdded){
+        members.removeAll(currentAdded);
+        notifyDataSetChanged();
+    }
 }
