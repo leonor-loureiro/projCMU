@@ -8,17 +8,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.Task;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
@@ -60,7 +65,7 @@ public class LoginActivity extends AppCompatActivity {
     public void login(View view){
 
 
-        String username = usernameET.getText().toString();
+        final String username = usernameET.getText().toString();
         String password = passwordET.getText().toString();
 
 
@@ -70,18 +75,39 @@ public class LoginActivity extends AppCompatActivity {
         }else {
             //TODO: login operation
             try {
-                ServerAPI.getInstance().login(getApplicationContext(), username, password);
+                ServerAPI.getInstance().login(getApplicationContext(), username, password, new JsonHttpResponseHandler() {
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+
+                        globalVariables.setToken("TOKEN");
+                        globalVariables.setUser(new Member(username));
+
+                        Toast.makeText(LoginActivity.this,
+                                "Login successfuly",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                        signInHelper.googleSignIn();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers,Throwable throwable, JSONArray response) {
+                        Toast.makeText(LoginActivity.this,
+                                    "Couldnt Login.",
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+                        Intent intent = getIntent();
+                        finish();
+                        startActivity(intent);
+
+                    }
+                });
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            //Perform google sign in to get drive permissions
-            //Launch app's first screen once it's successfully logged in
-            signInHelper.googleSignIn();
-            globalVariables.setToken("TOKEN");
-            globalVariables.setUser(new Member(username));
 
 
         }
