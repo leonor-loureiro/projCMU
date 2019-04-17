@@ -59,9 +59,6 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
         this.currentMemberAdapter = adapter;
     }
 
-    public List<Member> getMembers() {
-        return members;
-    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -86,6 +83,7 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
         final Button addButton =  itemView.findViewById(R.id.adduserbutton);
 
 
+        //if user already added button is disabled
         if(addButton != null) {
             if(currentMemberAdapter.contains(member))
                 addButton.setEnabled(false);
@@ -106,6 +104,10 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
 
     }
 
+    /**
+     * sends a request to the server to add the user to the album
+     * @param member member to be added
+     */
     private void addUserHandle(final Member member, final Button addUserButton) {
         try {
             if(!currentMemberAdapter.contains(member))
@@ -147,6 +149,7 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
 
     }
 
+
     public void add(Member member){
         super.add(member);
         members.add(member);
@@ -154,6 +157,10 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
     }
 
 
+    /**
+     * Creates a new filter to search trough the Users in the system
+     * @return the newly created filter
+     */
     @Override
     public Filter getFilter() {
         Filter filter = new Filter() {
@@ -162,8 +169,8 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
                 FilterResults results = new FilterResults();
                 List<Member> FilteredArrayMembers = new ArrayList<Member>();
 
-                // perform your search here using the searchConstraint String.
 
+                //performm the filtering
                 constraint = constraint.toString().toLowerCase();
                 for (int i = 0; i < members.size(); i++) {
                     String dataNames = members.get(i).getName();
@@ -207,8 +214,4 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
         return false;
     }
 
-    public void removeAll(List<Member> currentAdded){
-        members.removeAll(currentAdded);
-        notifyDataSetChanged();
-    }
 }

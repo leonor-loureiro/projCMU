@@ -16,11 +16,9 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
@@ -32,8 +30,6 @@ import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class AddUserActivity extends AppCompatActivity {
 
-
-    ArrayList <String> listUsers = new ArrayList<String>();
 
     MembersAdapter adapter;
 
@@ -111,6 +107,12 @@ public class AddUserActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Gets the members in the system from the server
+     * @throws UnsupportedEncodingException
+     * @throws JSONException
+     */
+
     private void getAllMembers() throws UnsupportedEncodingException, JSONException {
 
         ServerAPI.getInstance().getUsers(this.getApplicationContext(),
@@ -147,6 +149,10 @@ public class AddUserActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * parses the response from the server, and adds the Users in the system to the adapter
+     * @param response
+     */
     private void extractAllMembers(JSONArray response) throws JSONException {
 
         String currentUser = globalVariables.getUser().getName();

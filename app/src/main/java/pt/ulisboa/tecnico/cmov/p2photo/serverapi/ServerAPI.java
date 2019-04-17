@@ -57,6 +57,10 @@ public class ServerAPI {
     }
 
 
+    /**
+     * Sends a register request to the server
+     * @param responseHandler Handles the response from the server
+     */
     public void register(Context applicationContext, String username, String password,JsonHttpResponseHandler responseHandler) throws IOException, JSONException {
 
         HashMap<String,String> params = new HashMap<>();
@@ -69,6 +73,11 @@ public class ServerAPI {
 
     }
 
+
+    /**
+     * Sends a login request to the server
+     * @param responseHandler Handles the response from the server
+     */
     public void login(Context applicationContext, String username, String password,JsonHttpResponseHandler responseHandler) throws IOException, JSONException {
 
 
@@ -83,7 +92,12 @@ public class ServerAPI {
     }
 
 
-    public void getGroupMembership(Context applicationContext, String token, String name, String albumName, JsonHttpResponseHandler jsonHttpResponseHandler) throws JSONException, UnsupportedEncodingException {
+    /**
+     * Sends a getGroupMembership request to the server
+     * @param responseHandler Handles the response from the server
+     */
+
+    public void getGroupMembership(Context applicationContext, String token, String name, String albumName, JsonHttpResponseHandler responseHandler) throws JSONException, UnsupportedEncodingException {
 
         HashMap<String, String> params = new HashMap<>();
 
@@ -93,18 +107,17 @@ public class ServerAPI {
 
         String json = generateJson(params);
 
-        HttpUtils.get(applicationContext, "getGroupMembership",  new StringEntity(json),jsonHttpResponseHandler);
+        HttpUtils.get(applicationContext, "getGroupMembership",  new StringEntity(json),responseHandler);
 
     }
 
+
     /**
-     * @return list of all members of the P2Pservice
-     * @param applicationContext
-     * @param token
-     * @param username
-     * @param jsonHttpResponseHandler
+     * Sends a getUsers request to the server
+     * @param responseHandler Handles the response from the server
      */
-    public void getUsers(Context applicationContext, String token, String username, JsonHttpResponseHandler jsonHttpResponseHandler) throws UnsupportedEncodingException, JSONException {
+
+    public void getUsers(Context applicationContext, String token, String username, JsonHttpResponseHandler responseHandler) throws UnsupportedEncodingException, JSONException {
 
 
         HashMap<String, String> params = new HashMap<>();
@@ -114,18 +127,17 @@ public class ServerAPI {
 
         String json = generateJson(params);
 
-        HttpUtils.get(applicationContext, "getUsers",  new StringEntity(json), jsonHttpResponseHandler);
+        HttpUtils.get(applicationContext, "getUsers",  new StringEntity(json), responseHandler);
 
     }
 
+
     /**
-     * Lists all the albums belonging to the user
-     * @return list of all user's album
-     * @param applicationContext
-     * @param token
-     * @param requestHandler
+     * Sends a register request to the server
+     * @param responseHandler Handles the response from the server
      */
-    public void getUserAlbums(Context applicationContext, String username, String token, JsonHttpResponseHandler requestHandler)
+
+    public void getUserAlbums(Context applicationContext, String username, String token, JsonHttpResponseHandler responseHandler)
             throws IOException, JSONException {
 
         HashMap<String, String> params = new HashMap<>();
@@ -135,14 +147,20 @@ public class ServerAPI {
 
         String json = generateJson(params);
 
-        HttpUtils.get(applicationContext, "getUserAlbums",  new StringEntity(json),requestHandler);
+        HttpUtils.get(applicationContext, "getUserAlbums",  new StringEntity(json),responseHandler);
 
     }
 
 
+
+    /**
+     * Sends a shareAlbum request to the server
+     * @param responseHandler Handles the response from the server
+     */
+
     public void shareAlbum(Context applicationContext,
                            String token, String username1, String username2, String albumName,
-                           JsonHttpResponseHandler requestHandler)
+                           JsonHttpResponseHandler responseHandler)
             throws IOException, JSONException {
 
 
@@ -154,12 +172,18 @@ public class ServerAPI {
         params.put("albumName",albumName);
         String json = generateJson(params);
 
-        HttpUtils.post(applicationContext,"shareAlbum",new StringEntity(json),requestHandler);
+        HttpUtils.post(applicationContext,"shareAlbum",new StringEntity(json),responseHandler);
     }
+
+
+    /**
+     * Sends a createAlbum request to the server
+     * @param responseHandler Handles the response from the server
+     */
 
     public void createAlbum(Context applicationContext,
                             String token, String username, String name, String url, String fileID,
-                            JsonHttpResponseHandler handler)
+                            JsonHttpResponseHandler responseHandler)
             throws IOException, JSONException {
 
         HashMap<String, String> params = new HashMap<>();
@@ -171,9 +195,13 @@ public class ServerAPI {
         params.put("fileID",fileID);
         String json = generateJson(params);
 
-        HttpUtils.post(applicationContext, "createAlbum",  new StringEntity(json), handler);
+        HttpUtils.post(applicationContext, "createAlbum",  new StringEntity(json), responseHandler);
     }
 
+
+    /**
+     * Sends a updateAlbum request to the server
+     */
     public void updateAlbum(final Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
 
         HashMap<String, String> params = new HashMap<>();
@@ -202,7 +230,13 @@ public class ServerAPI {
 
     }
 
-    public void getFileID(Context applicationContext, String token, String username, String albumName, JsonHttpResponseHandler jsonHttpResponseHandler) throws JSONException, UnsupportedEncodingException {
+
+    /**
+     * Sends a register request to the server
+     * @param responseHandler Handles the response from the server
+     */
+
+    public void getFileID(Context applicationContext, String token, String username, String albumName, JsonHttpResponseHandler responseHandler) throws JSONException, UnsupportedEncodingException {
         HashMap<String, String> params = new HashMap<>();
 
         params.put("token",token);
@@ -210,9 +244,14 @@ public class ServerAPI {
         params.put("albumName",albumName);
         String json = generateJson(params);
 
-        HttpUtils.get(applicationContext, "getFileID",  new StringEntity(json),jsonHttpResponseHandler);
+        HttpUtils.get(applicationContext, "getFileID",  new StringEntity(json),responseHandler);
     }
 
+
+    /**
+     * generates a json based on a Map
+     * @return the String in json
+     */
     private String generateJson(Map<String,String> params) throws JSONException {
 
         JSONObject jsonObject = new JSONObject();
@@ -223,6 +262,9 @@ public class ServerAPI {
 
     }
 
+    /**
+     * Called when the token expired, goes to the login screen
+     */
     public void tokenInvalid(Context context){
 
         Toast.makeText(context,
