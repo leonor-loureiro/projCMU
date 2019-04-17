@@ -5,6 +5,7 @@ import pt.ulisboa.ist.cmu.p2photo.server.data.User;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyExistsException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
+import pt.ulisboa.ist.cmu.p2photo.server.exception.WrongPasswordException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,30 +19,19 @@ public class P2PhotoServerManager {
 
     private List<User> users = new ArrayList<>();
 
+    private SecurityHandler security;
+
 
     /**
      * Stop unintended instances
      */
    private P2PhotoServerManager(){
+       security = new SecurityHandler();
+
        try {
            users = AtomicFileManager.getUserList();
        } catch (IOException | ClassNotFoundException e) {
            e.printStackTrace();
-       }
-   }
-
-
-    /**
-     * If user exists
-     * @param username unique identifier of the user
-     * @return true if the user exists
-     */
-   private boolean userExists(String username){
-       try {
-           findUser(username);
-           return true;
-       } catch (UserNotExistsException e) {
-           return false;
        }
    }
 
@@ -60,6 +50,7 @@ public class P2PhotoServerManager {
 
     /**
      * Register the username into the server
+     * Safely hashes the password to prevent attacks
      *
      * @param username the name of the user
      * @param password the secret password
@@ -72,13 +63,11 @@ public class P2PhotoServerManager {
         if(userExists(username))
             throw new UserAlreadyExistsException(username);
 
-        users.add(new User(username, password));
-
-        //TODO: properly generate token
+        users.add(new User(username, security.hashPassword(password)));
 
         updateInformation();
 
-        return "TOKEEEEEN";
+        return security.generateToken(username);
     }
 
 
@@ -89,13 +78,30 @@ public class P2PhotoServerManager {
      * @param password the secret password
      * @return the token
      */
-    public String login(String username, String password) throws UserNotExistsException {
+    public String login(String username, String password) throws UserNotExistsException, WrongPasswordException {
 
-        if(!userExists(username))
-            throw new UserNotExistsException(username);
+        User user = findUser(username);
+
+        if(!security.passwordMatches(password, user.getPassword()))
+            throw new WrongPasswordException(username);
+
         printInfo("Logging in user " + username);
-        //TODO: properly generate token
-        return "TOKENNN";
+
+
+        return security.generateToken(username);
+    }
+
+
+    /**
+     * Verifies if the token received is valid
+     * @param username the user who the token belongs to
+     * @param token the user's token
+     * @return true if the token was valid
+     */
+    public boolean verifyTokenValidity(String username, String token){
+        boolean result = security.validateJTW(token, username);
+        printInfo("Verifying token validity for " + username + " ... is valid? " + result);
+        return result;
     }
 
 
@@ -202,6 +208,86 @@ public class P2PhotoServerManager {
 
 
     /**
+     * @param username the name of the use whose albums will be found
+     * @return the list of album names
+     */
+    public List<String> getUserAlbumsNames(String username) throws UserNotExistsException {
+        ArrayList<String> list = new ArrayList<>();
+        List <Album> albums = getUserAlbums(username);
+
+        for (Album album : albums) {
+            list.add(album.getName());
+        }
+
+        printInfo("getting names of all album of user " + username);
+
+        return list;
+    }
+
+
+
+    /**
+     * Finds the fileId corresponding to the user-album
+     * @param username the name of the user
+     * @param albumName the name of the album
+     * @return the fileID representing the user's album catalog file ID
+     * @throws UserNotExistsException If the user does not exist
+     * @throws AlbumNotFoundException If the Album name does not exist
+     */
+    public String getFileID(String username, String albumName) throws UserNotExistsException, AlbumNotFoundException {
+
+        Album album = findAlbum(username, albumName);
+
+        printInfo("Getting file ID for " + username);
+        return album.findFileID(username);
+    }
+
+
+
+
+    //////////////////////////////////////////////////////////
+    //                                                      //
+    //                      Auxiliary Functions             //
+    //                                                      //
+    //////////////////////////////////////////////////////////
+
+    /**
+     * User for debug purposes
+     * @param info information to be displayed
+     */
+    public void printInfo(String info){
+        System.out.println(info);
+    }
+
+    /**
+     * Persists data
+     */
+    private void updateInformation(){
+
+        try {
+            AtomicFileManager.atomicWriteObjectToFile(users);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        printInfo("Updating storage...");
+    }
+
+    /**
+     * If user exists
+     * @param username unique identifier of the user
+     * @return true if the user exists
+     */
+    private boolean userExists(String username){
+        try {
+            findUser(username);
+            return true;
+        } catch (UserNotExistsException e) {
+            return false;
+        }
+    }
+
+    /**
      * This function returns the user with the given username
      * @param username username of the user to be found
      * @return the user matching the username
@@ -233,61 +319,4 @@ public class P2PhotoServerManager {
     }
 
 
-    /**
-     * @param username the name of the use whose albums will be found
-     * @return the list of album names
-     */
-    public List<String> getUserAlbumsNames(String username) throws UserNotExistsException {
-        ArrayList<String> list = new ArrayList<>();
-        List <Album> albums = getUserAlbums(username);
-
-        for (Album album : albums) {
-            list.add(album.getName());
-        }
-
-        printInfo("getting names of all album of user " + username);
-
-        return list;
-    }
-
-
-    /**
-     * Persists data
-     */
-    public void updateInformation(){
-
-        try {
-            AtomicFileManager.atomicWriteObjectToFile(users);
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        printInfo("Updating storage...");
-    }
-
-
-    /**
-     * Finds the fileId corresponding to the user-album
-     * @param username the name of the user
-     * @param albumName the name of the album
-     * @return the fileID representing the user's album catalog file ID
-     * @throws UserNotExistsException If the user does not exist
-     * @throws AlbumNotFoundException If the Album name does not exist
-     */
-    public String getFileID(String username, String albumName) throws UserNotExistsException, AlbumNotFoundException {
-
-        Album album = findAlbum(username, albumName);
-
-        printInfo("Getting file ID for " + username);
-        return album.findFileID(username);
-    }
-
-
-    /**
-     * User for debug purposes
-     * @param info information to be displayed
-     */
-    public void printInfo(String info){
-        System.out.println(info);
-    }
 }

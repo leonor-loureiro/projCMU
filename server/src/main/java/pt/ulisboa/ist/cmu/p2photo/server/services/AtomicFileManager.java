@@ -23,6 +23,12 @@ public interface AtomicFileManager {
         return users;
     }
 
+    /**
+     *
+     * @param sourceFile
+     * @param destinationFile
+     * @throws IOException
+     */
     static void atomicFileMove(String sourceFile, String destinationFile)
             throws IOException {
         Path sourcePath = Paths.get(sourceFile);
@@ -74,7 +80,6 @@ public interface AtomicFileManager {
             //Confirm the data was successfully saved to disk (not sure if necessary)
             fis = new FileInputStream(tempFile.getAbsolutePath());
             ois = new ObjectInputStream(fis);
-            List<User> arrayList = (List) ois.readObject();
 
             fis.close();
 

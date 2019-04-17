@@ -9,6 +9,7 @@ import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyExistsException;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
+import pt.ulisboa.ist.cmu.p2photo.server.exception.WrongPasswordException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,24 +70,26 @@ public class P2PhotoServerController {
         String username = credentials.get("username");
         String password = credentials.get("password");
 
-        System.out.println(credentials.get("username"));
-        System.out.println(credentials.get("password"));
-
-        // generate login token
-
         String[] stringtoreturn = new String[1];
 
-        String token = null;
         try {
-            token = P2PhotoServerManager.getInstance().login(username, password);
+            String token = P2PhotoServerManager.getInstance().login(username, password);
             stringtoreturn[0] = token;
+
             return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
+
         } catch (UserNotExistsException e) {
             e.printStackTrace();
-        }
+            stringtoreturn[0] = "User" + username + " does not exists";
 
-        stringtoreturn[0] = "User" + username + " does not exists";
-        return new ResponseEntity<>(stringtoreturn,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(stringtoreturn,HttpStatus.BAD_REQUEST);
+
+        } catch (WrongPasswordException e) {
+            e.printStackTrace();
+            stringtoreturn[0] = "Wrong password for " + username + ".";
+
+            return new ResponseEntity<>(stringtoreturn,HttpStatus.BAD_REQUEST);
+        }
 
     }
 
@@ -104,7 +107,9 @@ public class P2PhotoServerController {
         String username = credentials.get("username");
         String albumName = credentials.get("albumName");
 
-        //TODO: Verify token
+        if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
 
         try {
             return new ResponseEntity<>(P2PhotoServerManager.getInstance().getGroupMembership(username, albumName), HttpStatus.OK);
@@ -113,7 +118,7 @@ public class P2PhotoServerController {
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>(new HashMap<String,String>(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new HashMap<>(), HttpStatus.BAD_REQUEST);
     }
 
 
@@ -130,7 +135,9 @@ public class P2PhotoServerController {
         String username = credentials.get("username");
         String albumName = credentials.get("albumName");
 
-        //TODO: Verify token
+        if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
 
         try {
             String[] stringtoreturn = new String[1];
@@ -156,7 +163,9 @@ public class P2PhotoServerController {
         String token = credentials.get("token");
         String username = credentials.get("username");
 
-        //TODO: Verify token
+        if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
         String[] users = P2PhotoServerManager.getInstance().getUsers().toArray(new String[0]);
 
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -175,8 +184,8 @@ public class P2PhotoServerController {
         String token = credentials.get("token");
         String username = credentials.get("username");
 
-        //TODO: Verify token
-
+        if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 
         // get albums
         try {
@@ -212,7 +221,10 @@ public class P2PhotoServerController {
         String username2 = credentials.get("username2");
         String albumName = credentials.get("albumName");
 
-        //TODO: Verify token
+
+        if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username1, token))
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
 
         String [] stringtoreturn = new String[1];
 
@@ -245,7 +257,9 @@ public class P2PhotoServerController {
         String url = credentials.get("url");
         String fileID = credentials.get("fileID");
 
-        //TODO: Verify token
+        if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
 
         String [] stringtoreturn = new String[1];
         // Create Album
@@ -276,15 +290,17 @@ public class P2PhotoServerController {
     @RequestMapping(value = "/updateAlbum")
     public ResponseEntity<String[]> updateAlbum(@RequestBody Map<String, String> credentials) {
 
-        String token = credentials.get("token");
         String username = credentials.get("username");
+        String token = credentials.get("token");
         String albumName = credentials.get("albumName");
         String url = credentials.get("url");
         String fileID = credentials.get("fileID");
 
-        //TODO: Verify token
-
         String[] stringtosend = new String[1];
+
+        if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
         // Update Album
         try {
             stringtosend[0] = "Success";
