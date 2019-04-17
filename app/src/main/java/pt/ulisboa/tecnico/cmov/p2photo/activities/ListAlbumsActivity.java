@@ -63,11 +63,10 @@ public class ListAlbumsActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        List<Album> albums = new ArrayList<>();
-        getAlbums(albums);
+        getAlbums();
 
         //Set the adapter responsible for showing the list of albums
-        adapter = new ListAlbumsAdapter(this, albums);
+        adapter = new ListAlbumsAdapter(this, new ArrayList<Album>());
         listView = findViewById(R.id.folders_list);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
@@ -94,9 +93,8 @@ public class ListAlbumsActivity extends AppCompatActivity {
 
     /**
      * Send the server request to retrieve the list of the user albums
-     * @param albums
      */
-    private void getAlbums(List<Album> albums) {
+    private void getAlbums() {
 
         try {
             ServerAPI.getInstance().getUserAlbums(
@@ -217,14 +215,16 @@ public class ListAlbumsActivity extends AppCompatActivity {
                 final String fileID = result.first;
                 final String url = result.second;
 
-                Log.i("link",result.second);
+                Log.i("Create album", "url = " + url);
+                Log.i("Create album", "fileID = " + fileID);
+
                 try {
                     ServerAPI.getInstance().createAlbum(ListAlbumsActivity.this,
                             globalVariables.getToken(),
                             globalVariables.getUser().getName(),
                             name,
-                            fileID,
                             url,
+                            fileID,
                             new JsonHttpResponseHandler() {
 
                                 @Override

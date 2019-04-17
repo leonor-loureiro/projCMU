@@ -20,4 +20,5 @@
     <string name="home">Home</string>
     <string name ="addusers">Add Users</string>
     <string name="failed_get_albums">Failed to get albums.</string>
+    <string name="failed_get_photos">Failed to get album photos</string>
 </resources>

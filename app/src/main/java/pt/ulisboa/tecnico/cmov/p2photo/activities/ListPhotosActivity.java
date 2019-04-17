@@ -43,7 +43,6 @@ import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
-import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
@@ -70,6 +69,11 @@ public class ListPhotosActivity extends AppCompatActivity {
 
     //Handles all google drive operations
     private GoogleDriveHandler driveHandler;
+
+    //Url of the current user's catalog
+    private String mCatalogUrl;
+    //Contents of the current user's catalog
+    private List<String> mCatalogContent = new ArrayList<>();
 
 
     @Override
@@ -123,14 +127,18 @@ public class ListPhotosActivity extends AppCompatActivity {
      * @param albumUrls list of photo's urls
      */
     private void getAlbumPhotos(List<String> albumUrls) {
-        Log.i("album", "getting album's photos");
+        Log.i("ListPhotos", "getting album's photos");
 
         final List<String> urls = albumUrls;
 
         try {
-            Log.i("album", "Checking for updates on server.");
+            Log.i("ListPhotos", "Checking for updates on server.");
 
-            ServerAPI.getInstance().getGroupMembership(this.getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(),album.getName(), new JsonHttpResponseHandler() {
+            ServerAPI.getInstance().getGroupMembership(this,
+                    globalVariables.getToken(),
+                    globalVariables.getUser().getName(),
+                    album.getName(),
+                    new JsonHttpResponseHandler() {
 
                 /**
                  * If connection to server is available, get updated urls and users
@@ -138,69 +146,101 @@ public class ListPhotosActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     try {
-                        Log.i("album", "Correctly got album information from server");
+                        Log.i("ListPhotos", "Correctly got album information from server");
 
                         updateAlbumInfo(response);
-                        downloadAlbum(urls);
 
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
+                    } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
 
                 }
 
-                /**
-                 * If no connection to server was available, uses the local version of the album
-                 */
                 public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse){
-                    Log.i("album", "unable to contact server, downloading based on local urls");
-
-                    downloadAlbum(urls);
+                    Log.i("ListPhotos", "failed to get group membership = " + throwable.getMessage());
+                    Toast.makeText(ListPhotosActivity.this,
+                                   ListPhotosActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_photos),
+                                   Toast.LENGTH_SHORT)
+                            .show();
                 }
 
             });
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        } catch (JSONException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
 
     }
 
 
     /**
-     * Downloads the album
-     * @param urls list of albums to download
+     * Downloads the album catalogs
+     * @param urls list of catalogs to download
      */
-    public void downloadAlbum(List <String> urls){
-        Log.i("album", "downloading from google drive");
+    public void downloadAlbumCatalogs(List <String> urls){
+
+        Log.i("ListPhotos", "download album catalogs #" + urls.size());
+
+        for(final String url : urls){
+            if(url == null)
+                continue;
+
+            Task<List<String>> task = driveHandler.downloadFile(url);
+            task.addOnSuccessListener(new OnSuccessListener<List<String>>() {
+                @Override
+                public void onSuccess(List<String> catalogUrls) {
+                    Log.i("ListPhotos",
+                            "SUCCESS: download album catalog = " + url + " -> " + catalogUrls.size()) ;
+
+                    //Save the catalog content of the current user
+                    if(url.equals(mCatalogUrl))
+                        mCatalogContent = catalogUrls;
+
+                    downloadPhotos(catalogUrls);
+                }
+            });
+            task.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.i("ListPhotos", "FAILED: download album catalog = " + url);
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    /**
+     * Download album photos
+     * @param urls list of photo's to download
+     */
+    public void downloadPhotos(List<String> urls) {
+        Log.i("ListPhotos", "downloading photos from google drive");
 
         for(final String url : urls) {
-            driveHandler.downloadPhoto(url).addOnSuccessListener(new OnSuccessListener<Bitmap>() {
+            Task<Bitmap> task =  driveHandler.downloadPhoto(url);
+            task.addOnSuccessListener(new OnSuccessListener<Bitmap>() {
                 @Override
                 public void onSuccess(Bitmap bitmap) {
-
-                    //TODO: compare if it's null?
-
-                    Log.i("Drive", "OnSuccessListener");
                     adapter.addPhoto(new Photo(url, bitmap));
                 }
             });
+            task.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.i("ListPhotos", "failed to download photo = " + url);
+                    e.printStackTrace();
+                }
+            });
         }
     }
 
 
     /**
-     *
-     * @param resp updates the album information based on response from server
+     * Updates the album information based on response from server
      */
-    private void updateAlbumInfo(JSONObject resp) throws UnsupportedEncodingException, JSONException {
+    private void updateAlbumInfo(JSONObject resp) throws JSONException, UnsupportedEncodingException {
 
-        String link;
+        String username, url;
         String currentUser = globalVariables.getUser().getName();
         String albumName = album.getName();
 
@@ -210,39 +250,47 @@ public class ListPhotosActivity extends AppCompatActivity {
         List<String> newMembership = new ArrayList<>();
 
         for(int i = 0;i < resp.names().length();i++){
+            username = resp.names().getString(i);
+            url = resp.getString(username);
 
-            link = resp.getString(resp.names().getString(i));
-
-            if(currentUser.equals(resp.names().get(i))){
-                if(link == null || link.equals("null")){
-                    Log.i("album", "album was shared with me but not updated, updating album");
+            if(currentUser.equals(username)){
+                if(url == null || url.equals("null")){
+                    Log.i("ListPhotos", "updateAlbumInfo -> " + currentUser + " slice not initialize");
+                    url = null;
                     updateSharedAlbum(albumName);
                 }
-            }else{
-                newMembership.add(link);
+                mCatalogUrl = url;
             }
-
+            newMembership.add(url);
         }
 
         album.setGroupMembership(newMembership);
 
+        //Get file ID, if already created
+        if(mCatalogUrl != null)
+            getFileID();
 
+        //Download album
+        downloadAlbumCatalogs(album.getGroupMembership());
     }
 
-    public void updateFileID() throws UnsupportedEncodingException, JSONException {
-        ServerAPI.getInstance().getFileID(this.getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(),album.getName(),new JsonHttpResponseHandler() {
+    public void getFileID() throws UnsupportedEncodingException, JSONException {
+        ServerAPI.getInstance().getFileID(this,
+                globalVariables.getToken(),
+                globalVariables.getUser().getName(),
+                album.getName(),
+                new JsonHttpResponseHandler() {
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                try {
-                    Log.i("album", "successfully updated shared album");
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                    try {
+                        album.setFileID((String) response.get(0));
+                        Log.i("ListPhotos", "newFileID = " + album.getFileID() );
 
-                    Log.i("newFileID", (String) response.get(0));
-                    album.setFileID((String) response.get(0));
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
         });
     }
 
@@ -253,25 +301,30 @@ public class ListPhotosActivity extends AppCompatActivity {
         final String albumName = name;
         final Task<Pair<String,String>> task = driveHandler.createAlbumSlice(name);
 
+        Log.i("UpdateSharedAlbum", albumName);
+
         //Add success listener
         task.addOnSuccessListener(new OnSuccessListener<Pair<String, String>>() {
             @Override
             public void onSuccess(Pair<String, String> result) {
 
-            // TODO: Update local album list if such part is implemented!
+            final String url = result.second;
+            final String fileID = result.first;
 
-            Toast.makeText(ListPhotosActivity.this,
-                    "Album " + albumName + " updated successfully.",
-                    Toast.LENGTH_SHORT)
-                    .show();
+            Log.i("UpdateSharedAlbum", "fileID = " + fileID);
+            Log.i("UpdateSharedAlbum", "url = " + url);
 
-            Log.i("link",result.second);
             try {
-                ServerAPI.getInstance().updateAlbum(getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(),albumName,result.second,result.first);
-                updateFileID();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+                //Send url and fileID to the server
+                ServerAPI.getInstance().updateAlbum(getApplicationContext(),
+                        globalVariables.getToken(),
+                        globalVariables.getUser().getName(),
+                        albumName,url,fileID);
+
+                //Set album file ID
+                album.setFileID(fileID);
+
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
             }
@@ -401,13 +454,14 @@ public class ListPhotosActivity extends AppCompatActivity {
                 String filePath = Utils.getPath(this, photoUri);
 
                 //Upload photo to google drive
-                Task<String> task = driveHandler.addPhotoToAlbum(album.getFileID(), new ArrayList<String>(), filePath);
+                Task<String> task = driveHandler.addPhotoToAlbum(album.getFileID(), mCatalogContent, filePath);
 
                 //Add on success listener
                 task.addOnSuccessListener(new OnSuccessListener<String>() {
                     @Override
                     public void onSuccess(String url) {
                         addPhotoSuccess(url, photoUri);
+
                     }
                 });
 
@@ -437,6 +491,9 @@ public class ListPhotosActivity extends AppCompatActivity {
             //Display photo
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(ListPhotosActivity.this.getContentResolver(), photoUri);
             adapter.addPhoto(new Photo(url, bitmap));
+
+            //Save photo in current catalog content
+            mCatalogContent.add(url);
 
             Toast.makeText(ListPhotosActivity.this,
                     "Photo successfully added to album.",

@@ -82,9 +82,7 @@ public class AddUserActivity extends AppCompatActivity {
 
         try {
             getAlbumMembers();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (UnsupportedEncodingException | JSONException e) {
             e.printStackTrace();
         }
 
@@ -102,9 +100,7 @@ public class AddUserActivity extends AppCompatActivity {
 
         try {
             getAllMembers();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (UnsupportedEncodingException | JSONException e) {
             e.printStackTrace();
         }
 
