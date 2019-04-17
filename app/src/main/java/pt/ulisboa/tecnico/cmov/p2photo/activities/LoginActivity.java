@@ -80,7 +80,11 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 
-                        globalVariables.setToken("TOKEN");
+                        try {
+                            globalVariables.setToken((String) response.get(0));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         globalVariables.setUser(new Member(username));
 
                         Toast.makeText(LoginActivity.this,

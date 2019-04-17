@@ -115,10 +115,17 @@ public class ListAlbumsActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
                             Log.i("Get Albums", "failed = " + throwable.getMessage());
-                            Toast.makeText(ListAlbumsActivity.this,
-                                    ListAlbumsActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_albums),
-                                    Toast.LENGTH_SHORT)
-                                    .show();
+                                Toast.makeText(ListAlbumsActivity.this,
+                                        ListAlbumsActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_albums),
+                                        Toast.LENGTH_SHORT)
+                                        .show();
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                            if(statusCode == 401)
+                                ServerAPI.getInstance().tokenInvalid(ListAlbumsActivity.this);
+
                         }
                     });
         }catch (IOException | JSONException e) {
@@ -248,8 +255,18 @@ public class ListAlbumsActivity extends AppCompatActivity {
                                     Toast.makeText(ListAlbumsActivity.this,
                                             "Failed to create album " + albumName + ".",
                                             Toast.LENGTH_SHORT)
-                                            .show();                                }
+                                            .show();
+                                }
+
+                                @Override
+                                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                    if(statusCode == 401)
+                                        ServerAPI.getInstance().tokenInvalid(ListAlbumsActivity.this);
+
+                                }
                             });
+
+
 
 
                 } catch (IOException | JSONException e) {

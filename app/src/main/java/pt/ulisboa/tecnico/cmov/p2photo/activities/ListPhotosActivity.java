@@ -157,15 +157,22 @@ public class ListPhotosActivity extends AppCompatActivity {
 
                 }
 
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse){
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse){
                     Log.i("ListPhotos", "failed to get group membership = " + throwable.getMessage());
                     Toast.makeText(ListPhotosActivity.this,
-                                   ListPhotosActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_photos),
-                                   Toast.LENGTH_SHORT)
-                            .show();
+                                ListPhotosActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_photos),
+                                Toast.LENGTH_SHORT)
+                                .show();
+                }
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                    if(statusCode == 401)
+                        ServerAPI.getInstance().tokenInvalid(ListPhotosActivity.this);
                 }
 
-            });
+
+                    });
 
         } catch (JSONException | UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -296,7 +303,14 @@ public class ListPhotosActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-        });
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        if(statusCode == 401)
+                            ServerAPI.getInstance().tokenInvalid(ListPhotosActivity.this);
+
+                    }
+                });
     }
 
     /**

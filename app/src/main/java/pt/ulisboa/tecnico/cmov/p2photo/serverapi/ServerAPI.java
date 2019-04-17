@@ -1,7 +1,9 @@
 package pt.ulisboa.tecnico.cmov.p2photo.serverapi;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -17,6 +19,9 @@ import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
+import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.ListPhotosActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.LoginActivity;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 
 public class ServerAPI {
@@ -169,7 +174,7 @@ public class ServerAPI {
         HttpUtils.post(applicationContext, "createAlbum",  new StringEntity(json), handler);
     }
 
-    public void updateAlbum(Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
+    public void updateAlbum(final Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
 
         HashMap<String, String> params = new HashMap<>();
 
@@ -183,11 +188,16 @@ public class ServerAPI {
         HttpUtils.post(applicationContext, "updateAlbum",  new StringEntity(json), new JsonHttpResponseHandler() {
 
             @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 
             }
 
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                if(statusCode == 401)
+                    ServerAPI.getInstance().tokenInvalid(applicationContext);
 
+            }
         });
 
     }
@@ -210,6 +220,18 @@ public class ServerAPI {
             jsonObject.put(entry.getKey(),entry.getValue());
 
         return jsonObject.toString();
+
+    }
+
+    public void tokenInvalid(Context context){
+
+        Toast.makeText(context,
+                context.getString(R.string.token_expired),
+                Toast.LENGTH_SHORT)
+                .show();
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
 
     }
 

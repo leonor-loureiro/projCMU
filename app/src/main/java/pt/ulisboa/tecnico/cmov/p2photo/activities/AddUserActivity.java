@@ -128,12 +128,20 @@ public class AddUserActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                        Log.i("Get users", "FAILED: " + throwable.getMessage());
-                        Toast.makeText(AddUserActivity.this,
-                                AddUserActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_users),
-                                Toast.LENGTH_SHORT)
-                        .show();
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+
+                            Log.i("Get users", "FAILED: " + throwable.getMessage());
+                            Toast.makeText(AddUserActivity.this,
+                                    AddUserActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_users),
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        if(statusCode == 401)
+                            ServerAPI.getInstance().tokenInvalid(AddUserActivity.this);
+
                     }
                 });
 

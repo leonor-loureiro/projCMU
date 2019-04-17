@@ -89,10 +89,12 @@ public class RegisterActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-
-
-                        globalVariables.setToken("TOKEN");
-                        globalVariables.setUser(new Member(username));
+                    try {
+                        globalVariables.setToken((String) response.get(0));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    globalVariables.setUser(new Member(username));
 
                         Toast.makeText(RegisterActivity.this,
                                 "Register successfuly",

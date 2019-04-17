@@ -21,6 +21,7 @@ public class SecurityHandler {
      * Token's valid period
      */
     private static final int validPeriod = 1800000; // 30 minutes
+//    private static final int validPeriod = 180000/2; // 1,5 minutes
 
     private static String keystoreFile = System.getProperty("user.dir") + "/keystore";
     private static String keystorePwd = "password";

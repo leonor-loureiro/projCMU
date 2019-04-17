@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.p2photo.data;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,10 @@ import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.AddUserActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbumsActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.ListPhotosActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.LoginActivity;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
@@ -121,11 +126,19 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
 
                             @Override
                             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                                Log.i("MembersAdapter","FAILURE: addUserHandle " + member.getName());
+
+                            Log.i("MembersAdapter","FAILURE: addUserHandle " + member.getName());
                                 Toast.makeText(mContext,
                                         mContext.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_add_member) + " " + member.getName(),
                                         Toast.LENGTH_SHORT)
                                 .show();
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                if(statusCode == 401)
+                                    ServerAPI.getInstance().tokenInvalid(mContext);
+
                             }
                         });
         } catch (IOException | JSONException e) {
