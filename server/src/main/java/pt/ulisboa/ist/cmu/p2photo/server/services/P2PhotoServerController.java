@@ -73,11 +73,21 @@ public class P2PhotoServerController {
         System.out.println(credentials.get("password"));
 
         // generate login token
-        String token = P2PhotoServerManager.getInstance().login(username, password);
+
         String[] stringtoreturn = new String[1];
 
-        stringtoreturn[0] = token;
-        return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
+        String token = null;
+        try {
+            token = P2PhotoServerManager.getInstance().login(username, password);
+            stringtoreturn[0] = token;
+            return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
+        } catch (UserNotExistsException e) {
+            e.printStackTrace();
+        }
+
+        stringtoreturn[0] = "User" + username + " does not exists";
+        return new ResponseEntity<>(stringtoreturn,HttpStatus.BAD_REQUEST);
+
     }
 
 

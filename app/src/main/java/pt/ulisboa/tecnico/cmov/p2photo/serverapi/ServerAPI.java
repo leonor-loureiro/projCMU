@@ -64,7 +64,7 @@ public class ServerAPI {
 
     }
 
-    public void login(Context applicationContext, String username, String password) throws IOException, JSONException {
+    public void login(Context applicationContext, String username, String password,JsonHttpResponseHandler responseHandler) throws IOException, JSONException {
 
 
         HashMap<String,String> params = new HashMap<>();
@@ -73,14 +73,7 @@ public class ServerAPI {
         params.put("password",password);
         String json = generateJson(params);
 
-        HttpUtils.post(applicationContext,"login", new StringEntity(json), new JsonHttpResponseHandler() {
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-
-            }
-
-        });
+        HttpUtils.post(applicationContext,"login", new StringEntity(json),responseHandler);
 
     }
 

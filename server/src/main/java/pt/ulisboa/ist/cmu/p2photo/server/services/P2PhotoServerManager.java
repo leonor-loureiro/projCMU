@@ -89,7 +89,10 @@ public class P2PhotoServerManager {
      * @param password the secret password
      * @return the token
      */
-    public String login(String username, String password) {
+    public String login(String username, String password) throws UserNotExistsException {
+
+        if(!userExists(username))
+            throw new UserNotExistsException(username);
         printInfo("Logging in user " + username);
         //TODO: properly generate token
         return "TOKENNN";
