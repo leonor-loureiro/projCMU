@@ -129,6 +129,10 @@ public class ListAlbumsActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Add the albums received from the server to the list
+     * @param response server response
+     */
     private void transformResults(JSONArray response) throws JSONException {
         for(int i = 0;i < response.length();i++){
             adapter.add(new Album((String)response.get(i)));
@@ -203,32 +207,52 @@ public class ListAlbumsActivity extends AppCompatActivity {
      */
     private void createNewAlbum(final String name) {
         final String albumName = name;
+        //TODO check if album exists
         final Task<Pair<String,String>> task = driveHandler.createAlbumSlice(name);
 
         //Add success listener
         task.addOnSuccessListener(new OnSuccessListener<Pair<String, String>>() {
             @Override
             public void onSuccess(Pair<String, String> result) {
-
-                //TODO: update server
-
-                //Add the album to the list
-                Album album = new Album(albumName, result.first);
-                adapter.add(album);
-                adapter.notifyDataSetChanged();
-
-
-                Toast.makeText(ListAlbumsActivity.this,
-                        "Album " + albumName + " created successfully.",
-                        Toast.LENGTH_SHORT)
-                        .show();
+                final String fileID = result.first;
+                final String url = result.second;
 
                 Log.i("link",result.second);
                 try {
-                    ServerAPI.getInstance().createAlbum(getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(),name,result.second,result.first);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
+                    ServerAPI.getInstance().createAlbum(ListAlbumsActivity.this,
+                            globalVariables.getToken(),
+                            globalVariables.getUser().getName(),
+                            name,
+                            fileID,
+                            url,
+                            new JsonHttpResponseHandler() {
+
+                                @Override
+                                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                                    //Add the album to the list
+                                    Album album = new Album(albumName, fileID);
+                                    adapter.add(album);
+                                    adapter.notifyDataSetChanged();
+
+
+                                    Toast.makeText(ListAlbumsActivity.this,
+                                            "Album " + albumName + " created successfully.",
+                                            Toast.LENGTH_SHORT)
+                                            .show();
+
+                                }
+
+                                @Override
+                                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                                    Log.i("ListAlbums", "create album server = " + throwable.getMessage());
+                                    Toast.makeText(ListAlbumsActivity.this,
+                                            "Failed to create album " + albumName + ".",
+                                            Toast.LENGTH_SHORT)
+                                            .show();                                }
+                            });
+
+
+                } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
             }

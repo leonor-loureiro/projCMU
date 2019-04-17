@@ -127,7 +127,8 @@ public class ServerAPI {
      * @param token
      * @param requestHandler
      */
-    public void getUserAlbums(Context applicationContext, String username, String token, JsonHttpResponseHandler requestHandler) throws IOException, JSONException {
+    public void getUserAlbums(Context applicationContext, String username, String token, JsonHttpResponseHandler requestHandler)
+            throws IOException, JSONException {
 
         HashMap<String, String> params = new HashMap<>();
 
@@ -141,7 +142,10 @@ public class ServerAPI {
     }
 
 
-    public void shareAlbum(Context applicationContext,String token, String username1, String username2, String albumName,JsonHttpResponseHandler requestHandler) throws IOException, JSONException {
+    public void shareAlbum(Context applicationContext,
+                           String token, String username1, String username2, String albumName,
+                           JsonHttpResponseHandler requestHandler)
+            throws IOException, JSONException {
 
 
         HashMap<String, String> params = new HashMap<>();
@@ -153,11 +157,12 @@ public class ServerAPI {
         String json = generateJson(params);
 
         HttpUtils.post(applicationContext,"shareAlbum",new StringEntity(json),requestHandler);
-
-
     }
 
-    public void createAlbum(Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
+    public void createAlbum(Context applicationContext,
+                            String token, String username, String name, String url, String fileID,
+                            JsonHttpResponseHandler handler)
+            throws IOException, JSONException {
 
         HashMap<String, String> params = new HashMap<>();
 
@@ -168,16 +173,7 @@ public class ServerAPI {
         params.put("fileID",fileID);
         String json = generateJson(params);
 
-        HttpUtils.post(applicationContext, "createAlbum",  new StringEntity(json), new JsonHttpResponseHandler() {
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-
-            }
-
-
-        });
-
+        HttpUtils.post(applicationContext, "createAlbum",  new StringEntity(json), handler);
     }
 
     public void updateAlbum(Context applicationContext, String token, String username, String name, String url, String fileID) throws IOException, JSONException {
