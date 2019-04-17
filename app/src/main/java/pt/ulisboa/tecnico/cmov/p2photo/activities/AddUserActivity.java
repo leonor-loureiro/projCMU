@@ -7,14 +7,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -26,7 +20,6 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -66,38 +59,25 @@ public class AddUserActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-
-
-
         this.globalVariables = (GlobalVariables)getApplicationContext();
 
         //Get album object
         Intent intent = getIntent();
         album = (Album) intent.getSerializableExtra("album");
-        List<Member> members = new ArrayList<>();
 
 
 
-        adapter = new MembersAdapter(this,members,R.layout.member_row,album.getName(),null);
-
-        try {
-            getAlbumMembers();
-        } catch (UnsupportedEncodingException | JSONException e) {
-            e.printStackTrace();
-        }
-
+        //Create adapter for the album members list
+        adapter = new MembersAdapter(this,album.getMembers(),R.layout.member_row,album.getName(),null);
         listViewMembers = findViewById(R.id.members);
-
         listViewMembers.setAdapter(adapter);
 
-        List<Member> membersToAdd = new ArrayList<>();
-
-        adapterU = new MembersAdapter(this,membersToAdd,R.layout.add_user_row,album.getName(),adapter);
-
+        //Create adapter for the application user's list
+        adapterU = new MembersAdapter(this,new ArrayList<Member>(),R.layout.add_user_row,album.getName(),adapter);
         listViewAllUsers= findViewById(R.id.allusers);
-
         listViewAllUsers.setAdapter(adapterU);
 
+        //Get list of all users from server
         try {
             getAllMembers();
         } catch (UnsupportedEncodingException | JSONException e) {
@@ -105,12 +85,13 @@ public class AddUserActivity extends AppCompatActivity {
         }
 
 
+
         int id = findViewById(R.id.searchView).getContext()
                 .getResources()
                 .getIdentifier("android:id/search_src_text", null, null);
-
         filterText = findViewById(R.id.searchView).findViewById(id);
 
+        //Create text changed listener for search bar
         filterText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -127,89 +108,38 @@ public class AddUserActivity extends AppCompatActivity {
 
             }
         });
-
-
-
     }
 
-    private void getAlbumMembers() throws UnsupportedEncodingException, JSONException {
-
-        ServerAPI.getInstance().getGroupMembership(this.getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(),album.getName(), new JsonHttpResponseHandler() {
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    changeAlbumMembers(response);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-        });
-
-    }
-
-    private void changeAlbumMembers(JSONObject response) throws UnsupportedEncodingException, JSONException {
-
-        String link;
-        String currentUser = globalVariables.getUser().getName();
-
-
-        for(int i = 0;i < response.names().length();i++){
-            if(currentUser.equals((String)response.names().get(i))){
-
-                continue;
-            }
-            adapter.add(new Member((String) response.names().get(i)));
-            link = response.getString(response.names().getString(i));
-
-            List<String> newMembership = album.getGroupMembership();
-
-            newMembership.add(link);
-
-            album.setGroupMembership(newMembership);
-        }
-
-        ServerAPI.getInstance().getFileID(this.getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(),album.getName(),new JsonHttpResponseHandler() {
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                try {
-                    Log.i("newFileID", (String) response.get(0));
-                    album.setFileID((String) response.get(0));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-
-        });
-
-
-    }
 
     private void getAllMembers() throws UnsupportedEncodingException, JSONException {
 
-        ServerAPI.getInstance().getUsers(this.getApplicationContext(),globalVariables.getToken(),globalVariables.getUser().getName(), new JsonHttpResponseHandler() {
+        ServerAPI.getInstance().getUsers(this.getApplicationContext(),
+                globalVariables.getToken(),
+                globalVariables.getUser().getName(),
+                new JsonHttpResponseHandler() {
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                try {
-                    changeAllMembers(response);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                        try {
+                            extractAllMembers(response);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
-        });
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                        Log.i("Get users", "FAILED: " + throwable.getMessage());
+                        Toast.makeText(AddUserActivity.this,
+                                AddUserActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_users),
+                                Toast.LENGTH_SHORT)
+                        .show();
+                    }
+                });
 
     }
 
-    private void changeAllMembers(JSONArray response) throws JSONException {
+    private void extractAllMembers(JSONArray response) throws JSONException {
 
         String currentUser = globalVariables.getUser().getName();
         for(int i = 0;i < response.length();i++){

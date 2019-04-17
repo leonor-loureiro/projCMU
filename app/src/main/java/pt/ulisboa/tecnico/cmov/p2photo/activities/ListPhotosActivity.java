@@ -43,6 +43,7 @@ import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
@@ -247,7 +248,8 @@ public class ListPhotosActivity extends AppCompatActivity {
         Log.i("album", "updating album information");
 
 
-        List<String> newMembership = new ArrayList<>();
+        List<String> catalogUrls = new ArrayList<>();
+        List<Member> albumMembers = new ArrayList<>();
 
         for(int i = 0;i < resp.names().length();i++){
             username = resp.names().getString(i);
@@ -260,11 +262,14 @@ public class ListPhotosActivity extends AppCompatActivity {
                     updateSharedAlbum(albumName);
                 }
                 mCatalogUrl = url;
+            }else{
+                albumMembers.add(new Member(username));
             }
-            newMembership.add(url);
+            catalogUrls.add(url);
         }
 
-        album.setGroupMembership(newMembership);
+        album.setGroupMembership(catalogUrls);
+        album.setMembers(albumMembers);
 
         //Get file ID, if already created
         if(mCatalogUrl != null)

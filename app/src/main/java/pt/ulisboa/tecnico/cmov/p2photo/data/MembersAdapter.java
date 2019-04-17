@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -74,7 +75,7 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
             itemView = convertView;
         }
 
-        TextView memberName = (TextView) itemView.findViewById(R.id.membername);
+        TextView memberName = itemView.findViewById(R.id.membername);
         memberName.setText(member.getName());
 
         final Button addButton =  itemView.findViewById(R.id.adduserbutton);
@@ -103,20 +104,31 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
     private void addUserHandle(final Member member, final Button addUserButton) {
         try {
             if(!currentMemberAdapter.contains(member))
-                ServerAPI.getInstance().shareAlbum(mContext,globalVariables.getToken(),globalVariables.getUser().getName(),member.getName(),album,new JsonHttpResponseHandler() {
+                ServerAPI.getInstance().shareAlbum(mContext,
+                        globalVariables.getToken(),
+                        globalVariables.getUser().getName(),
+                        member.getName(),
+                        album,
+                        new JsonHttpResponseHandler() {
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                    Log.i("success","success");
-                    currentMemberAdapter.add(member);
-                    addUserButton.setEnabled(false);
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                            Log.i("MembersAdapter","SUCCESS: addUserHandle " + member.getName());
+                            currentMemberAdapter.add(member);
+                            addUserButton.setEnabled(false);
 
-                }
+                        }
 
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                                Log.i("MembersAdapter","FAILURE: addUserHandle " + member.getName());
+                                Toast.makeText(mContext,
+                                        mContext.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_add_member) + " " + member.getName(),
+                                        Toast.LENGTH_SHORT)
+                                .show();
+                            }
+                        });
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
 

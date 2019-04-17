@@ -21,4 +21,6 @@
     <string name ="addusers">Add Users</string>
     <string name="failed_get_albums">Failed to get albums.</string>
     <string name="failed_get_photos">Failed to get album photos</string>
+    <string name="failed_get_users">Failed to get list of users</string>
+    <string name="failed_add_member">Failed to add member</string>
 </resources>
