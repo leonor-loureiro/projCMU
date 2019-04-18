@@ -251,7 +251,7 @@ public class ServerAPI {
     /**
      * generates a json based on a Map
      * @return the String in json
-     */
+         */
     private String generateJson(Map<String,String> params) throws JSONException {
 
         JSONObject jsonObject = new JSONObject();

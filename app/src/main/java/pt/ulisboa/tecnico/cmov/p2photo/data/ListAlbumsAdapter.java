@@ -51,4 +51,14 @@ public class ListAlbumsAdapter extends ArrayAdapter<Album>{
 
 
     }
+
+    public boolean contains(String albumName) {
+        for (Album album:
+             albums) {
+
+            if(album.getName().equals(albumName))
+                return true;
+        }
+        return false;
+    }
 }

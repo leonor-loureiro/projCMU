@@ -212,8 +212,19 @@ public class ListAlbumsActivity extends AppCompatActivity {
      */
     private void createNewAlbum(final String name) {
         final String albumName = name;
+
+        if(adapter.contains(name)){
+
+            Toast.makeText(ListAlbumsActivity.this,
+                    "Album " + albumName + " already exists.",
+                    Toast.LENGTH_SHORT)
+                    .show();
+            return;
+
+        }
         //TODO check if album exists
         final Task<Pair<String,String>> task = driveHandler.createAlbumSlice(name);
+
 
         //Add success listener
         task.addOnSuccessListener(new OnSuccessListener<Pair<String, String>>() {
