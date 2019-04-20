@@ -274,6 +274,13 @@ public class ListAlbumsActivity extends AppCompatActivity {
                                     if(statusCode == 401)
                                         ServerAPI.getInstance().tokenInvalid(ListAlbumsActivity.this);
 
+                                    // HTTP Conflict, user already has album with such name
+                                    if(statusCode == 409)
+                                        Toast.makeText(ListAlbumsActivity.this,
+                                            "Failed to create album " + albumName + " already exists.",
+                                            Toast.LENGTH_SHORT)
+                                            .show();
+
                                 }
                             });
 

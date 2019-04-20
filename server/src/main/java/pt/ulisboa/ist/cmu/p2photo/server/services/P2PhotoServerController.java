@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
-import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
-import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyExistsException;
-import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
-import pt.ulisboa.ist.cmu.p2photo.server.exception.WrongPasswordException;
+import pt.ulisboa.ist.cmu.p2photo.server.exception.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -236,6 +233,8 @@ public class P2PhotoServerController {
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
             e.printStackTrace();
+        } catch (UserAlreadyHasAlbumException e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         }
 
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -264,15 +263,16 @@ public class P2PhotoServerController {
         String [] stringtoreturn = new String[1];
         // Create Album
         try {
-            try {
-                stringtoreturn[0] = "Success";
-                P2PhotoServerManager.getInstance().createAlbum(username, albumName, url, fileID);
-            } catch (AlbumNotFoundException e) {
-                e.printStackTrace();
-            }
+            stringtoreturn[0] = "Success";
+            P2PhotoServerManager.getInstance().createAlbum(username, albumName, url, fileID);
+
             return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
+
         } catch (UserNotExistsException e) {
             e.printStackTrace();
+
+        } catch (UserAlreadyHasAlbumException e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         }
 
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);

@@ -141,6 +141,15 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
                                 if(statusCode == 401)
                                     ServerAPI.getInstance().tokenInvalid(mContext);
 
+                                // HTTP Conflict, target user already has album with such name
+                                if(statusCode == 409){
+                                    Toast.makeText(mContext,
+                                            "Failed to share album " +album +", "+member.getName() +" already has an album with same name.",
+                                            Toast.LENGTH_LONG)
+                                            .show();
+                                }
+
+
                             }
                         });
         } catch (IOException | JSONException e) {

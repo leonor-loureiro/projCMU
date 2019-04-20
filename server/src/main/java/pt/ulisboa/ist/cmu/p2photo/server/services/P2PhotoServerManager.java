@@ -2,10 +2,7 @@ package pt.ulisboa.ist.cmu.p2photo.server.services;
 
 import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
 import pt.ulisboa.ist.cmu.p2photo.server.data.User;
-import pt.ulisboa.ist.cmu.p2photo.server.exception.AlbumNotFoundException;
-import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyExistsException;
-import pt.ulisboa.ist.cmu.p2photo.server.exception.UserNotExistsException;
-import pt.ulisboa.ist.cmu.p2photo.server.exception.WrongPasswordException;
+import pt.ulisboa.ist.cmu.p2photo.server.exception.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -175,7 +172,7 @@ public class P2PhotoServerManager {
      * @throws UserNotExistsException if user does not exist
      * @throws AlbumNotFoundException if album does not exist
      */
-    public void shareAlbum(String username, String albumName, String username2) throws UserNotExistsException, AlbumNotFoundException {
+    public void shareAlbum(String username, String albumName, String username2) throws UserNotExistsException, AlbumNotFoundException, UserAlreadyHasAlbumException {
         //Check if user2 exists
         User user2 = findUser(username2);
 
@@ -198,7 +195,7 @@ public class P2PhotoServerManager {
      * @param albumName album unique identifier
      * @throws UserNotExistsException if user doesn't exist
      */
-    public void createAlbum(String username, String albumName, String url, String fileID) throws UserNotExistsException, AlbumNotFoundException {
+    public void createAlbum(String username, String albumName, String url, String fileID) throws UserNotExistsException, UserAlreadyHasAlbumException {
 
         printInfo("Creating album for " + username);
         User user = findUser(username);
@@ -245,11 +242,11 @@ public class P2PhotoServerManager {
 
 
 
-    //////////////////////////////////////////////////////////
-    //                                                      //
-    //                      Auxiliary Functions             //
-    //                                                      //
-    //////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////
+    //                                                           //
+    //                    Auxiliary Functions                    //
+    //                                                           //
+    ///////////////////////////////////////////////////////////////
 
     /**
      * User for debug purposes

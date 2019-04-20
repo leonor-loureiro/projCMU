@@ -1,5 +1,7 @@
 package pt.ulisboa.ist.cmu.p2photo.server.data;
 
+import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyHasAlbumException;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +47,12 @@ public class User implements Serializable {
         return albums;
     }
 
-    public void addAlbum(Album album){
+    public void addAlbum(Album album) throws UserAlreadyHasAlbumException {
+        for(Album alb : this.getAlbums())
+            if (album.getName().equals(alb.getName()))
+                throw new UserAlreadyHasAlbumException(alb.getName());
+
         albums.add(album);
     }
+
 }
