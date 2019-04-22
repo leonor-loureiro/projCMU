@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.GridView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +62,7 @@ public class ListPhotosActivity extends AppCompatActivity {
     MaterialButton shareButton;
     MaterialButton addPhotoButton;
     FloatingActionButton addButton;
+    RelativeLayout loadingBarLayout;
     boolean actionButtonExpanded = false;
 
     private GlobalVariables globalVariables;
@@ -89,6 +91,8 @@ public class ListPhotosActivity extends AppCompatActivity {
         Intent intent = getIntent();
         album = (Album) intent.getSerializableExtra("album");
         Log.i("List Photos", album.getName());
+
+        loadingBarLayout = findViewById(R.id.loading_bar_layout);
 
         //Set the toolbar as the ActionBar for this window
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -471,6 +475,8 @@ public class ListPhotosActivity extends AppCompatActivity {
         // receives photo from gallery
         else if (requestCode == GALLERY) {
             if (data != null) {
+                showLoadingBar();
+
                 final Uri photoUri = data.getData();
 
                 //Get real file path
@@ -484,6 +490,8 @@ public class ListPhotosActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(String url) {
                         addPhotoSuccess(url, photoUri);
+                        hideLoadingBar();
+
 
                     }
                 });
@@ -492,6 +500,7 @@ public class ListPhotosActivity extends AppCompatActivity {
                 task.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        hideLoadingBar();
                         Toast.makeText(ListPhotosActivity.this,
                                 "Failed to add photo to album.",
                                 Toast.LENGTH_SHORT)
@@ -502,6 +511,20 @@ public class ListPhotosActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    public void showLoadingBar() {
+        //Show loading bar
+        loadingBarLayout.setVisibility(View.VISIBLE);
+        //Hide add button
+        addButton.setVisibility(View.INVISIBLE);
+    }
+
+    public void hideLoadingBar() {
+        //Show loading bar
+        loadingBarLayout.setVisibility(View.INVISIBLE);
+        //Hide add button
+        addButton.setVisibility(View.VISIBLE);
     }
 
     /**
