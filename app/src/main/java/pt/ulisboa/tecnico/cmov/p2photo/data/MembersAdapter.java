@@ -38,16 +38,15 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
     private Context mContext;
     private int ID;
     private GlobalVariables globalVariables;
-    private String album;
+    private Album album;
 
-    public MembersAdapter(Context context, List<Member> data, int id, String album, MembersAdapter adapter) {
+    public MembersAdapter(Context context, List<Member> data, int id, Album album, MembersAdapter adapter) {
         super(context, R.layout.member_row, data);
         Log.i("Members", "Start");
 
         members = new ArrayList<>();
-        for(int i = 0;i < data.size();i++){
-            members.add(data.get(i));
-        }
+        members.addAll(data);
+
         mContext = context;
         ID = id;
         Log.i("Members", data.size() + "");
@@ -115,7 +114,7 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
                         globalVariables.getToken(),
                         globalVariables.getUser().getName(),
                         member.getName(),
-                        album,
+                        album.getName(),
                         new JsonHttpResponseHandler() {
 
                         @Override
@@ -144,7 +143,7 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
                                 // HTTP Conflict, target user already has album with such name
                                 if(statusCode == 409){
                                     Toast.makeText(mContext,
-                                            "Failed to share album " +album +", "+member.getName() +" already has an album with same name.",
+                                            "Failed to share album " +album.getName() +", "+member.getName() +" already has an album with same name.",
                                             Toast.LENGTH_LONG)
                                             .show();
                                 }

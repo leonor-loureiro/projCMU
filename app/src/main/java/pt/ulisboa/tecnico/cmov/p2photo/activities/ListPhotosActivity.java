@@ -56,6 +56,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 public class ListPhotosActivity extends AppCompatActivity {
 
     private static final int GALLERY = 1327;
+    private static final int ADD_USER = 200;
     private static final int STORAGE_PERMISSION = 100 ;
     MaterialButton shareButton;
     MaterialButton addPhotoButton;
@@ -390,7 +391,7 @@ public class ListPhotosActivity extends AppCompatActivity {
     public void addUserScreen(View view) {
         Intent intent = new Intent(ListPhotosActivity.this, AddUserActivity.class);
         intent.putExtra("album",album);
-        startActivity(intent);
+        startActivityForResult(intent, ADD_USER);
     }
 
     /**
@@ -464,8 +465,11 @@ public class ListPhotosActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if(requestCode == ADD_USER){
+            album = (Album) data.getSerializableExtra("album");
+        }
         // receives photo from gallery
-        if (requestCode == GALLERY) {
+        else if (requestCode == GALLERY) {
             if (data != null) {
                 final Uri photoUri = data.getData();
 

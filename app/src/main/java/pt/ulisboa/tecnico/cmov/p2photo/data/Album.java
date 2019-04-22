@@ -51,6 +51,10 @@ public class Album implements Serializable{
         this.groupMembership = groupMembership;
     }
 
+    public void addMember(Member member){
+        members.add(member);
+    }
+
 
 
 }

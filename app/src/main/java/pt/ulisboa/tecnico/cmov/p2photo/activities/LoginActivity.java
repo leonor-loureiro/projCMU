@@ -70,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
             Utils.openWarningBox(this,  getString(R.string.invalidCredentials), null);
 
         }else {
-            //TODO: login operation
             try {
                 ServerAPI.getInstance().login(getApplicationContext(), username, password, new JsonHttpResponseHandler() {
 
@@ -85,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                         globalVariables.setUser(new Member(username));
 
                         Toast.makeText(LoginActivity.this,
-                                "Login successfuly",
+                                LoginActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.login_sucess),
                                 Toast.LENGTH_SHORT)
                                 .show();
                         signInHelper.googleSignIn();
@@ -94,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(int statusCode, Header[] headers,Throwable throwable, JSONArray response) {
                         Toast.makeText(LoginActivity.this,
-                                    "Couldnt Login.",
+                                    LoginActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.login_failure),
                                     Toast.LENGTH_SHORT)
                                     .show();
                         Intent intent = getIntent();
@@ -103,9 +102,7 @@ public class LoginActivity extends AppCompatActivity {
 
                     }
                 });
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (JSONException | IOException e) {
                 e.printStackTrace();
             }
 

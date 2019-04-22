@@ -20,6 +20,8 @@ import org.json.JSONException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import javax.xml.transform.Result;
+
 import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
@@ -64,12 +66,12 @@ public class AddUserActivity extends AppCompatActivity {
 
 
         //Create adapter for the album members list
-        adapter = new MembersAdapter(this,album.getMembers(),R.layout.member_row,album.getName(),null);
+        adapter = new MembersAdapter(this,album.getMembers(),R.layout.member_row,album,null);
         listViewMembers = findViewById(R.id.members);
         listViewMembers.setAdapter(adapter);
 
         //Create adapter for the application user's list
-        adapterU = new MembersAdapter(this,new ArrayList<Member>(),R.layout.add_user_row,album.getName(),adapter);
+        adapterU = new MembersAdapter(this,new ArrayList<Member>(),R.layout.add_user_row,album,adapter);
         listViewAllUsers= findViewById(R.id.allusers);
         listViewAllUsers.setAdapter(adapterU);
 
@@ -167,7 +169,16 @@ public class AddUserActivity extends AppCompatActivity {
 
 
     public void goBackToAlbums(View view) {
+        //Start first activity
+        Intent intent = new Intent(this, ListPhotosActivity.class);
+        intent.putExtra("album", album);
+        setResult(0, intent);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        goBackToAlbums(null);
     }
 
 

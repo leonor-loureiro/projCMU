@@ -24,5 +24,7 @@
     <string name="failed_get_users">Failed to get list of users</string>
     <string name="failed_add_member">Failed to add member</string>
     <string name="token_expired">Token is expired</string>
+    <string name="login_sucess">Login successfuly</string>
+    <string name="login_failure">Login failed.</string>
 
 </resources>

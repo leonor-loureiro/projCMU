@@ -22,6 +22,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -39,14 +40,18 @@ public class GoogleDriveHandler {
     //Permission to share with anyone with the link
     private final Permission pubPermission;
 
+    //Random generator for the file names
+    private final Random random;
+
     //Constants
     private static String TYPE_ALBUM_SLICE = "text/plain";
     private static String TYPE_PHOTO = "image/jpeg";
-    private static String ALBUM_SLICE_EXT = "_album";
+    private static String ALBUM_SLICE_EXT = "_album_";
 
 
     public GoogleDriveHandler(Drive mDrive) {
         this.mDriveService = mDrive;
+        random = new Random();
         pubPermission = new Permission ();
         pubPermission.setRole("reader");
         pubPermission.setType("anyone");
@@ -70,7 +75,7 @@ public class GoogleDriveHandler {
                 File metadata = new File()
                         .setParents(Collections.singletonList("root"))  //place slice at root
                         .setMimeType(TYPE_ALBUM_SLICE)
-                        .setName(name + ALBUM_SLICE_EXT);
+                        .setName(name + ALBUM_SLICE_EXT + random.nextInt(90000)); //ensure no duplicate files
 
                 //Create file
                 File driveFile = mDriveService.files().create(metadata).execute();
@@ -196,7 +201,7 @@ public class GoogleDriveHandler {
     private void updateFile(final String fileId, final String contents) throws IOException {
 
         // Create a File containing any metadata changes.
-        File metadata = new File().setName("Test_album");
+        File metadata = new File();
 
         // Convert content to an AbstractInputStreamContent instance.
         ByteArrayContent contentStream = ByteArrayContent.fromString("text/plain", contents);
