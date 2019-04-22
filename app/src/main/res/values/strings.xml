@@ -26,5 +26,6 @@
     <string name="token_expired">Token is expired</string>
     <string name="login_sucess">Login successfuly</string>
     <string name="login_failure">Login failed.</string>
+    <string name="failed_load_photos">Failed to load some photos...</string>
 
 </resources>

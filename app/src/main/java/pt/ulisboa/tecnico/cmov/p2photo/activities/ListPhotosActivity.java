@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.p2photo.activities;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -64,6 +65,7 @@ public class ListPhotosActivity extends AppCompatActivity {
     FloatingActionButton addButton;
     RelativeLayout loadingBarLayout;
     boolean actionButtonExpanded = false;
+    ProgressDialog progressDialog;
 
     private GlobalVariables globalVariables;
 
@@ -78,6 +80,9 @@ public class ListPhotosActivity extends AppCompatActivity {
     private String mCatalogUrl;
     //Contents of the current user's catalog
     private List<String> mCatalogContent = new ArrayList<>();
+    private int nrPhotos = 0;
+    private boolean errorDownload;
+    private int nrCatalogs = 0;
 
 
     @Override
@@ -108,9 +113,9 @@ public class ListPhotosActivity extends AppCompatActivity {
         adapter = new PhotoAdapter(this, new ArrayList<Photo>());
         gridView.setAdapter(adapter);
 
-        List<String> urls = new ArrayList<>();
-        urls.add("https://drive.google.com/uc?id=1DczyIArphZj8gRcmi4050zAmnGBigVO4&export=download");
-        getAlbumPhotos(urls);
+        progressDialog= ProgressDialog.show(this, "",
+                "Loading photos...", true);
+        getAlbumPhotos();
 
         //Action buttons menu animation
         shareButton = findViewById(R.id.share);
@@ -130,12 +135,9 @@ public class ListPhotosActivity extends AppCompatActivity {
 
     /**
      * This method is responsible for download all the photos and displaying then
-     * @param albumUrls list of photo's urls
      */
-    private void getAlbumPhotos(List<String> albumUrls) {
+    private void getAlbumPhotos() {
         Log.i("ListPhotos", "getting album's photos");
-
-        final List<String> urls = albumUrls;
 
         try {
             Log.i("ListPhotos", "Checking for updates on server.");
@@ -193,10 +195,16 @@ public class ListPhotosActivity extends AppCompatActivity {
     public void downloadAlbumCatalogs(List <String> urls){
 
         Log.i("ListPhotos", "download album catalogs #" + urls.size());
+        //If no catalog dismiss progress
+        if(urls.isEmpty())
+            progressDialog.dismiss();
+
 
         for(final String url : urls){
             if(url == null)
                 continue;
+
+            nrCatalogs++;
 
             Task<List<String>> task = driveHandler.downloadFile(url);
             task.addOnSuccessListener(new OnSuccessListener<List<String>>() {
@@ -210,6 +218,8 @@ public class ListPhotosActivity extends AppCompatActivity {
                         mCatalogContent = catalogUrls;
 
                     downloadPhotos(catalogUrls);
+                    downloadCatalogsFinished();
+
                 }
             });
             task.addOnFailureListener(new OnFailureListener() {
@@ -217,8 +227,22 @@ public class ListPhotosActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {
                     Log.i("ListPhotos", "FAILED: download album catalog = " + url);
                     e.printStackTrace();
+                    downloadCatalogsFinished();
+                    errorDownload = true;
                 }
             });
+        }
+    }
+
+    private void downloadCatalogsFinished() {
+        nrCatalogs--;
+        if(nrCatalogs == 0 && nrPhotos == 0) {
+            progressDialog.dismiss();
+            if(errorDownload)
+                Toast.makeText(this,
+                        getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_load_photos),
+                        Toast.LENGTH_SHORT)
+                        .show();
         }
     }
 
@@ -227,6 +251,8 @@ public class ListPhotosActivity extends AppCompatActivity {
      * @param urls list of photo's to download
      */
     public void downloadPhotos(List<String> urls) {
+
+        nrPhotos += urls.size();
         Log.i("ListPhotos", "downloading photos from google drive");
 
         for(final String url : urls) {
@@ -235,6 +261,7 @@ public class ListPhotosActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Bitmap bitmap) {
                     adapter.addPhoto(new Photo(url, bitmap));
+                    photosDownloadFinished();
                 }
             });
             task.addOnFailureListener(new OnFailureListener() {
@@ -242,8 +269,22 @@ public class ListPhotosActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {
                     Log.i("ListPhotos", "failed to download photo = " + url);
                     e.printStackTrace();
+                    errorDownload = true;
+                    photosDownloadFinished();
                 }
             });
+        }
+    }
+
+    private void photosDownloadFinished() {
+        nrPhotos--;
+        if(nrPhotos == 0) {
+            progressDialog.dismiss();
+            if(errorDownload)
+                Toast.makeText(this,
+                        getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_load_photos),
+                        Toast.LENGTH_SHORT)
+                .show();
         }
     }
 
