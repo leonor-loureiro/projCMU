@@ -38,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private GlobalVariables globalVariables;
 
+    Boolean google = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,8 @@ public class LoginActivity extends AppCompatActivity {
         usernameET = findViewById(R.id.username);
         passwordET = findViewById(R.id.password);
 
-        signInHelper = new GoogleSignInHelper(this);
+        if(google)
+            signInHelper = new GoogleSignInHelper(this);
 
         this.globalVariables = (GlobalVariables)getApplicationContext();
 
@@ -87,7 +90,10 @@ public class LoginActivity extends AppCompatActivity {
                                 LoginActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.login_sucess),
                                 Toast.LENGTH_SHORT)
                                 .show();
-                        signInHelper.googleSignIn();
+                        if(google)
+                            signInHelper.googleSignIn();
+                        else
+                            startListAlbumsActivity();
                     }
 
                     @Override
@@ -118,7 +124,8 @@ public class LoginActivity extends AppCompatActivity {
         if(requestCode == GoogleSignInHelper.REQUEST_CODE_SIGN_IN) {
 
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            signInHelper.handleSignInResult(task);
+            if(google)
+                signInHelper.handleSignInResult(task);
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -129,6 +136,14 @@ public class LoginActivity extends AppCompatActivity {
     public void startRegisterActivity(View view) {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
+    }
+
+    private void startListAlbumsActivity() {
+        //Start first activity
+        Intent intent = new Intent(this, ListAlbumsActivity.class);
+        //Clears the activity stack
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        this.startActivity(intent);
     }
 
 

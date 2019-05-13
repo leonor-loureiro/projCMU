@@ -27,5 +27,7 @@
     <string name="login_sucess">Login successfuly</string>
     <string name="login_failure">Login failed.</string>
     <string name="failed_load_photos">Failed to load some photos...</string>
+    <string name="port">10001</string>
+    <string name="inGroupButton">connect</string>
 
 </resources>

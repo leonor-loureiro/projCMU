@@ -25,6 +25,13 @@
         >
     </ListView>
 
+    <Button
+        android:id="@+id/idInGroupButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/inGroupButton"
+        app:layout_constraintBottom_toBottomOf="@id/folders_list"/>
+
 
 
 
