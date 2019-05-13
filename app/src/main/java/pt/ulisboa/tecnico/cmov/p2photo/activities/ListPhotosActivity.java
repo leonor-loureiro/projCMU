@@ -138,53 +138,66 @@ public class ListPhotosActivity extends AppCompatActivity {
      */
     private void getAlbumPhotos() {
         Log.i("ListPhotos", "getting album's photos");
+        if(!globalVariables.google){
+            List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(album.getFileID());
+            if(photos != null){
+                adapter.addAllPhotos(photos);
+            }else
+                getAlbumPhotosFailure();
+            progressDialog.dismiss();
+        }else {
+            try {
+                Log.i("ListPhotos", "Checking for updates on server.");
 
-        try {
-            Log.i("ListPhotos", "Checking for updates on server.");
+                ServerAPI.getInstance().getGroupMembership(this,
+                        globalVariables.getToken(),
+                        globalVariables.getUser().getName(),
+                        album.getName(),
+                        new JsonHttpResponseHandler() {
 
-            ServerAPI.getInstance().getGroupMembership(this,
-                    globalVariables.getToken(),
-                    globalVariables.getUser().getName(),
-                    album.getName(),
-                    new JsonHttpResponseHandler() {
+                            /**
+                             * If connection to server is available, get updated urls and users
+                             */
+                            @Override
+                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                try {
+                                    Log.i("ListPhotos", "Correctly got album information from server");
 
-                /**
-                 * If connection to server is available, get updated urls and users
-                 */
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    try {
-                        Log.i("ListPhotos", "Correctly got album information from server");
+                                    updateAlbumInfo(response);
 
-                        updateAlbumInfo(response);
+                                } catch (JSONException | UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
 
-                    } catch (JSONException | UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
+                            }
 
-                }
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                                Log.i("ListPhotos", "failed to get group membership = " + throwable.getMessage());
+                                getAlbumPhotosFailure();
+                            }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse){
-                    Log.i("ListPhotos", "failed to get group membership = " + throwable.getMessage());
-                    Toast.makeText(ListPhotosActivity.this,
-                                ListPhotosActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_photos),
-                                Toast.LENGTH_SHORT)
-                                .show();
-                }
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                    if(statusCode == 401)
-                        ServerAPI.getInstance().tokenInvalid(ListPhotosActivity.this);
-                }
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                if (statusCode == 401)
+                                    ServerAPI.getInstance().tokenInvalid(ListPhotosActivity.this);
+                            }
 
 
-                    });
+                        });
 
-        } catch (JSONException | UnsupportedEncodingException e) {
-            e.printStackTrace();
+            } catch (JSONException | UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
 
+    }
+
+    private void getAlbumPhotosFailure() {
+        Toast.makeText(ListPhotosActivity.this,
+                ListPhotosActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_photos),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 
 
@@ -515,10 +528,24 @@ public class ListPhotosActivity extends AppCompatActivity {
         }
         // receives photo from gallery
         else if (requestCode == GALLERY) {
-            if (data != null) {
+            if (data == null)
+                return;
+
+            final Uri photoUri = data.getData();
+
+            if (!globalVariables.google) {
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoUri);
+                    if(globalVariables.getFileManager()
+                            .addPhotoToAlbum(globalVariables.getUser().getName(), album.getName(), bitmap))
+                        adapter.addPhoto(new Photo("", bitmap));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
                 showLoadingBar();
 
-                final Uri photoUri = data.getData();
+
 
                 //Get real file path
                 String filePath = Utils.getPath(this, photoUri);

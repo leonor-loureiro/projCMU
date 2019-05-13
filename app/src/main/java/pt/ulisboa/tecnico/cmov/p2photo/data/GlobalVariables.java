@@ -5,8 +5,13 @@ import android.app.Application;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.api.services.drive.Drive;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
+import pt.ulisboa.tecnico.cmov.p2photo.storage.FileManager;
 import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
+import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 public class GlobalVariables extends Application {
 
@@ -15,6 +20,7 @@ public class GlobalVariables extends Application {
 
     //TODO alguem que tenha o login funcional mude isto
 
+    public boolean google = false;
     private String token;
     //Google Account
     private GoogleSignInAccount account;
@@ -24,6 +30,12 @@ public class GlobalVariables extends Application {
     private GoogleDriveHandler googleDriveHandler;
     //Manages the app's cache memory
     private MemoryCacheManager cacheManager;
+    //Manages the wifi direct operations
+    private WifiDirectManager wifiDirectManager;
+    //Manages the internal storage operations
+    private FileManager fileManager;
+
+    private List<String> operationsLog = new ArrayList<>();
 
     public GoogleSignInAccount getAccount() {
         return account;
@@ -69,7 +81,35 @@ public class GlobalVariables extends Application {
         return cacheManager;
     }
 
+    public FileManager getFileManager() {
+        return fileManager;
+    }
+
+    public void setFileManager(FileManager fileManager) {
+        this.fileManager = fileManager;
+    }
+
     public void setCacheManager(MemoryCacheManager cacheManager) {
         this.cacheManager = cacheManager;
+    }
+
+    public WifiDirectManager getWifiDirectManager() {
+        return wifiDirectManager;
+    }
+
+    public void setWifiDirectManager(WifiDirectManager wifiDirectManager) {
+        this.wifiDirectManager = wifiDirectManager;
+    }
+
+    public List<String> getOperationsLog() {
+        return operationsLog;
+    }
+
+    public void setOperationsLog(List<String> operationsLog) {
+        this.operationsLog = operationsLog;
+    }
+
+    public void addOperation(String operation){
+        operationsLog.add(operation);
     }
 }
