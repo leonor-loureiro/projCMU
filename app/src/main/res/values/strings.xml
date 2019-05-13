@@ -12,6 +12,7 @@
     <string name="title_activity_list_albums">ListAlbums</string>
     <string name="create_album">Create album</string>
 
+    <string name="settings">Settings</string>
     <string name="logout">Logout</string>
     <string name="add_photo">Add photo</string>
     <string name="share">Add user</string>
@@ -27,5 +28,14 @@
     <string name="login_sucess">Login successfuly</string>
     <string name="login_failure">Login failed.</string>
     <string name="failed_load_photos">Failed to load some photos...</string>
+    <string name="cache_settings_pref">CacheSettings</string>
+    <string name="cache_size_pref">CacheSize</string>
+    <string name="max_cache_size">Max cache size is now </string>
+    <string name="size_unit">MB</string>
+    <string name="cache_size">Cache Size</string>
+    <string name="save_changes">Save changes</string>
+    <string name="server_log">Server Log</string>
+    <string name="sync">Sync</string>
+    <string name="server_log_sync">Server Log Synced</string>
 
 </resources>

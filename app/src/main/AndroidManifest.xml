@@ -19,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:icon"
-        android:name="pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables">
+        android:name="pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,6 +33,7 @@
 
         <activity android:name=".activities.AddUserActivity" />
         <activity android:name=".activities.ListPhotosActivity"/>
+        <activity android:name=".activities.AdminActivity"/>
 
     </application>
 

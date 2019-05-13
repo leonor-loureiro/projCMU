@@ -230,6 +230,17 @@ public class ServerAPI {
 
     }
 
+    /**
+     * Sends a getUsers request to the server
+     * @param responseHandler Handles the response from the server
+     */
+
+    public void getOperationsLog(Context applicationContext, JsonHttpResponseHandler responseHandler) throws UnsupportedEncodingException, JSONException {
+
+        HttpUtils.get(applicationContext, "getOperationsLog",  null, responseHandler);
+
+    }
+
 
     /**
      * Sends a register request to the server

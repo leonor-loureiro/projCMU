@@ -6,6 +6,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.api.services.drive.Drive;
 
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
+import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
 
 public class GlobalVariables extends Application {
 
@@ -21,6 +22,8 @@ public class GlobalVariables extends Application {
     private Drive driveService;
     //Handles google drive operations
     private GoogleDriveHandler googleDriveHandler;
+    //Manages the app's cache memory
+    private MemoryCacheManager cacheManager;
 
     public GoogleSignInAccount getAccount() {
         return account;
@@ -60,5 +63,13 @@ public class GlobalVariables extends Application {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public MemoryCacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    public void setCacheManager(MemoryCacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 }

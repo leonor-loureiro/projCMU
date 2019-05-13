@@ -41,6 +41,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
+import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
 
 
 public class ListAlbumsActivity extends AppCompatActivity {
@@ -57,7 +58,8 @@ public class ListAlbumsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list_albums);
         this.globalVariables = (GlobalVariables)getApplicationContext();
 
-
+        //Initialize the memory cache manager
+        globalVariables.setCacheManager(new MemoryCacheManager(this));
 
         //Set the toolbar as the ActionBar for this window
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -309,4 +311,8 @@ public class ListAlbumsActivity extends AppCompatActivity {
     }
 
 
+    public void openAdminMenu(MenuItem item) {
+        Intent intent = new Intent(this, AdminActivity.class);
+        startActivity(intent);
+    }
 }

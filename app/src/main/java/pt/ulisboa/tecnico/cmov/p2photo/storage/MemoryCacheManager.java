@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.p2photo.storage;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -12,6 +13,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import pt.ulisboa.tecnico.cmov.p2photo.R;
+
 /**
  * This class is responsible for reading/writing into cache
  */
@@ -19,19 +22,24 @@ public class MemoryCacheManager {
 
     private File cacheDir;
     private final Context mContext;
+    private static final String TAG = "MemoryCacheManager";
 
-    private long limit;
 
     public MemoryCacheManager(Context mContext) {
         this.mContext = mContext;
         cacheDir = mContext.getCacheDir();
-        //Use 25% of available heap size
-        setLimit(Runtime.getRuntime().maxMemory()/4);
     }
 
-    public void setLimit(long limit){
-        this.limit = limit;
-        Log.i("MemoryCacheManager", "MemoryCache will use up to "+limit/1024./1024.+"MB");
+
+    /**
+     * Returns cache maximum size in MB
+     */
+    public long getLimit(){
+        int heapSize = (int) Math.floor(Runtime.getRuntime().maxMemory()/1024./1024.);
+        SharedPreferences sharedPref =
+                mContext.getSharedPreferences(mContext.getString(R.string.cache_settings_pref), Context.MODE_PRIVATE);
+        //Default = 25% of available heap size
+        return sharedPref.getInt(mContext.getString(R.string.cache_size_pref), heapSize/4);
     }
 
     /**
@@ -57,7 +65,7 @@ public class MemoryCacheManager {
     public Bitmap loadImageFromCache(String filename){
         File imageFile = new File(cacheDir, filename);
         if(!imageFile.exists()){
-            Log.i("MemoryCacheManager", "Image " + filename + " not in cache");
+            Log.i(TAG, "Image " + filename + " not in cache");
             return null;
         }
 
@@ -72,7 +80,17 @@ public class MemoryCacheManager {
         return bitmap;
     }
 
-    public long getDirectorySize(File directory) {
+    /**
+     * Returns the current cache size
+     */
+    public long getCacheSize(){
+        return getDirectorySize(cacheDir);
+    }
+
+    /**
+     * Returns the size of a directory
+     */
+    private long getDirectorySize(File directory) {
         long size = 0;
         for (File file : directory.listFiles()) {
             if (file != null && file.isDirectory()) {
@@ -81,7 +99,7 @@ public class MemoryCacheManager {
                 size += file.length();
             }
         }
-        Log.i("MemoryCacheManager", "Used space = " + size/1024./1024.+"MB" + " / " + limit/1024./1024.+"MB");
+        Log.i(TAG, "Used space = " + size/1024./1024.+"MB" + " / " + getLimit()+"MB");
         return size;
     }
 
@@ -90,7 +108,9 @@ public class MemoryCacheManager {
      * until cache is at 1/3 capacity.
      */
     public void manageCacheSize(){
-        long size = getDirectorySize(cacheDir);
+        long size = getCacheSize();
+        long limit = getLimit() * 1024 * 1024;
+
         if(size <= limit)
             return;
 
@@ -107,16 +127,14 @@ public class MemoryCacheManager {
         int i = 0;
         while(size > limit/3){
             File file = files[i];
-            Log.i("MemoryCacheManager", "Deleting file " + file.getName());
+            Log.i(TAG, "Deleting file " + file.getName());
             long fileSize = file.length();
             if(file.delete())
                 size -= fileSize;
             i++;
 
         }
-
-        Log.i("MemoryCacheManager", "Cache cleaned " + size/1024./1024.+"MB");
-
+        Log.i(TAG, "Cache cleaned " + size/1024./1024.+"MB / " + limit + "MB");
 
     }
 
