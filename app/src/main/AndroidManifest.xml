@@ -35,6 +35,8 @@
         <activity android:name=".activities.ListPhotosActivity"/>
         <activity android:name=".activities.AdminActivity"/>
 
+        <service android:name="pt.inesc.termite.wifidirect.service.SimWifiP2pService" />
+
     </application>
 
 

@@ -25,7 +25,7 @@
     <string name="failed_get_users">Failed to get list of users</string>
     <string name="failed_add_member">Failed to add member</string>
     <string name="token_expired">Token is expired</string>
-    <string name="login_sucess">Login successfuly</string>
+    <string name="login_sucess">Login successful</string>
     <string name="login_failure">Login failed.</string>
     <string name="failed_load_photos">Failed to load some photos...</string>
     <string name="cache_settings_pref">CacheSettings</string>
@@ -37,5 +37,7 @@
     <string name="server_log">Server Log</string>
     <string name="sync">Sync</string>
     <string name="server_log_sync">Server Log Synced</string>
+    <string name="port">10001</string>
+    <string name="inGroupButton">connect</string>
 
 </resources>

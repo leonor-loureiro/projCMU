@@ -29,28 +29,36 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import cz.msebera.android.httpclient.Header;
+import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
+import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
+import pt.inesc.termite.wifidirect.SimWifiP2pManager;
+import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketManager;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
-import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
+import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 
-public class ListAlbumsActivity extends AppCompatActivity {
+
+public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pManager.PeerListListener, SimWifiP2pManager.GroupInfoListener {
 
     ListAlbumsAdapter adapter;
     ListView listView;
     GoogleDriveHandler driveHandler;
 
     private GlobalVariables globalVariables;
+
+    private WifiDirectManager wifiManager;
+
+    boolean google = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +68,7 @@ public class ListAlbumsActivity extends AppCompatActivity {
 
         //Initialize the memory cache manager
         globalVariables.setCacheManager(new MemoryCacheManager(this));
+
 
         //Set the toolbar as the ActionBar for this window
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -80,8 +89,42 @@ public class ListAlbumsActivity extends AppCompatActivity {
         });
 
 
-        driveHandler = ((GlobalVariables) getApplicationContext()).getGoogleDriveHandler();
 
+
+        if(google)
+            driveHandler = ((GlobalVariables) getApplicationContext()).getGoogleDriveHandler();
+        else {
+            wifiManager = new WifiDirectManager(this);
+            // initialize the WDSim API
+            wifiManager.initiateWifi();
+        }
+
+        findViewById(R.id.idInGroupButton).setOnClickListener(listenerInGroupButton);
+
+
+
+    }
+
+
+
+    private View.OnClickListener listenerInGroupButton = new View.OnClickListener() {
+        public void onClick(View v){
+            wifiManager.requestGroupInfo(v);
+        }
+    };
+
+    @Override
+    public void onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo) {
+
+      wifiManager.onGroupInfoAvailable(devices,groupInfo);
+
+    }
+
+
+
+
+    @Override
+    public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
 
     }
 
@@ -144,6 +187,10 @@ public class ListAlbumsActivity extends AppCompatActivity {
         for(int i = 0;i < response.length();i++){
             adapter.add(new Album((String)response.get(i)));
         }
+        adapter.add(new Album("sebas"));
+        adapter.add(new Album("andre"));
+        adapter.add(new Album("leonor"));
+
     }
 
 
@@ -310,9 +357,16 @@ public class ListAlbumsActivity extends AppCompatActivity {
 
     }
 
-
     public void openAdminMenu(MenuItem item) {
         Intent intent = new Intent(this, AdminActivity.class);
         startActivity(intent);
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        wifiManager.unregisterReceiver();
+    }
+
+
 }
