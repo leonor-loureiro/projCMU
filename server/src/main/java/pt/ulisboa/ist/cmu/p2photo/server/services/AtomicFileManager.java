@@ -1,5 +1,6 @@
 package pt.ulisboa.ist.cmu.p2photo.server.services;
 
+import pt.ulisboa.ist.cmu.p2photo.server.data.Operation;
 import pt.ulisboa.ist.cmu.p2photo.server.data.User;
 
 import java.io.*;
@@ -13,6 +14,8 @@ import java.util.List;
 public interface AtomicFileManager {
 
     static String destFilename =  System.getProperty("user.dir") + "/userList";
+    static String logFilename =  System.getProperty("user.dir") + "/operationsLog";
+
 
     static List<User> getUserList() throws IOException, ClassNotFoundException {
 
@@ -21,6 +24,24 @@ public interface AtomicFileManager {
         in.close();
 
         return users;
+    }
+
+    static List<Operation> getOperationsLog() throws IOException, ClassNotFoundException {
+        if(new File(logFilename+".ser").exists()) {
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(logFilename + ".ser"));
+            List<Operation> operations = (List<Operation>) in.readObject();
+            in.close();
+            return operations;
+        }else
+            return new ArrayList<>();
+    }
+
+    static void writeUsers(List<User> users) throws IOException, ClassNotFoundException {
+        atomicWriteObjectToFile(users, destFilename);
+    }
+
+    static void writeOperations(List<Operation> operations) throws IOException, ClassNotFoundException {
+        atomicWriteObjectToFile(operations, logFilename);
     }
 
     /**
@@ -42,7 +63,7 @@ public interface AtomicFileManager {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    static void atomicWriteObjectToFile(List<?> content)
+    static void atomicWriteObjectToFile(List<?> content, String filename)
             throws IOException, ClassNotFoundException {
 
         //Temp file
@@ -60,7 +81,7 @@ public interface AtomicFileManager {
 
             //Create a tmp file
             // Uses resource directory to avoid issues with multiple drives
-            tempFile = File.createTempFile(destFilename + "-", ".tmp",  new File(System.getProperty("user.dir")));
+            tempFile = File.createTempFile(filename + "-", ".tmp",  new File(System.getProperty("user.dir")));
 
             fos = new FileOutputStream(tempFile.getAbsolutePath());
             oos = new ObjectOutputStream(fos);
@@ -86,7 +107,7 @@ public interface AtomicFileManager {
             //if(arrayList.equals(content)){
             //Data was successfully written to temp file
             //replace destinationFile with tempFile
-            atomicFileMove(tempFile.getAbsolutePath(), destFilename + ".ser");
+            atomicFileMove(tempFile.getAbsolutePath(), filename + ".ser");
 
             //}
 

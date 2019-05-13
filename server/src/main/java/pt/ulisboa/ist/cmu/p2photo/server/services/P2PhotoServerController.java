@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
+import pt.ulisboa.ist.cmu.p2photo.server.data.Operation;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.*;
 
 import java.util.ArrayList;
@@ -163,7 +164,7 @@ public class P2PhotoServerController {
         if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 
-        String[] users = P2PhotoServerManager.getInstance().getUsers().toArray(new String[0]);
+        String[] users = P2PhotoServerManager.getInstance().getUsers(username).toArray(new String[0]);
 
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -314,6 +315,25 @@ public class P2PhotoServerController {
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Gets the log of operations in the server
+     * @return operations log
+     */
+    @RequestMapping(value = "/getOperationsLog")
+    public ResponseEntity<String[]> getOperationsLog() {
+        List<Operation> log = P2PhotoServerManager.getInstance().getOperationsLog();
+
+        String[] output = new String[log.size()];
+
+        int i = 0;
+        for(Operation op : log){
+            output[i++] = op.toString();
+        }
+
+        return new ResponseEntity<>(output, HttpStatus.OK);
+
+    }
 
 
-}
+
+    }

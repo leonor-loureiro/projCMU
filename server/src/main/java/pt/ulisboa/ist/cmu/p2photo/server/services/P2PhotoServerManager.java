@@ -1,6 +1,7 @@
 package pt.ulisboa.ist.cmu.p2photo.server.services;
 
 import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
+import pt.ulisboa.ist.cmu.p2photo.server.data.Operation;
 import pt.ulisboa.ist.cmu.p2photo.server.data.User;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.*;
 
@@ -16,6 +17,8 @@ public class P2PhotoServerManager {
 
     private List<User> users = new ArrayList<>();
 
+    private List<Operation> operationsLog = new ArrayList<>();
+
     private SecurityHandler security;
 
 
@@ -27,6 +30,7 @@ public class P2PhotoServerManager {
 
        try {
            users = AtomicFileManager.getUserList();
+           operationsLog = AtomicFileManager.getOperationsLog();
        } catch (IOException | ClassNotFoundException e) {
            e.printStackTrace();
        }
@@ -64,7 +68,18 @@ public class P2PhotoServerManager {
 
         updateInformation();
 
+        logOperation(new Operation("Register", username));
+
         return security.generateToken(username);
+    }
+
+    private void logOperation(Operation operation) {
+        operationsLog.add(operation);
+        try {
+            AtomicFileManager.writeOperations(operationsLog);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -84,6 +99,7 @@ public class P2PhotoServerManager {
 
         printInfo("Logging in user " + username);
 
+        logOperation(new Operation("Login", username));
 
         return security.generateToken(username);
     }
@@ -98,6 +114,8 @@ public class P2PhotoServerManager {
     public boolean verifyTokenValidity(String username, String token){
         boolean result = security.validateJTW(token, username);
         printInfo("Verifying token validity for " + username + " ... is valid? " + result);
+        if(!result)
+            logOperation(new Operation("VerifyTokenFailed", username));
         return result;
     }
 
@@ -110,6 +128,7 @@ public class P2PhotoServerManager {
      */
     public Map<String, String> getGroupMembership(String username, String albumName) throws UserNotExistsException, AlbumNotFoundException {
         printInfo("getting members of album " + albumName);
+        logOperation(new Operation("GetGroupMembership", username, albumName));
         return findAlbum(username, albumName).getGroupMembership();
     }
 
@@ -117,12 +136,14 @@ public class P2PhotoServerManager {
     /**
      * @return the list of all users of this service
      */
-    public List<String> getUsers() {
+    public List<String> getUsers(String username) {
         printInfo("Getting all users.");
 
         List<String> userIds = new ArrayList<>();
         for (User user: users)
             userIds.add(user.getUsername());
+
+        logOperation(new Operation("GetUsers", username));
         return userIds;
     }
 
@@ -137,6 +158,7 @@ public class P2PhotoServerManager {
         printInfo("getting album all albums of user " + username);
 
         User user = findUser(username);
+
         return user.getAlbums();
     }
 
@@ -156,6 +178,8 @@ public class P2PhotoServerManager {
         Album album = findAlbum(username, albumName);
         album.updateForUser(username, url, fileID);
         updateInformation();
+
+        logOperation(new Operation("UpdateAlbum", username, albumName));
 
         printInfo("Updating album info of user " + username);
     }
@@ -185,6 +209,8 @@ public class P2PhotoServerManager {
         updateInformation();
 
         printInfo("Sharing album of " + username + " with " + username2);
+
+        logOperation(new Operation("ShareAlbum", username, albumName, username2));
     }
 
 
@@ -201,6 +227,7 @@ public class P2PhotoServerManager {
         User user = findUser(username);
         user.addAlbum(new Album(albumName, username, url, fileID));
         updateInformation();
+        logOperation(new Operation("CreateAlbum", username, albumName));
     }
 
 
@@ -217,6 +244,7 @@ public class P2PhotoServerManager {
         }
 
         printInfo("getting names of all album of user " + username);
+        logOperation(new Operation("GetUserAlbumNames", username));
 
         return list;
     }
@@ -236,6 +264,7 @@ public class P2PhotoServerManager {
         Album album = findAlbum(username, albumName);
 
         printInfo("Getting file ID for " + username);
+        logOperation(new Operation("GetFileID", username, albumName));
         return album.findFileID(username);
     }
 
@@ -262,7 +291,7 @@ public class P2PhotoServerManager {
     private void updateInformation(){
 
         try {
-            AtomicFileManager.atomicWriteObjectToFile(users);
+            AtomicFileManager.writeUsers(users);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -315,5 +344,7 @@ public class P2PhotoServerManager {
         throw new AlbumNotFoundException(albumName);
     }
 
-
+    public List<Operation> getOperationsLog() {
+        return operationsLog;
+    }
 }
