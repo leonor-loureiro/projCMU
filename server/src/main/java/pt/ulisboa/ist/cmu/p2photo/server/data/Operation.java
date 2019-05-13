@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 
 public class Operation implements Serializable {
-    long timestamp;
-    String type;
-    String user;
-    String album;
-    String user2;
+    private long timestamp;
+    private String type;
+    private String user;
+    private String album;
+    private String user2;
 
     public Operation(String type, String user) {
         timestamp = System.currentTimeMillis();
