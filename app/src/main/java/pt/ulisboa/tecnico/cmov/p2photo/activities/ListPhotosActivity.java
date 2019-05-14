@@ -97,7 +97,7 @@ public class ListPhotosActivity extends AppCompatActivity {
         Intent intent = getIntent();
         album = (Album) intent.getSerializableExtra("album");
         Log.i("List Photos", album.getName());
-
+        
         loadingBarLayout = findViewById(R.id.loading_bar_layout);
 
         //Set the toolbar as the ActionBar for this window
@@ -116,7 +116,7 @@ public class ListPhotosActivity extends AppCompatActivity {
 
         progressDialog= ProgressDialog.show(this, "",
                 "Loading photos...", true);
-        getAlbumPhotos();
+        getAlbumInfo();
 
         //Action buttons menu animation
         shareButton = findViewById(R.id.share);
@@ -137,61 +137,62 @@ public class ListPhotosActivity extends AppCompatActivity {
     /**
      * This method is responsible for download all the photos and displaying then
      */
-    private void getAlbumPhotos() {
+    private void getAlbumInfo() {
         Log.i("ListPhotos", "getting album's photos");
-        if(!globalVariables.google){
-            List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(album.getFileID());
-            if(photos != null){
-                adapter.addAllPhotos(photos);
-            }else
-                getAlbumPhotosFailure();
-            progressDialog.dismiss();
-        }else {
-            try {
-                Log.i("ListPhotos", "Checking for updates on server.");
+        try {
+            Log.i("ListPhotos", "Checking for updates on server.");
 
-                ServerAPI.getInstance().getGroupMembership(this,
-                        globalVariables.getToken(),
-                        globalVariables.getUser().getName(),
-                        album.getName(),
-                        new JsonHttpResponseHandler() {
+            ServerAPI.getInstance().getGroupMembership(this,
+                    globalVariables.getToken(),
+                    globalVariables.getUser().getName(),
+                    album.getName(),
+                    new JsonHttpResponseHandler() {
 
-                            /**
-                             * If connection to server is available, get updated urls and users
-                             */
-                            @Override
-                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                                try {
-                                    Log.i("ListPhotos", "Correctly got album information from server");
+                        /**
+                         * If connection to server is available, get updated urls and users
+                         */
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            try {
+                                Log.i("ListPhotos", "Correctly got album information from server");
 
-                                    updateAlbumInfo(response);
+                                updateAlbumInfo(response);
 
-                                } catch (JSONException | UnsupportedEncodingException e) {
-                                    e.printStackTrace();
-                                }
-
+                            } catch (JSONException | UnsupportedEncodingException e) {
+                                e.printStackTrace();
                             }
 
-                            @Override
-                            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                                Log.i("ListPhotos", "failed to get group membership = " + throwable.getMessage());
-                                getAlbumPhotosFailure();
-                            }
+                        }
 
-                            @Override
-                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                                if (statusCode == 401)
-                                    ServerAPI.getInstance().tokenInvalid(ListPhotosActivity.this);
-                            }
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                            Log.i("ListPhotos", "failed to get group membership = " + throwable.getMessage());
+                            getAlbumPhotosFailure();
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                            if (statusCode == 401)
+                                ServerAPI.getInstance().tokenInvalid(ListPhotosActivity.this);
+                        }
 
 
-                        });
+                    });
 
-            } catch (JSONException | UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+        } catch (JSONException | UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
 
+
+    }
+
+    private void loadP2PAlbum() {
+        List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(album.getFileID());
+        if(photos != null){
+            adapter.addAllPhotos(photos);
+        }else
+            getAlbumPhotosFailure();
+        progressDialog.dismiss();
     }
 
     private void getAlbumPhotosFailure() {
@@ -325,7 +326,8 @@ public class ListPhotosActivity extends AppCompatActivity {
             url = resp.getString(username);
 
             if(currentUser.equals(username)){
-                if(url == null || url.equals("null")){
+                //If its cloud mode and user's url not yet defined, create slice and update it
+                if(globalVariables.google && (url == null || url.equals("null"))){
                     Log.i("ListPhotos", "updateAlbumInfo -> " + currentUser + " slice not initialize");
                     url = null;
                     updateSharedAlbum(albumName);
@@ -344,8 +346,10 @@ public class ListPhotosActivity extends AppCompatActivity {
         if(mCatalogUrl != null)
             getFileID();
 
-        //Download album
-        downloadAlbumCatalogs(album.getGroupMembership());
+        if(globalVariables.google) {
+            //Download album
+            downloadAlbumCatalogs(album.getGroupMembership());
+        }
     }
 
     public void getFileID() throws UnsupportedEncodingException, JSONException {
@@ -359,6 +363,7 @@ public class ListPhotosActivity extends AppCompatActivity {
                 public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                     try {
                         album.setFileID((String) response.get(0));
+                        loadP2PAlbum();
                         Log.i("ListPhotos", "newFileID = " + album.getFileID() );
 
                     } catch (JSONException e) {
@@ -544,6 +549,7 @@ public class ListPhotosActivity extends AppCompatActivity {
                     if(globalVariables.getFileManager()
                             .addPhotoToAlbum(globalVariables.getUser().getName(), album.getName(), bitmap))
                         adapter.addPhoto(new Photo("", bitmap));
+                    hideLoadingBar();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

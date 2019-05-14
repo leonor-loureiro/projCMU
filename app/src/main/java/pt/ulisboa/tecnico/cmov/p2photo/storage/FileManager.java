@@ -43,8 +43,12 @@ public class FileManager {
         return userAlbums;
     }
 
-    public boolean updateAlbum(String username, String albumName, String content){
-        return writeFile(username + "_" + albumName, content);
+    public String updateAlbum(String username, String albumName, String content){
+        //TODO: check file already exists
+        String filename = username + "_" + albumName;
+        if(writeFile(filename, content))
+            return filename;
+        return null;
     }
 
     public boolean addPhotoToAlbum(String username, String albumName, Bitmap image){
@@ -52,7 +56,7 @@ public class FileManager {
         Log.i(TAG, "Saving image " + imageFilename);
         if(saveImage(imageFilename, image)) {
             Log.i(TAG, "Updating album " + albumName);
-            return updateAlbum(username, albumName, imageFilename + "\n");
+            return updateAlbum(username, albumName, imageFilename + "\n") != null;
         }
         return false;
     }

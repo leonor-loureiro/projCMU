@@ -54,10 +54,12 @@ public class RegisterActivity extends AppCompatActivity {
         passwordET = findViewById(R.id.password);
         confirmPasswordET = findViewById(R.id.password2);
 
-        signInHelper = new GoogleSignInHelper(this);
-
-
         this.globalVariables = (GlobalVariables)getApplicationContext();
+
+        if(globalVariables.google)
+            signInHelper = new GoogleSignInHelper(this);
+
+
 
 
     }
@@ -65,11 +67,6 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // Check for existing Google Sign In account, if the user is already signed in
-        // the GoogleSignInAccount will be non-null.
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if(account != null)
-            ;//user already signed-in
     }
 
     public void register(View view) {
@@ -106,7 +103,14 @@ public class RegisterActivity extends AppCompatActivity {
                                 "Register successfuly",
                                 Toast.LENGTH_SHORT)
                                 .show();
-                    signInHelper.googleSignIn();
+                    if(globalVariables.google)
+                        signInHelper.googleSignIn();
+                    else{
+                        Intent intent = new Intent(RegisterActivity.this, ListAlbumsActivity.class);
+                        //Clears the activity stack
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    }
 
 
                 }
