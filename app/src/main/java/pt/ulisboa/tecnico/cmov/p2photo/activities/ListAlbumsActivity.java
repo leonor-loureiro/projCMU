@@ -380,11 +380,11 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
         startActivity(intent);
     }
 
-    @Override
+ /*   @Override
     public void onPause() {
         super.onPause();
         wifiManager.unregisterReceiver();
-    }
+    } */
 
 
 }
