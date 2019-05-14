@@ -16,7 +16,9 @@ public class User implements Serializable {
     // Hashed password
     private String password;
     // User's albums
-    private List<Album> albums = new ArrayList<Album>();
+    private List<Album> albumsP2Peer = new ArrayList<Album>();
+
+    private List<Album> albumsGoogle = new ArrayList<>();
 
     public User(String username) {
         this.username = username;
@@ -43,16 +45,31 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public List<Album> getAlbums() {
-        return albums;
-    }
 
-    public void addAlbum(Album album) throws UserAlreadyHasAlbumException {
-        for(Album alb : this.getAlbums())
+    public void addAlbumGoogle(Album album) throws UserAlreadyHasAlbumException {
+        for(Album alb : this.getAlbumsP2P())
             if (album.getName().equals(alb.getName()))
                 throw new UserAlreadyHasAlbumException(alb.getName());
 
-        albums.add(album);
+        albumsGoogle.add(album);
     }
+
+
+    public void addAlbumP2P(Album album) throws UserAlreadyHasAlbumException {
+        for(Album alb : this.getAlbumsGoogle())
+            if (album.getName().equals(alb.getName()))
+                throw new UserAlreadyHasAlbumException(alb.getName());
+
+        albumsP2Peer.add(album);
+    }
+
+    public List<Album> getAlbumsGoogle() {
+        return albumsGoogle;
+    }
+
+    public List<Album> getAlbumsP2P() {
+        return albumsP2Peer;
+    }
+
 
 }
