@@ -8,6 +8,8 @@ import com.google.api.services.drive.Drive;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.SecretKey;
+
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.storage.FileManager;
 import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
@@ -15,12 +17,11 @@ import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 public class GlobalVariables extends Application {
 
-    //TODO alguem que tenha o login funcional mude isto
+    //Logged in user
     private Member user;
-
-    //TODO alguem que tenha o login funcional mude isto
-
+    //Mode (Cloud / P2P)
     public boolean google = false;
+    //Session token
     private String token;
     //Google Account
     private GoogleSignInAccount account;
@@ -112,4 +113,5 @@ public class GlobalVariables extends Application {
     public void addOperation(String operation){
         operationsLog.add(operation);
     }
+
 }

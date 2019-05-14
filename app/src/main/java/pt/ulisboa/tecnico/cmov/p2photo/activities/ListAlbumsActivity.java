@@ -59,13 +59,13 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
 
     private WifiDirectManager wifiManager;
 
-    boolean google = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_albums);
         this.globalVariables = (GlobalVariables)getApplicationContext();
+
+
 
         //Initialize the memory cache manager
         globalVariables.setCacheManager(new MemoryCacheManager(this));
@@ -89,7 +89,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
             }
         });
 
-        if(google)
+        if(globalVariables.google)
             driveHandler = globalVariables.getGoogleDriveHandler();
         else {
             wifiManager =  new WifiDirectManager(this);
@@ -138,7 +138,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
      */
     private void getAlbums() {
 
-        if(!google){
+        if(!globalVariables.google){
             adapter.clear();
             adapter.addAll(
                 globalVariables.getFileManager().getAlbumsList(globalVariables.getUser().getName())
@@ -279,7 +279,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
 
         }
 
-        if(!google) {
+        if(!globalVariables.google) {
             Log.i("ListAlbumsActivity", "Create album in internal storage");
             if(globalVariables.getFileManager()
                     .updateAlbum(globalVariables.getUser().getName(), albumName, "")) {
@@ -383,7 +383,8 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
     @Override
     public void onPause() {
         super.onPause();
-        wifiManager.unregisterReceiver();
+        if(!globalVariables.google)
+            wifiManager.unregisterReceiver();
     }
 
 

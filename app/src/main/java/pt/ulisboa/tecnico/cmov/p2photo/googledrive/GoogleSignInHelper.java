@@ -24,6 +24,7 @@ import java.util.Collections;
 
 import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbumsActivity;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
+import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 
 /**
  * This class is responsible for handling the google login
@@ -32,6 +33,7 @@ public class GoogleSignInHelper {
 
     public static final int REQUEST_CODE_SIGN_IN = 100;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 2404;
+    private static final String TAG = "GoogleSignInHelper";
     private Activity activity;
     private GlobalVariables globalVariables;
 
@@ -46,6 +48,7 @@ public class GoogleSignInHelper {
      * if not, performs the google sign and request permissions for the google drive
      */
     public void googleSignIn() {
+        Log.i(TAG, "Perform google sign-in");
 
         if(!checkGooglePlayServices()){
             return;
@@ -75,14 +78,14 @@ public class GoogleSignInHelper {
      */
     public void handleSignInResult(Task<GoogleSignInAccount> task) {
         try {
-            Log.i("Google Sign In", "sign in successfully performed");
+            Log.i(TAG, "sign in successfully performed");
             GoogleSignInAccount account = task.getResult(ApiException.class);
-            Log.i("Google", account.getEmail());
+            Log.i(TAG, account.getEmail());
             createCredential(account);
 
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
-            Log.d("SignInResult", "signInResult:failed code=" + e.getStatusCode());
+            Log.d(TAG, "signInResult:failed code=" + e.getStatusCode());
             Toast.makeText(activity, "Google sign in failed.", Toast.LENGTH_SHORT).show();
         }
     }
@@ -95,6 +98,7 @@ public class GoogleSignInHelper {
      */
     private void createCredential(GoogleSignInAccount account) {
 
+        Log.i(TAG, "Create credential for " + account.getDisplayName());
         //Set google account
         globalVariables.setAccount(account);
 
@@ -131,7 +135,7 @@ public class GoogleSignInHelper {
     }
 
     private boolean checkGooglePlayServices(){
-        Log.i("Google", "CheckGooglePlayServices");
+        Log.i(TAG, "CheckGooglePlayServices");
         GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(activity);
 
@@ -143,7 +147,7 @@ public class GoogleSignInHelper {
                 return false;
             }else{
                 Toast.makeText(activity, "Device is not supported.", Toast.LENGTH_SHORT).show();
-                Log.i("GooglePlayServices", "Device is not supported");
+                Log.i(TAG, "Device is not supported");
                 return false;
             }
         }

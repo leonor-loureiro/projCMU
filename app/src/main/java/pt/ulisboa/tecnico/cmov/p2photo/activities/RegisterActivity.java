@@ -1,6 +1,8 @@
 package pt.ulisboa.tecnico.cmov.p2photo.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +21,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
+import javax.crypto.SecretKey;
+
 import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
@@ -26,11 +30,13 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleSignInHelper;
+import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 
 public class RegisterActivity extends AppCompatActivity {
 
+    public static final String TAG = "RegisterActivity";
     EditText usernameET;
     EditText passwordET;
     EditText confirmPasswordET;
@@ -96,11 +102,11 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                     globalVariables.setUser(new Member(username));
 
-                        Toast.makeText(RegisterActivity.this,
+                    Toast.makeText(RegisterActivity.this,
                                 "Register successfuly",
                                 Toast.LENGTH_SHORT)
                                 .show();
-                        signInHelper.googleSignIn();
+                    signInHelper.googleSignIn();
 
 
                 }

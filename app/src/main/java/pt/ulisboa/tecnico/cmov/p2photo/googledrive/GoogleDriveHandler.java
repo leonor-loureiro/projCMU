@@ -2,8 +2,10 @@ package pt.ulisboa.tecnico.cmov.p2photo.googledrive;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -17,15 +19,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.LoginActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 
 /**
  * This class implements all the google drive file operations
@@ -44,9 +52,10 @@ public class GoogleDriveHandler {
     private final Random random;
 
     //Constants
-    private static String TYPE_ALBUM_SLICE = "text/plain";
-    private static String TYPE_PHOTO = "image/jpeg";
-    private static String ALBUM_SLICE_EXT = "_album_";
+    private final static String TYPE_ALBUM_SLICE = "text/plain";
+    private final static String TYPE_PHOTO = "image/jpeg";
+    private final static String ALBUM_SLICE_EXT = "_album_";
+    private final static String TAG = "GoogleDriveHandler";
 
 
     public GoogleDriveHandler(Drive mDrive) {
@@ -97,11 +106,12 @@ public class GoogleDriveHandler {
      * @param fileUrl download url
      * @return content as a list of strings
      */
-    public Task<List<String>> downloadFile(final String fileUrl) {
+    public Task<List<String>> downloadFile(final String username, final String fileUrl) {
         Callable<List<String>> callable = new Callable<List<String>>() {
             @Override
             public List<String> call() throws Exception {
-                List<String> content = new ArrayList<>();
+
+                StringBuilder contentsBuilder = new StringBuilder();
 
                 URL url = new URL(fileUrl);
                 //Create an url connection
@@ -113,11 +123,26 @@ public class GoogleDriveHandler {
                 //Read contents
                 String line;
                 while ((line = bufferedReader.readLine()) != null)
-                    content.add(line);
-
+                    contentsBuilder.append(line);
+                    //content.add(line);
                 bufferedReader.close();
-                Log.i("Drive", "Contents: " + content.toString());
-                return content;
+
+                String contentStr = contentsBuilder.toString();
+                if(contentStr.trim().length() == 0){
+                    return new ArrayList<>();
+                }
+                //Generate user's secret key, if it does not exist yet
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    contentStr = SecurityManager.decrypt(username, contentStr);
+                    if(contentStr == null)
+                        return null;
+                }else{
+                    Log.i(TAG, "Security feature disabled. Needs API >= 23. Found API " + Build.VERSION.SDK_INT);
+                }
+
+                Log.i(TAG, "Contents: " + contentStr);
+
+                return Arrays.asList(contentStr.split("\n"));
             }
         };
 
@@ -132,7 +157,7 @@ public class GoogleDriveHandler {
      * @param photoPath path of the photo to be uploaded in the device
      * @return photo download link
      */
-    public Task<String> addPhotoToAlbum(final String albumFileID, List<String> photos, final String photoPath){
+    public Task<String> addPhotoToAlbum(final String username, final String albumFileID, List<String> photos, final String photoPath){
 
         // Build contents
         final StringBuilder stringBuilder = new StringBuilder();
@@ -148,8 +173,22 @@ public class GoogleDriveHandler {
                 //Add photo's url to album catalog
                 stringBuilder.append(photoUrl);
 
+                String contents = stringBuilder.toString();
+
+                //Generate user's secret key, if it does not exist yet
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    contents = SecurityManager.encrypt(username, contents);
+                    if(contents == null){
+                        return null;
+                    }
+                }else{
+                    Log.i(TAG, "Security feature disabled. Needs API >= 23. Found API " + Build.VERSION.SDK_INT);
+                }
+
+                Log.i(TAG, "addPhotoToAlbum: " + contents);
+
                 //Update album catalog
-                updateFile(albumFileID, stringBuilder.toString());
+                updateFile(albumFileID, contents);
 
                 return photoUrl;
             }

@@ -60,6 +60,7 @@ public class ListPhotosActivity extends AppCompatActivity {
     private static final int GALLERY = 1327;
     private static final int ADD_USER = 200;
     private static final int STORAGE_PERMISSION = 100 ;
+    private static final String TAG = "ListPhotosActivity" ;
     MaterialButton shareButton;
     MaterialButton addPhotoButton;
     FloatingActionButton addButton;
@@ -79,7 +80,7 @@ public class ListPhotosActivity extends AppCompatActivity {
     //Url of the current user's catalog
     private String mCatalogUrl;
     //Contents of the current user's catalog
-    private List<String> mCatalogContent = new ArrayList<>();
+    private ArrayList<String> mCatalogContent = new ArrayList<>();
     private int nrPhotos = 0;
     private boolean errorDownload;
     private int nrCatalogs = 0;
@@ -219,7 +220,7 @@ public class ListPhotosActivity extends AppCompatActivity {
 
             nrCatalogs++;
 
-            Task<List<String>> task = driveHandler.downloadFile(url);
+            Task<List<String>> task = driveHandler.downloadFile(globalVariables.getUser().getName(), url);
             task.addOnSuccessListener(new OnSuccessListener<List<String>>() {
                 @Override
                 public void onSuccess(List<String> catalogUrls) {
@@ -227,8 +228,10 @@ public class ListPhotosActivity extends AppCompatActivity {
                             "SUCCESS: download album catalog = " + url + " -> " + catalogUrls.size()) ;
 
                     //Save the catalog content of the current user
-                    if(url.equals(mCatalogUrl))
-                        mCatalogContent = catalogUrls;
+                    if(url.equals(mCatalogUrl)) {
+                        mCatalogContent = new ArrayList<>();
+                        mCatalogContent.addAll(catalogUrls);
+                    }
 
                     downloadPhotos(catalogUrls);
                     downloadCatalogsFinished();
@@ -533,6 +536,8 @@ public class ListPhotosActivity extends AppCompatActivity {
 
             final Uri photoUri = data.getData();
 
+            showLoadingBar();
+
             if (!globalVariables.google) {
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoUri);
@@ -543,15 +548,15 @@ public class ListPhotosActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             } else {
-                showLoadingBar();
-
-
 
                 //Get real file path
                 String filePath = Utils.getPath(this, photoUri);
 
                 //Upload photo to google drive
-                Task<String> task = driveHandler.addPhotoToAlbum(album.getFileID(), mCatalogContent, filePath);
+                Task<String> task = driveHandler.addPhotoToAlbum(globalVariables.getUser().getName(),
+                                    album.getFileID(),
+                                    mCatalogContent,
+                                    filePath);
 
                 //Add on success listener
                 task.addOnSuccessListener(new OnSuccessListener<String>() {
@@ -606,6 +611,8 @@ public class ListPhotosActivity extends AppCompatActivity {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(ListPhotosActivity.this.getContentResolver(), photoUri);
             adapter.addPhoto(new Photo(url, bitmap));
 
+            Log.i(TAG, "Add photo: " + url);
+            Log.i(TAG, mCatalogContent.toString());
             //Save photo in current catalog content
             mCatalogContent.add(url);
 

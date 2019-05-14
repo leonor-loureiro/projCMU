@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.p2photo.activities;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
+import javax.crypto.SecretKey;
+
 import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
@@ -27,18 +30,18 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleSignInHelper;
+import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = "LoginActivity";
     EditText usernameET;
     EditText passwordET;
 
     private GoogleSignInHelper signInHelper;
 
     private GlobalVariables globalVariables;
-
-    Boolean google = false;
 
 
     @Override
@@ -50,10 +53,12 @@ public class LoginActivity extends AppCompatActivity {
         usernameET = findViewById(R.id.username);
         passwordET = findViewById(R.id.password);
 
-        if(google)
+        this.globalVariables = (GlobalVariables)getApplicationContext();
+
+        if(globalVariables.google)
             signInHelper = new GoogleSignInHelper(this);
 
-        this.globalVariables = (GlobalVariables)getApplicationContext();
+
 
 
     }
@@ -86,11 +91,13 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         globalVariables.setUser(new Member(username));
 
+
                         Toast.makeText(LoginActivity.this,
-                                LoginActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.login_sucess),
+                                getString(R.string.login_sucess),
                                 Toast.LENGTH_SHORT)
                                 .show();
-                        if(google)
+
+                        if(globalVariables.google)
                             signInHelper.googleSignIn();
                         else
                             startListAlbumsActivity();
@@ -99,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(int statusCode, Header[] headers,Throwable throwable, JSONArray response) {
                         Toast.makeText(LoginActivity.this,
-                                    LoginActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.login_failure),
+                                    getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.login_failure),
                                     Toast.LENGTH_SHORT)
                                     .show();
                         Intent intent = getIntent();
@@ -124,8 +131,7 @@ public class LoginActivity extends AppCompatActivity {
         if(requestCode == GoogleSignInHelper.REQUEST_CODE_SIGN_IN) {
 
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            if(google)
-                signInHelper.handleSignInResult(task);
+            signInHelper.handleSignInResult(task);
         }
 
         super.onActivityResult(requestCode, resultCode, data);
