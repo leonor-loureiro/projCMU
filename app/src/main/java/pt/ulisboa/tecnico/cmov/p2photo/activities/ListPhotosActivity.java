@@ -84,6 +84,7 @@ public class ListPhotosActivity extends AppCompatActivity {
     private int nrPhotos = 0;
     private boolean errorDownload;
     private int nrCatalogs = 0;
+    private final boolean google = this.globalVariables.google;
 
 
     @Override
@@ -145,7 +146,7 @@ public class ListPhotosActivity extends AppCompatActivity {
             ServerAPI.getInstance().getGroupMembership(this,
                     globalVariables.getToken(),
                     globalVariables.getUser().getName(),
-                    album.getName(),
+                    album.getName(),this.globalVariables.google + "",
                     new JsonHttpResponseHandler() {
 
                         /**
@@ -356,7 +357,7 @@ public class ListPhotosActivity extends AppCompatActivity {
         ServerAPI.getInstance().getFileID(this,
                 globalVariables.getToken(),
                 globalVariables.getUser().getName(),
-                album.getName(),
+                album.getName(),this.globalVariables.google + "",
                 new JsonHttpResponseHandler() {
 
                 @Override
@@ -405,7 +406,7 @@ public class ListPhotosActivity extends AppCompatActivity {
                 ServerAPI.getInstance().updateAlbum(getApplicationContext(),
                         globalVariables.getToken(),
                         globalVariables.getUser().getName(),
-                        albumName,url,fileID);
+                        albumName,url,fileID, google + "");
 
                 //Set album file ID
                 album.setFileID(fileID);

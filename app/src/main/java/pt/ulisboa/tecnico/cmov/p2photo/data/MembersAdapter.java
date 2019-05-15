@@ -114,7 +114,7 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
                         globalVariables.getToken(),
                         globalVariables.getUser().getName(),
                         member.getName(),
-                        album.getName(),
+                        album.getName(),this.globalVariables.google + "",
                         new JsonHttpResponseHandler() {
 
                         @Override
