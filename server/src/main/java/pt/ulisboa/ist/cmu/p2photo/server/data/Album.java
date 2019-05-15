@@ -26,13 +26,12 @@ public class Album implements Serializable {
 
     public Album(String name, String username, String catalogURL, String fileID, String secretKey) {
         this.name = name;
-        addMember(username, catalogURL, fileID);
-        this.secretKeys.put(username, secretKey);
+        addMember(username, catalogURL, fileID, secretKey);
     }
 
     public Album(String name, String username, String catalogURL, String fileID) {
         this.name = name;
-        addMember(username, catalogURL, fileID);
+        addMember(username, catalogURL, fileID, null);
     }
 
     public String getName() {
@@ -47,9 +46,10 @@ public class Album implements Serializable {
         return groupMembership;
     }
 
-    public void addMember(String username, String catalogURL, String fileID){
+    public void addMember(String username, String catalogURL, String fileID, String secretKey){
         this.groupMembership.put(username, catalogURL);
         this.fileIDs.put(username, fileID);
+        this.secretKeys.put(username, secretKey);
     }
 
 

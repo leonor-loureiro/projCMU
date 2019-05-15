@@ -41,8 +41,6 @@ public class AddUserActivity extends AppCompatActivity {
 
     ListView listViewAllUsers;
 
-    private EditText filterText;
-
     private Album album;
 
     private GlobalVariables globalVariables;
@@ -62,7 +60,6 @@ public class AddUserActivity extends AppCompatActivity {
         //Get album object
         Intent intent = getIntent();
         album = (Album) intent.getSerializableExtra("album");
-
 
 
         //Create adapter for the album members list
@@ -87,7 +84,8 @@ public class AddUserActivity extends AppCompatActivity {
         int id = findViewById(R.id.searchView).getContext()
                 .getResources()
                 .getIdentifier("android:id/search_src_text", null, null);
-        filterText = findViewById(R.id.searchView).findViewById(id);
+
+        EditText filterText = findViewById(R.id.searchView).findViewById(id);
 
         //Create text changed listener for search bar
         filterText.addTextChangedListener(new TextWatcher() {
@@ -134,15 +132,6 @@ public class AddUserActivity extends AppCompatActivity {
                         }
 
                     }
-                    /*
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                        try {
-                            extractAllMembers(response);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }*/
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {

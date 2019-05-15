@@ -178,7 +178,8 @@ public class P2PhotoServerManager {
      * @throws UserNotExistsException If the user doesn't exist
      * @throws AlbumNotFoundException If the album name does not exist
      */
-    public void updateAlbum(String username, String albumName, String url, String fileID,String mode) throws UserNotExistsException, AlbumNotFoundException {
+    public void updateAlbum(String username, String albumName, String url, String fileID, String mode)
+            throws UserNotExistsException, AlbumNotFoundException {
 
         Album album = findAlbum(username, albumName,mode);
         album.updateForUser(username, url, fileID);
@@ -201,13 +202,13 @@ public class P2PhotoServerManager {
      * @throws UserNotExistsException if user does not exist
      * @throws AlbumNotFoundException if album does not exist
      */
-    public void shareAlbum(String username, String albumName, String username2,String mode) throws UserNotExistsException, AlbumNotFoundException, UserAlreadyHasAlbumException {
+    public void shareAlbum(String username, String albumName, String username2, String secretKey, String mode) throws UserNotExistsException, AlbumNotFoundException, UserAlreadyHasAlbumException {
         //Check if user2 exists
         User user2 = findUser(username2);
 
         Album album = findAlbum(username, albumName,mode);
 
-        album.addMember(username2, null, null);
+        album.addMember(username2, null, null, secretKey);
 
         if(mode.equals("true"))
             user2.addAlbumGoogle(album);

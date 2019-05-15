@@ -162,7 +162,7 @@ public class ServerAPI {
      */
 
     public void shareAlbum(Context applicationContext,
-                           String token, String username1, String username2, String albumName,String mode,
+                           String token, String username1, String username2, String albumName, String secretKey, String mode,
                            JsonHttpResponseHandler responseHandler)
             throws IOException, JSONException {
 
@@ -173,6 +173,7 @@ public class ServerAPI {
         params.put("username1", username1);
         params.put("username2", username2);
         params.put("albumName",albumName);
+        params.put("key", secretKey);
         params.put("mode",mode);
         String json = generateJson(params);
 
@@ -210,7 +211,8 @@ public class ServerAPI {
     /**
      * Sends a updateAlbum request to the server
      */
-    public void updateAlbum(final Context applicationContext, String token, String username, String name, String url, String fileID,String mode) throws IOException, JSONException {
+    public void updateAlbum(final Context applicationContext, String token, String username, String name, String url, String fileID, String mode)
+            throws IOException, JSONException {
 
         HashMap<String, String> params = new HashMap<>();
 

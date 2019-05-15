@@ -5,11 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
 import pt.ulisboa.ist.cmu.p2photo.server.data.Operation;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -253,6 +251,7 @@ public class P2PhotoServerController {
         String username1 = credentials.get("username1");
         String username2 = credentials.get("username2");
         String albumName = credentials.get("albumName");
+        String key = credentials.get("key");
         String mode = credentials.get("mode");
 
 
@@ -266,7 +265,7 @@ public class P2PhotoServerController {
         // Share Album
         try {
             stringtoreturn[0] = "Success";
-            P2PhotoServerManager.getInstance().shareAlbum(username1, albumName, username2,mode);
+            P2PhotoServerManager.getInstance().shareAlbum(username1, albumName, username2, key, mode);
             return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
@@ -347,7 +346,7 @@ public class P2PhotoServerController {
         // Update Album
         try {
             stringtosend[0] = "Success";
-            P2PhotoServerManager.getInstance().updateAlbum(username, albumName, url, fileID,mode);
+            P2PhotoServerManager.getInstance().updateAlbum(username, albumName, url, fileID, mode);
             return new ResponseEntity<>(stringtosend, HttpStatus.OK);
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
