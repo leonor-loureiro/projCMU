@@ -18,6 +18,13 @@ public class Operation implements Serializable {
         this.user = user;
     }
 
+    public Operation(String type, String user, String album) {
+        timestamp = System.currentTimeMillis();
+        this.type = type;
+        this.user = user;
+        this.album = album;
+    }
+
     public Operation(String type, String user, boolean mode) {
         timestamp = System.currentTimeMillis();
         this.type = type;

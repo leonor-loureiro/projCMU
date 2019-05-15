@@ -29,8 +29,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+
+import javax.crypto.SecretKey;
 
 import cz.msebera.android.httpclient.Header;
 import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
@@ -42,6 +45,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
+import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 import pt.ulisboa.tecnico.cmov.p2photo.storage.FileManager;
 import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
@@ -324,13 +328,30 @@ public class ListAlbumsActivity extends AppCompatActivity
     }
 
     private void createAlbumInServer(final String fileID, String url, final String albumName) {
+        String cipheredKey = null;
+        if(globalVariables.google) {
+            //Generate a secret key
+            SecretKey secretKey = SecurityManager.generateSecretKey();
+            //Encrypt the url
+            url = SecurityManager.encryptAES(secretKey, url);
+            Log.i(TAG, "Encrypted url = " + url);
+
+            //TODO: public loaded at login
+            PublicKey publicKey = SecurityManager.getPublicKey(globalVariables.getUser().getName());
+            cipheredKey = SecurityManager.encryptRSA(publicKey, secretKey.getEncoded());
+            Log.i(TAG, "Encrypted secret key = " + cipheredKey);
+        }
+
         try {
             ServerAPI.getInstance().createAlbum(ListAlbumsActivity.this,
                     globalVariables.getToken(),
                     globalVariables.getUser().getName(),
                     albumName,
                     url,
-                    fileID,this.globalVariables.google + "",
+                    fileID,
+                    cipheredKey,
+                    this.globalVariables.google + "",
+
                     new JsonHttpResponseHandler() {
 
                         @Override

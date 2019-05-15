@@ -164,8 +164,7 @@ public class WifiDirectManager {
                     }
                 } catch (IOException e) {
                     Log.d("Error socket:", e.getMessage());
-                    break;
-                    //e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
             return null;

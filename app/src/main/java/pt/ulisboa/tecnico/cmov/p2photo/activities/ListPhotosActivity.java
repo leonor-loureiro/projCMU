@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
@@ -38,9 +37,12 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import javax.crypto.SecretKey;
 
 import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
@@ -51,6 +53,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
+import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 /**
@@ -118,7 +121,11 @@ public class ListPhotosActivity extends AppCompatActivity {
 
         progressDialog= ProgressDialog.show(this, "",
                 "Loading photos...", true);
-        getAlbumInfo();
+
+        if(globalVariables.google)
+            getSecretKey();
+        else
+            getAlbumInfo();
 
         //Action buttons menu animation
         shareButton = findViewById(R.id.share);
@@ -223,7 +230,7 @@ public class ListPhotosActivity extends AppCompatActivity {
 
             nrCatalogs++;
 
-            Task<List<String>> task = driveHandler.downloadFile(globalVariables.getUser().getName(), url);
+            Task<List<String>> task = driveHandler.downloadFile(url);
             task.addOnSuccessListener(new OnSuccessListener<List<String>>() {
                 @Override
                 public void onSuccess(List<String> catalogUrls) {
@@ -326,6 +333,7 @@ public class ListPhotosActivity extends AppCompatActivity {
         for(int i = 0;i < resp.names().length();i++){
             username = resp.names().getString(i);
             url = resp.getString(username);
+            url = SecurityManager.decryptAES(album.getSecretKey(), url);
 
             if(currentUser.equals(username)){
                 //If its cloud mode and user's url not yet defined, create slice and update it
@@ -336,6 +344,7 @@ public class ListPhotosActivity extends AppCompatActivity {
                 }
                 mCatalogUrl = url;
             }else{
+
                 albumMembers.add(new Member(username));
             }
             catalogUrls.add(url);
@@ -343,6 +352,7 @@ public class ListPhotosActivity extends AppCompatActivity {
 
         album.setGroupMembership(catalogUrls);
         album.setMembers(albumMembers);
+
 
         //Get file ID, if already created
         if(mCatalogUrl != null)
@@ -354,6 +364,49 @@ public class ListPhotosActivity extends AppCompatActivity {
         }
     }
 
+    public void getSecretKey(){
+        try {
+            ServerAPI.getInstance().getSecretKey(this,
+                    globalVariables.getToken(),
+                    globalVariables.getUser().getName(),
+                    album.getName(),
+                    new JsonHttpResponseHandler() {
+
+                //TODO: check when server is down
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                            try {
+                                Log.i(TAG, "Secret Key = " + response.get(0));
+
+                                //TODO: move private key to user global variables
+                                PrivateKey privateKey = SecurityManager.getPrivateKey( globalVariables.getUser().getName());
+
+                                //Decipher secret key
+                                byte[] encodedKey = SecurityManager.decryptRSA(privateKey,(String) response.get(0));
+                                //Set album secret key
+                                album.setSecretKey(SecurityManager.getSecretKeyFromBytes(encodedKey));
+
+                                getAlbumInfo();
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                            if(statusCode == 401)
+                                ServerAPI.getInstance().tokenInvalid(ListPhotosActivity.this);
+
+                        }
+                    });
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
     public void getFileID() throws UnsupportedEncodingException, JSONException {
         ServerAPI.getInstance().getFileID(this,
                 globalVariables.getToken(),
@@ -566,8 +619,8 @@ public class ListPhotosActivity extends AppCompatActivity {
                 String filePath = Utils.getPath(this, photoUri);
 
                 //Upload photo to google drive
-                Task<String> task = driveHandler.addPhotoToAlbum(globalVariables.getUser().getName(),
-                                    album.getFileID(),
+                Task<String> task = driveHandler.addPhotoToAlbum(
+                        album.getFileID(),
                                     mCatalogContent,
                                     filePath);
 

@@ -17,10 +17,17 @@ public class Album implements Serializable {
     private Map<String, String> groupMembership = new HashMap<>();
     // The file ID for each user
     private Map<String, String> fileIDs = new HashMap<>();
-
+    //Secret keys encrypted for each user
+    private Map<String, String> secretKeys = new HashMap<>();
 
     public Map<String, String> getFileIDs() {
         return fileIDs;
+    }
+
+    public Album(String name, String username, String catalogURL, String fileID, String secretKey) {
+        this.name = name;
+        addMember(username, catalogURL, fileID);
+        this.secretKeys.put(username, secretKey);
     }
 
     public Album(String name, String username, String catalogURL, String fileID) {
@@ -54,4 +61,10 @@ public class Album implements Serializable {
     public String findFileID(String username) {
         return fileIDs.get(username);
     }
+
+    public String findSecretKey(String username) {
+        return secretKeys.get(username);
+    }
+
+
 }

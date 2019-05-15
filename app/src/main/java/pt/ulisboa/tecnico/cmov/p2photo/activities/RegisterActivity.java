@@ -20,6 +20,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Arrays;
 
 import javax.crypto.SecretKey;
 
@@ -87,8 +91,28 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        String publicKey = null;
+        //Generate public key
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            KeyPair keyPair = SecurityManager.generateRSAKeyPair(username);
+            if(keyPair != null)
+                publicKey = SecurityManager.publicKeyToString(keyPair.getPublic());
+
+            Log.i(TAG, "Public Key = " + publicKey);
+            Log.i(TAG, "Public Key Equals = " + SecurityManager.getPublicKeyFromString(publicKey).equals(keyPair.getPublic()));
+
+            SecretKey secretKey = SecurityManager.generateSecretKey();
+            String cipherKey = SecurityManager.encryptRSA(SecurityManager.getPublicKeyFromString(publicKey), secretKey.getEncoded());
+            Log.i(TAG, "Cipher = " + cipherKey );
+            byte[] encodedKey = SecurityManager.decryptRSA(keyPair.getPrivate(), cipherKey);
+            Log.i(TAG, "Secret Key equals = " + SecurityManager.getSecretKeyFromBytes(encodedKey).equals(secretKey) );
+
+        }else{
+            disableSecurity();
+        }
+
         try {
-            ServerAPI.getInstance().register(this.getApplicationContext(), username, password,new JsonHttpResponseHandler() {
+            ServerAPI.getInstance().register(this.getApplicationContext(), username, password, publicKey, new JsonHttpResponseHandler() {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
@@ -136,6 +160,12 @@ public class RegisterActivity extends AppCompatActivity {
         //Perform google sign in to get drive permissions
         //Launch app's first screen once it's successfully logged in
 
+    }
+
+    private void disableSecurity() {
+        //TODO: force mode P2P
+        Toast.makeText(this, getString(R.string.security_disabled) + Build.VERSION.SDK_INT, Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "Security disabled Current API is " + Build.VERSION.SDK_INT );
     }
 
 
