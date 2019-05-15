@@ -156,7 +156,7 @@ public class ListAlbumsActivity extends AppCompatActivity
                 ServerAPI.getInstance().getUserAlbums(
                         this.getApplicationContext(),
                         globalVariables.getUser().getName(),
-                        globalVariables.getToken(),
+                        globalVariables.getToken(),this.globalVariables.google + "",
                         new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
@@ -330,7 +330,7 @@ public class ListAlbumsActivity extends AppCompatActivity
                     globalVariables.getUser().getName(),
                     albumName,
                     url,
-                    fileID,
+                    fileID,this.globalVariables.google + "",
                     new JsonHttpResponseHandler() {
 
                         @Override

@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
@@ -86,6 +87,7 @@ public class ListPhotosActivity extends AppCompatActivity {
     private int nrCatalogs = 0;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,7 +147,7 @@ public class ListPhotosActivity extends AppCompatActivity {
             ServerAPI.getInstance().getGroupMembership(this,
                     globalVariables.getToken(),
                     globalVariables.getUser().getName(),
-                    album.getName(),
+                    album.getName(),this.globalVariables.google + "",
                     new JsonHttpResponseHandler() {
 
                         /**
@@ -356,7 +358,7 @@ public class ListPhotosActivity extends AppCompatActivity {
         ServerAPI.getInstance().getFileID(this,
                 globalVariables.getToken(),
                 globalVariables.getUser().getName(),
-                album.getName(),
+                album.getName(),this.globalVariables.google + "",
                 new JsonHttpResponseHandler() {
 
                 @Override
@@ -397,6 +399,9 @@ public class ListPhotosActivity extends AppCompatActivity {
             final String url = result.second;
             final String fileID = result.first;
 
+            GlobalVariables global = (GlobalVariables)getApplicationContext();
+
+
             Log.i("UpdateSharedAlbum", "fileID = " + fileID);
             Log.i("UpdateSharedAlbum", "url = " + url);
 
@@ -405,7 +410,7 @@ public class ListPhotosActivity extends AppCompatActivity {
                 ServerAPI.getInstance().updateAlbum(getApplicationContext(),
                         globalVariables.getToken(),
                         globalVariables.getUser().getName(),
-                        albumName,url,fileID);
+                        albumName,url,fileID, global.google + "");
 
                 //Set album file ID
                 album.setFileID(fileID);
