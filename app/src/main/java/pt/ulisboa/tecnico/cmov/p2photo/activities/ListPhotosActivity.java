@@ -97,7 +97,7 @@ public class ListPhotosActivity extends AppCompatActivity {
         Intent intent = getIntent();
         album = (Album) intent.getSerializableExtra("album");
         Log.i("List Photos", album.getName());
-        
+
         loadingBarLayout = findViewById(R.id.loading_bar_layout);
 
         //Set the toolbar as the ActionBar for this window
