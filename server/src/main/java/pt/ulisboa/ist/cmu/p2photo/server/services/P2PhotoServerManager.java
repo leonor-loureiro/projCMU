@@ -128,7 +128,7 @@ public class P2PhotoServerManager {
      */
     public Map<String, String> getGroupMembership(String username, String albumName,String mode) throws UserNotExistsException, AlbumNotFoundException {
         printInfo("getting members of album " + albumName);
-        logOperation(new Operation("GetGroupMembership", username, albumName));
+        logOperation(new Operation("GetGroupMembership", username, albumName, Boolean.parseBoolean(mode)));
         return findAlbum(username, albumName,mode).getGroupMembership();
     }
 
@@ -182,7 +182,7 @@ public class P2PhotoServerManager {
         album.updateForUser(username, url, fileID);
         updateInformation();
 
-        logOperation(new Operation("UpdateAlbum", username, albumName));
+        logOperation(new Operation("UpdateAlbum", username, albumName, Boolean.parseBoolean(mode)));
 
         printInfo("Updating album info of user " + username);
     }
@@ -216,7 +216,7 @@ public class P2PhotoServerManager {
 
         printInfo("Sharing album of " + username + " with " + username2);
 
-        logOperation(new Operation("ShareAlbum", username, albumName, username2));
+        logOperation(new Operation("ShareAlbum", username, albumName, username2, Boolean.parseBoolean(mode)));
     }
 
 
@@ -236,7 +236,7 @@ public class P2PhotoServerManager {
         else
             user.addAlbumP2P(new Album(albumName, username, url, fileID));
         updateInformation();
-        logOperation(new Operation("CreateAlbum", username, albumName));
+        logOperation(new Operation("CreateAlbum", username, albumName, Boolean.parseBoolean(mode)));
     }
 
 
@@ -253,7 +253,7 @@ public class P2PhotoServerManager {
         }
 
         printInfo("getting names of all album of user " + username);
-        logOperation(new Operation("GetUserAlbumNames", username));
+        logOperation(new Operation("GetUserAlbumNames", username, Boolean.parseBoolean(mode)));
 
         return list;
     }
@@ -273,7 +273,7 @@ public class P2PhotoServerManager {
         Album album = findAlbum(username, albumName,mode);
 
         printInfo("Getting file ID for " + username);
-        logOperation(new Operation("GetFileID", username, albumName));
+        logOperation(new Operation("GetFileID", username, albumName, Boolean.parseBoolean(mode)));
         return album.findFileID(username);
     }
 

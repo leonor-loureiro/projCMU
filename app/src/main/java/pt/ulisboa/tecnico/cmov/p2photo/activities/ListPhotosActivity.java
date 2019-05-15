@@ -365,8 +365,10 @@ public class ListPhotosActivity extends AppCompatActivity {
                 public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                     try {
                         album.setFileID((String) response.get(0));
-                        loadP2PAlbum();
-                        Log.i("ListPhotos", "newFileID = " + album.getFileID() );
+                        Log.i("ListPhotos", "newFileID = " + album.getFileID());
+                        if(!globalVariables.google) {
+                            loadP2PAlbum();
+                        }
 
                     } catch (JSONException e) {
                         e.printStackTrace();

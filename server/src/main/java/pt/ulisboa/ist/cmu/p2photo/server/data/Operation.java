@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 
 public class Operation implements Serializable {
+
     private long timestamp;
     private String type;
     private String user;
     private String album;
     private String user2;
+    private boolean mode;
 
     public Operation(String type, String user) {
         timestamp = System.currentTimeMillis();
@@ -16,19 +18,28 @@ public class Operation implements Serializable {
         this.user = user;
     }
 
-    public Operation(String type, String user, String album) {
+    public Operation(String type, String user, boolean mode) {
+        timestamp = System.currentTimeMillis();
+        this.type = type;
+        this.user = user;
+        this.mode = mode;
+    }
+
+    public Operation(String type, String user, String album, boolean mode) {
         timestamp = System.currentTimeMillis();
         this.type = type;
         this.user = user;
         this.album = album;
+        this.mode = mode;
     }
 
-    public Operation(String type, String user, String album, String user2) {
+    public Operation(String type, String user, String album, String user2, boolean mode) {
         timestamp = System.currentTimeMillis();
         this.type = type;
         this.user = user;
         this.album = album;
         this.user2 = user2;
+        this.mode = mode;
     }
 
     public String getType() {

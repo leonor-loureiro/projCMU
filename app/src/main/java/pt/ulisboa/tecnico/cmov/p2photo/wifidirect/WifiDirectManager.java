@@ -35,13 +35,12 @@ public class WifiDirectManager {
     private Context context;
     public static final String TAG = "msgsender";
 
-    private SimWifiP2pManager mManager = null;
-    private SimWifiP2pManager.Channel mChannel = null;
-    private Messenger mService = null;
-    private boolean mBound = false;
-    private SimWifiP2pSocketServer mSrvSocket = null;
-    private SimWifiP2pBroadcastReceiver mReceiver;
-    private boolean google = false;
+    private static SimWifiP2pManager mManager = null;
+    private static SimWifiP2pManager.Channel mChannel = null;
+    private static Messenger mService = null;
+    private static boolean mBound = false;
+    private static SimWifiP2pSocketServer mSrvSocket = null;
+    private static SimWifiP2pBroadcastReceiver mReceiver;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         // callbacks for service binding, passed to bindService()
@@ -67,6 +66,9 @@ public class WifiDirectManager {
     public WifiDirectManager(Context listAlbumsActivity) {
         this.context= listAlbumsActivity;
 
+        if(mReceiver != null)
+            return;
+
         SimWifiP2pSocketManager.Init(context);
         // register broadcast receiver
         IntentFilter filter = new IntentFilter();
@@ -74,11 +76,16 @@ public class WifiDirectManager {
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_PEERS_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_NETWORK_MEMBERSHIP_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION);
+
         mReceiver = new SimWifiP2pBroadcastReceiver((ListAlbumsActivity) context);
         this.context.registerReceiver(mReceiver, filter);
+
     }
 
     public void initiateWifi() {
+        if(mBound)
+            return;
+
         Intent intent = new Intent(context, SimWifiP2pService.class);
         context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         mBound = true;

@@ -47,7 +47,7 @@ public class User implements Serializable {
 
 
     public void addAlbumGoogle(Album album) throws UserAlreadyHasAlbumException {
-        for(Album alb : this.getAlbumsP2P())
+        for(Album alb : this.getAlbumsGoogle())
             if (album.getName().equals(alb.getName()))
                 throw new UserAlreadyHasAlbumException(alb.getName());
 
@@ -56,7 +56,7 @@ public class User implements Serializable {
 
 
     public void addAlbumP2P(Album album) throws UserAlreadyHasAlbumException {
-        for(Album alb : this.getAlbumsGoogle())
+        for(Album alb : this.getAlbumsP2P())
             if (album.getName().equals(alb.getName()))
                 throw new UserAlreadyHasAlbumException(alb.getName());
 
