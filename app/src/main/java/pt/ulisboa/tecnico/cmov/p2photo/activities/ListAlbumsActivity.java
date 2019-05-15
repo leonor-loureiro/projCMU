@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -35,7 +36,6 @@ import cz.msebera.android.httpclient.Header;
 import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
 import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
 import pt.inesc.termite.wifidirect.SimWifiP2pManager;
-import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketManager;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
@@ -49,8 +49,10 @@ import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 
 
-public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pManager.PeerListListener, SimWifiP2pManager.GroupInfoListener {
+public class ListAlbumsActivity extends AppCompatActivity
+        implements SimWifiP2pManager.PeerListListener, SimWifiP2pManager.GroupInfoListener {
 
+    private static final String TAG = "ListAlbumsActivity";
     ListAlbumsAdapter adapter;
     ListView listView;
     GoogleDriveHandler driveHandler;
@@ -101,11 +103,16 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
             globalVariables.setFileManager(new FileManager(this));
 
         }
-        findViewById(R.id.idInGroupButton).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v){
-                wifiManager.requestGroupInfo(v);
-            }
-        });
+        Button connectButton = findViewById(R.id.idInGroupButton);
+        if(globalVariables.google){
+            connectButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v){
+                    wifiManager.requestGroupInfo(v);
+                }
+            });
+        }else{
+            connectButton.setVisibility(View.INVISIBLE);
+        }
 
         getAlbums();
 
@@ -138,13 +145,13 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
      */
     private void getAlbums() {
 
-        if(!globalVariables.google){
+        /*if(!globalVariables.google){
             adapter.clear();
             adapter.addAll(
                 globalVariables.getFileManager().getAlbumsList(globalVariables.getUser().getName())
             );
             adapter.notifyDataSetChanged();
-        }else{
+        }else{*/
             try {
                 ServerAPI.getInstance().getUserAlbums(
                         this.getApplicationContext(),
@@ -180,7 +187,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
             }catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-        }
+        //}
 
     }
 
@@ -264,12 +271,11 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
     /**
      * Creates the catalog file in the user's google drive and retrieves the share link.
      * Informs the server that a new album was created and adds the new album to the display
-     * @param name album name
+     * @param albumName album name
      */
-    private void createNewAlbum(final String name) {
-        final String albumName = name;
+    private void createNewAlbum(final String albumName) {
 
-        if(adapter.contains(name)){
+        if(adapter.contains(albumName)){
 
             Toast.makeText(ListAlbumsActivity.this,
                     "Album " + albumName + " already exists.",
@@ -280,79 +286,94 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
         }
 
         if(!globalVariables.google) {
-            Log.i("ListAlbumsActivity", "Create album in internal storage");
-            if(globalVariables.getFileManager()
-                    .updateAlbum(globalVariables.getUser().getName(), albumName, "")) {
-                createAlbumSuccess(albumName, null);
-            }else{
-                createAlbumFailure(albumName, ".");
-            }
+            createP2PAlbum(albumName);
         } else {
-                final Task<Pair<String, String>> task = driveHandler.createAlbumSlice(name);
-                //Add success listener
-                task.addOnSuccessListener(new OnSuccessListener<Pair<String, String>>() {
-                    @Override
-                    public void onSuccess(Pair<String, String> result) {
-                        final String fileID = result.first;
-                        final String url = result.second;
-
-                        Log.i("Create album", "url = " + url);
-                        Log.i("Create album", "fileID = " + fileID);
-
-                        try {
-                            ServerAPI.getInstance().createAlbum(ListAlbumsActivity.this,
-                                    globalVariables.getToken(),
-                                    globalVariables.getUser().getName(),
-                                    name,
-                                    url,
-                                    fileID,
-                                    new JsonHttpResponseHandler() {
-
-                                        @Override
-                                        public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                                            //Add the album to the list
-                                            createAlbumSuccess(albumName, fileID);
-
-                                        }
-
-                                        @Override
-                                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                                            Log.i("ListAlbums", "create album server = " + throwable.getMessage());
-                                            createAlbumFailure(albumName, ".");
-                                        }
-
-                                        @Override
-                                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                                            if (statusCode == 401)
-                                                ServerAPI.getInstance().tokenInvalid(ListAlbumsActivity.this);
-
-                                            // HTTP Conflict, user already has album with such name
-                                            if (statusCode == 409)
-                                                createAlbumFailure(albumName, " already exists");
-
-                                        }
-                                    });
-
-
-                        } catch (IOException | JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-                //Add failure listener
-                task.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(ListAlbumsActivity.this,
-                                "Failed to create album " + albumName + ".",
-                                Toast.LENGTH_SHORT)
-                                .show();
-                    }
-                });
-            }
+            createCloudAlbum(albumName);
         }
+    }
+
+    private void createCloudAlbum(final String albumName) {
+        Log.i(TAG, "Create Cloud Album");
+
+        final Task<Pair<String, String>> task = driveHandler.createAlbumSlice(albumName);
+        //Add success listener
+        task.addOnSuccessListener(new OnSuccessListener<Pair<String, String>>() {
+            @Override
+            public void onSuccess(Pair<String, String> result) {
+                final String fileID = result.first;
+                final String url = result.second;
+
+                Log.i("Create album", "url = " + url);
+                Log.i("Create album", "fileID = " + fileID);
+
+                createAlbumInServer(fileID, url, albumName);
+            }
+        });
+
+        //Add failure listener
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.printStackTrace();
+                Toast.makeText(ListAlbumsActivity.this,
+                        "Failed to create album " + albumName + ".",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
+    }
+
+    private void createAlbumInServer(final String fileID, String url, final String albumName) {
+        try {
+            ServerAPI.getInstance().createAlbum(ListAlbumsActivity.this,
+                    globalVariables.getToken(),
+                    globalVariables.getUser().getName(),
+                    albumName,
+                    url,
+                    fileID,
+                    new JsonHttpResponseHandler() {
+
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                            //Add the album to the list
+                            createAlbumSuccess(albumName, fileID);
+
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                            Log.i("ListAlbums", "create album server = " + throwable.getMessage());
+                            createAlbumFailure(albumName, ".");
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                            if (statusCode == 401)
+                                ServerAPI.getInstance().tokenInvalid(ListAlbumsActivity.this);
+
+                            // HTTP Conflict, user already has album with such name
+                            if (statusCode == 409)
+                                createAlbumFailure(albumName, " already exists");
+
+                        }
+                    });
+
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createP2PAlbum(String albumName) {
+        Log.i(TAG, "Create P2P Album");
+        String filename = globalVariables.getFileManager()
+                .updateAlbum(globalVariables.getUser().getName(), albumName, "");
+        if(filename != null){
+            createAlbumInServer(filename, null, albumName);
+        }else{
+            createAlbumFailure(albumName, ".");
+        }
+    }
 
     private void createAlbumFailure(String albumName, String errorMsg) {
         Toast.makeText(ListAlbumsActivity.this,
