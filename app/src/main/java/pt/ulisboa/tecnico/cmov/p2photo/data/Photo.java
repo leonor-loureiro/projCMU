@@ -37,4 +37,8 @@ public class Photo implements Serializable {
     public void setMine(Boolean mine) {
         this.mine = mine;
     }
+
+    public boolean isMine() {
+        return getMine();
+    }
 }

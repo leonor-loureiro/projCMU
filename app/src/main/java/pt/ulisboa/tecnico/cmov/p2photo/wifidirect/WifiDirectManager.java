@@ -42,6 +42,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoToSend;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class WifiDirectManager {
@@ -211,8 +212,8 @@ public class WifiDirectManager {
                       ArrayList<PhotoToSend> photosToSend = new ArrayList<>();
 
                       for(Photo photo : photos){
-                          if (photo.getMine()){
-                              //photosToSend.add(new PhotoToSend(photo.getUrl(),));
+                          if (photo.isMine()){
+                              photosToSend.add(new PhotoToSend(photo.getUrl(), Utils.encodeBitmap(photo.getBitmap())));
                           }
                       }
                       out.writeObject(photosToSend);

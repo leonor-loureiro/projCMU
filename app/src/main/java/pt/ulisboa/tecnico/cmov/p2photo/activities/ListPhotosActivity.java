@@ -771,8 +771,9 @@ public class ListPhotosActivity extends AppCompatActivity{
 
     public void addPhotos(ArrayList<PhotoToSend> result) {
        for(PhotoToSend photo : result){
-           //photo.setMine(false);
-           //adapter.addPhoto(new Photo(photo.getUrl(),));
+           Photo newPhoto = new Photo(photo.getUrl(),Utils.decodeBitmap(photo.getBitmap()));
+           newPhoto.setMine(false);
+           adapter.addPhoto(newPhoto);
        }
     }
 }

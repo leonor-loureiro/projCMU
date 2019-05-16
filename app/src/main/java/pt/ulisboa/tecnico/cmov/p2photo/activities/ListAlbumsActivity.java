@@ -97,6 +97,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
             }
         });
 
+
         getAlbums();
 
         if(globalVariables.google)
@@ -129,6 +130,8 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
      * Send the server request to retrieve the list of the user albums
      */
     private void getAlbums() {
+
+        Log.d("gettingUserAlbums","gettingThemAll");
 
         /*if(!globalVariables.google){
             adapter.clear();
