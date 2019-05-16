@@ -6,7 +6,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.api.services.drive.Drive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 
@@ -37,6 +39,8 @@ public class GlobalVariables extends Application {
     private WifiDirectManager wifiDirectManager;
     //Manages the internal storage operations
     private FileManager fileManager;
+    //FileIDs
+    private Map<String,String> fileIDs = new HashMap<>();
 
     private List<String> operationsLog = new ArrayList<>();
 
@@ -122,5 +126,12 @@ public class GlobalVariables extends Application {
 
     public void setMembersInGroup(ArrayList<Member> membersInGroup) {
         this.membersInGroup = membersInGroup;
+    }
+    public void updateFileID(String album, String fileID){
+        fileIDs.put(album, fileID);
+    }
+
+    public String getFileID(String album){
+        return fileIDs.get(album);
     }
 }

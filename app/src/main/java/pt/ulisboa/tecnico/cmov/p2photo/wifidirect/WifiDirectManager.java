@@ -12,20 +12,13 @@ import android.os.IBinder;
 import android.os.Messenger;
 import android.util.Log;
 
-import com.loopj.android.http.JsonHttpResponseHandler;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import cz.msebera.android.httpclient.Header;
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
 import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
@@ -44,7 +37,6 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoToSend;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
-import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class WifiDirectManager {
 
@@ -83,7 +75,6 @@ public class WifiDirectManager {
             mBound = false;
         }
     };
-    private String fileID = "";
 
     public WifiDirectManager(Context listAlbumsActivity, ListAlbumsAdapter adapter) {
         this.context= listAlbumsActivity;
@@ -124,8 +115,10 @@ public class WifiDirectManager {
             mManager.requestGroupInfo(mChannel, (SimWifiP2pManager.GroupInfoListener) context);
     }
 
-    public void send(String virtIp, String albumName, ListPhotosActivity listPhotosActivity) {
-        new GetPhotosCommTask(virtIp,albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+    public void send(String virtIp, String username, String albumName, ListPhotosActivity listPhotosActivity) {
+        //new SendCommTask(virtIp, username, albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new GetPhotosCommTask(virtIp,username,albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo) {
@@ -215,7 +208,7 @@ public class WifiDirectManager {
                     try {
                         int check = (int) value;
                         Log.d(TAG,"check if is int");
-
+                        isInt = true;
                     } catch (ClassCastException e) {
                         Log.d(TAG, "setting isint to " + isInt + "");
                         isInt = false;
@@ -226,7 +219,7 @@ public class WifiDirectManager {
                         if (isInt) {
 
                             ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
-                            Log.d(TAG,"writing the username to ");
+                            Log.d(TAG,"writing the username to " + globalVariables.getUser().getName());
                             out.writeObject(globalVariables.getUser().getName());
 
                         } else {
@@ -235,7 +228,9 @@ public class WifiDirectManager {
                             ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
 
 
-                            String fileID = adapter.getFileID(album);
+                            String fileID = globalVariables.getFileID(album);
+                            Log.d(TAG,"fileID: " + fileID);
+
 
                             List<Photo> photos = new ArrayList<>();
                             if ((fileID != null) && !(fileID.equals("null")))
@@ -244,6 +239,7 @@ public class WifiDirectManager {
                             ArrayList<PhotoToSend> photosToSend = new ArrayList<>();
 
                             for (Photo photo : photos) {
+                                Log.d(TAG,"photo: " + photo.getUrl() + " mine = " + photo.getMine());
                                 if (photo.isMine()) {
                                     photosToSend.add(new PhotoToSend(photo.getUrl(), Utils.encodeBitmap(photo.getBitmap())));
                                 }
@@ -252,29 +248,6 @@ public class WifiDirectManager {
                             out.writeObject(photosToSend);
 
                         }
-/*
-                        ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
-                        String album = (String) in.readObject();
-                        ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
-
-                        String fileID = adapter.getFileID(album);
-
-                        List<Photo> photos = new ArrayList<>();
-                        if( (fileID != null) && !(fileID.equals("null")))
-                         photos = globalVariables.getFileManager().getAlbumPhotos(fileID);
-
-                        ArrayList<PhotoToSend> photosToSend = new ArrayList<>();
-
-                        for(Photo photo : photos){
-                              if (photo.isMine()){
-                                  photosToSend.add(new PhotoToSend(photo.getUrl(), Utils.encodeBitmap(photo.getBitmap())));
-                              }
-                        }
-
-                        Log.d(TAG, "photosToSend: " + photosToSend.toString());
-                        out.writeObject(photosToSend); */
-
-
 
                     } catch (IOException e) {
                         Log.d("Error reading socket:", e.getMessage());
@@ -300,9 +273,11 @@ public class WifiDirectManager {
         private SimWifiP2pSocket mCliSocket = null;
         String peer;
         String albumName;
+        String username;
 
-        public GetPhotosCommTask(String peer, String albumName, ListPhotosActivity listPhotosActivity) {
+        public GetPhotosCommTask(String peer, String username, String albumName, ListPhotosActivity listPhotosActivity) {
             this.peer = peer;
+            this.username = username;
             this.albumName = albumName;
             this.context = listPhotosActivity;
 
@@ -338,7 +313,7 @@ public class WifiDirectManager {
 
         @Override
         protected void onPostExecute(ArrayList<PhotoToSend> result) {
-            context.addPhotos(result);
+            context.addPhotos(username, albumName, result);
 
 
         }

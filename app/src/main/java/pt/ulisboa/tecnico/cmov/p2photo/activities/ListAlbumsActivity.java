@@ -86,16 +86,19 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
 
 
         //Set the adapter responsible for showing the list of albums
-        adapter = new ListAlbumsAdapter(this, new ArrayList<Album>(),this.globalVariables);
-        listView = findViewById(R.id.folders_list);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        if(adapter == null) {
+            Log.i(TAG, "Set adapter");
+            adapter = new ListAlbumsAdapter(this, new ArrayList<Album>(), this.globalVariables);
+            listView = findViewById(R.id.folders_list);
+            listView.setAdapter(adapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                openAlbum(i);
-            }
-        });
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    openAlbum(i);
+                }
+            });
+        }
 
 
         getAlbums();
@@ -196,11 +199,13 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
      */
     private void transformResults(JSONObject response) throws JSONException {
         String albumName = null, fileID = null;
+        adapter.clear();
         for(int i = 0;i < response.names().length();i++){
             albumName = response.names().getString(i);
             fileID = response.getString(albumName);
             Log.i(TAG, "Album " + albumName + ": " + fileID);
             adapter.add(new Album(albumName, fileID));
+            globalVariables.updateFileID(albumName, fileID);
         }
 
         /*
