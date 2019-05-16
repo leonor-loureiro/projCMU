@@ -13,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -29,7 +28,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -44,7 +42,6 @@ import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
-import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
@@ -208,12 +205,6 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
             globalVariables.updateFileID(albumName, fileID);
         }
 
-        /*
-        //Dummy albums
-        adapter.add(new Album("sebas"));
-        adapter.add(new Album("andre"));
-        adapter.add(new Album("leonor"));*/
-
     }
 
 
@@ -343,7 +334,6 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
             url = SecurityManager.encryptAES(secretKey, url);
             Log.i(TAG, "Encrypted url = " + url);
 
-            //TODO: public loaded at login
             PublicKey publicKey = SecurityManager.getPublicKey(globalVariables.getUser().getName());
             cipheredKey = SecurityManager.encryptRSA(publicKey, secretKey.getEncoded());
             Log.i(TAG, "Encrypted secret key = " + cipheredKey);
@@ -428,6 +418,9 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
         Intent intent = new Intent(this, AdminActivity.class);
         startActivity(intent);
     }
+    public void syncAlbums(MenuItem item) {
+        getAlbums();
+    }
 
     @Override
     public void onGroupInfoAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList, SimWifiP2pInfo simWifiP2pInfo) {
@@ -437,13 +430,12 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
 
     @Override
     public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
-
+        //Necessary, but do nothing
     }
 
 
     public void userDetected() {
         wifiManager.requestGroupInfo();
-
     }
 
 

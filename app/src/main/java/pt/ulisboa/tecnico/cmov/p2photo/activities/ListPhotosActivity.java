@@ -450,7 +450,6 @@ public class ListPhotosActivity extends AppCompatActivity{
                             try {
                                 Log.i(TAG, "Secret Key = " + response.get(0));
 
-                                //TODO: move private key to user global variables
                                 PrivateKey privateKey = SecurityManager.getPrivateKey( globalVariables.getUser().getName());
 
                                 //Decipher secret key
@@ -621,6 +620,7 @@ public class ListPhotosActivity extends AppCompatActivity{
     public void logout(MenuItem item) {
         Utils.openYesNoBox(this, "Are you sure you want to logout?", null,new Callable<Void>() {
             public Void call() {
+                globalVariables.getWifiDirectManager().unbindService();
                 Intent intent = new Intent(ListPhotosActivity.this, LoginActivity.class);
                 //Clears the activity stack
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

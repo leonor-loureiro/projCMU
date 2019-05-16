@@ -67,7 +67,6 @@ public class CacheSettingsFragment extends Fragment {
     }
 
     private void updateCacheSize() {
-        //TODO save cache size key as resource
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt(getString(R.string.cache_size_pref), numberPicker.getValue());
         editor.apply();
@@ -75,7 +74,6 @@ public class CacheSettingsFragment extends Fragment {
                 getString(R.string.max_cache_size) + numberPicker.getValue() + getString(R.string.size_unit),
                 Toast.LENGTH_SHORT)
         .show();
-        ((GlobalVariables)getContext().getApplicationContext()).getCacheManager().getCacheSize();
     }
 
 }

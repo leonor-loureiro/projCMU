@@ -91,6 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        //TODO check if google mode on
         String publicKey = null;
         //Generate public key
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
@@ -163,7 +164,9 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void disableSecurity() {
-        //TODO: force mode P2P
+        //Force mode P2P
+        globalVariables.google = false;
+        //TODO: move to select mode activity
         Toast.makeText(this, getString(R.string.security_disabled) + Build.VERSION.SDK_INT, Toast.LENGTH_SHORT).show();
         Log.i(TAG, "Security disabled Current API is " + Build.VERSION.SDK_INT );
     }
