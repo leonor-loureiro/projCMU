@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.Contacts;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,7 +57,9 @@ public class MemoryCacheManager {
     public List<Photo> getAlbumPhotos(String username, String albumName){
         List<Photo> cachedPhotos = new ArrayList<>();
         String prefix = getPrefix(username, albumName);
+        Log.i(TAG, "Get cached album photos: " + prefix);
         for(File file: cacheDir.listFiles()) {
+            Log.i(TAG, "Cached file: " + file.getName());
             if (file.getName().startsWith(prefix)) {
                 cachedPhotos.add(
                         new Photo(file.getName().replaceFirst(prefix, ""),
@@ -70,6 +73,7 @@ public class MemoryCacheManager {
     }
 
     private String getPrefix(String username, String albumName) {
+        Log.i(TAG, "Prefix: " + albumName + "_" + username);
         return albumName + "_" + username + "_";
     }
 
@@ -82,6 +86,7 @@ public class MemoryCacheManager {
         }
         Log.i(TAG, "Add album photo: " + filename);
         saveImageToCache(filename, photo.getBitmap());
+        manageCacheSize();
     }
     /**
      * Save image in cache
@@ -152,6 +157,7 @@ public class MemoryCacheManager {
         long size = getCacheSize();
         long limit = getLimit() * 1024 * 1024;
 
+        Log.i(TAG, "Manage cache size: " + size + "/" + limit);
         if(size <= limit)
             return;
 
@@ -176,6 +182,7 @@ public class MemoryCacheManager {
 
         }
         Log.i(TAG, "Cache cleaned " + size/1024./1024.+"MB / " + limit + "MB");
+        Toast.makeText(mContext, "Cache cleaned.", Toast.LENGTH_SHORT).show();
 
     }
 

@@ -66,6 +66,4 @@ public class Album implements Serializable{
         members.add(member);
     }
 
-
-
 }

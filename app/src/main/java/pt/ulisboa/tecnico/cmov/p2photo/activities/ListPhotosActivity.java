@@ -412,6 +412,10 @@ public class ListPhotosActivity extends AppCompatActivity{
                 adapter.addAllPhotos(cachedPhotos);
             }
             /*for(Member member: membersInGroup){
+
+        for(Member memberOfAlbum:album.getMembers()){
+            for(Member member: membersInGroup){
+                Log.d(TAG,"i am " + globalVariables.getUser().getName() + " and i have " + member.getName() + " in my group");
                 if(memberOfAlbum.getName().equals(member.getName())){
                     Log.d("asking for photos",memberOfAlbum.getName());
                     askForPhotos(member);
@@ -560,6 +564,7 @@ public class ListPhotosActivity extends AppCompatActivity{
 
             //Set album file ID
             album.setFileID(fileID);
+            globalVariables.updateFileID(albumName, fileID);
 
         } catch (IOException | JSONException e) {
             e.printStackTrace();
@@ -803,6 +808,6 @@ public class ListPhotosActivity extends AppCompatActivity{
            adapter.addPhoto(newPhoto);
            cacheManager.addAlbumPhoto(username, albumName, newPhoto);
         }
-        //Log.i(TAG, "cached photos: " + cacheManager.getAlbumPhotos(username, albumName).size());
+        Log.i(TAG, "cached photos: " + cacheManager.getAlbumPhotos(username, albumName).size());
     }
 }

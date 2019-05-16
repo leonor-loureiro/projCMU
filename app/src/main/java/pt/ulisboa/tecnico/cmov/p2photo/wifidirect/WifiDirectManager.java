@@ -17,6 +17,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
@@ -74,7 +75,6 @@ public class WifiDirectManager {
             mBound = false;
         }
     };
-    private String fileID = "";
 
     public WifiDirectManager(Context listAlbumsActivity, ListAlbumsAdapter adapter) {
         this.context= listAlbumsActivity;
@@ -115,25 +115,32 @@ public class WifiDirectManager {
             mManager.requestGroupInfo(mChannel, (SimWifiP2pManager.GroupInfoListener) context);
     }
 
+
     public void send(String virtIp, String username, String albumName, ListPhotosActivity listPhotosActivity) {
-        new SendCommTask(virtIp, username, albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        //new SendCommTask(virtIp, username, albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new GetPhotosCommTask(virtIp,username,albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public ArrayList<Member> onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo, ArrayList<Member> membersInGroup) {
+    public void onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo) {
         // compile list of network members
         StringBuilder peersStr = new StringBuilder();
+        this.globalVariables.setMembersInGroup(new ArrayList<Member>());
         for (String deviceName : groupInfo.getDevicesInNetwork()) {
             SimWifiP2pDevice device = devices.getByName(deviceName);
             String devstr = "" + deviceName + " (" +
                     ((device == null)?"??":device.getVirtIp()) + ")\n";
             peersStr.append(devstr);
-            //connectToPeer(device.getVirtIp());
 
-            if(!membersInGroup.contains(new Member(deviceName))) {
+            /*if(!membersInGroup.contains(new Member(deviceName))) {
                 membersInGroup.add(new Member(deviceName, device.getVirtIp(),"qlqrcoisa"));
-                //send(device.getVirtIp(),"givemealbums");
-            }
+
+            }*/
+            Log.d(TAG,"addingdevice" + device.getVirtIp());
+            addDeviceName(device.getVirtIp());
+
         }
+
+        Log.d(TAG,"size of members" + this.globalVariables.getMembersInGroup().size() + " should be " + groupInfo.getDevicesInNetwork().size());
 
         // display list of network members
         new AlertDialog.Builder(context)
@@ -146,8 +153,12 @@ public class WifiDirectManager {
                 .show();
 
 
+    }
 
-        return membersInGroup;
+    private void addDeviceName(String virtIp) {
+        new GetUserNameCommTask(virtIp).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+
     }
 
     public void bindService() {
@@ -173,6 +184,8 @@ public class WifiDirectManager {
     public class IncommingCommTask extends AsyncTask<Void, String, Void> {
 
 
+        Boolean isInt = true;
+
         @Override
         protected Void doInBackground(Void... params) {
 
@@ -187,48 +200,74 @@ public class WifiDirectManager {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     SimWifiP2pSocket sock = mSrvSocket.accept();
+
+                    ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+
+                    Object value = in.readObject();
+
                     try {
-                        ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
-                        String album = (String) in.readObject();
-                        ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
+                        int check = (int) value;
+                        Log.d(TAG,"check if is int");
+                        isInt = true;
+                    } catch (ClassCastException e) {
+                        Log.d(TAG, "setting isint to " + isInt + "");
+                        isInt = false;
+                    }
 
-                        String fileID = adapter.getFileID(album);
+                    try {
+                        Log.d(TAG,"value of isINT is " + isInt + "");
+                        if (isInt) {
 
-                        List<Photo> photos = new ArrayList<>();
-                        if( (fileID != null) && !(fileID.equals("null")))
-                         photos = globalVariables.getFileManager().getAlbumPhotos(fileID);
+                            ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
+                            Log.d(TAG,"writing the username to " + globalVariables.getUser().getName());
+                            out.writeObject(globalVariables.getUser().getName());
 
-                        ArrayList<PhotoToSend> photosToSend = new ArrayList<>();
+                        } else {
+                            String album = (String) value;
 
-                        for(Photo photo : photos){
-                              if (photo.isMine()){
-                                  photosToSend.add(new PhotoToSend(photo.getUrl(), Utils.encodeBitmap(photo.getBitmap())));
-                              }
+                            ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
+
+
+                            String fileID = globalVariables.getFileID(album);
+                            Log.d(TAG,"fileID: " + fileID);
+
+
+                            List<Photo> photos = new ArrayList<>();
+                            if ((fileID != null) && !(fileID.equals("null")))
+                                photos = globalVariables.getFileManager().getAlbumPhotos(fileID);
+
+                            ArrayList<PhotoToSend> photosToSend = new ArrayList<>();
+
+                            for (Photo photo : photos) {
+                                Log.d(TAG,"photo: " + photo.getUrl() + " mine = " + photo.getMine());
+                                if (photo.isMine()) {
+                                    photosToSend.add(new PhotoToSend(photo.getUrl(), Utils.encodeBitmap(photo.getBitmap())));
+                                }
+                            }
+                            Log.d(TAG,"sending this number of photos " + photosToSend.size() + "");
+                            out.writeObject(photosToSend);
+
                         }
-
-                        Log.d(TAG, "photosToSend: " + photosToSend.toString());
-                        out.writeObject(photosToSend);
-
 
                     } catch (IOException e) {
                         Log.d("Error reading socket:", e.getMessage());
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
                     } finally {
                         sock.close();
                     }
                 } catch (IOException e) {
                     Log.d("Error socket:", e.getMessage());
                     e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
                 }
             }
             Log.i(TAG, "IncommingCommTask: interrupted");
             return null;
-        }
 
+        }
     }
 
-    public class SendCommTask extends AsyncTask<String, String, ArrayList<PhotoToSend>> {
+    public class GetPhotosCommTask extends AsyncTask<String, String, ArrayList<PhotoToSend>> {
 
         private final ListPhotosActivity context;
         private SimWifiP2pSocket mCliSocket = null;
@@ -236,7 +275,7 @@ public class WifiDirectManager {
         String albumName;
         String username;
 
-        public SendCommTask(String peer, String username, String albumName, ListPhotosActivity listPhotosActivity) {
+        public GetPhotosCommTask(String peer, String username, String albumName, ListPhotosActivity listPhotosActivity) {
             this.peer = peer;
             this.username = username;
             this.albumName = albumName;
@@ -274,11 +313,58 @@ public class WifiDirectManager {
 
         @Override
         protected void onPostExecute(ArrayList<PhotoToSend> result) {
-            context.addPhotos(username, username, result);
+            context.addPhotos(username, albumName, result);
 
 
         }
     }
+    public class GetUserNameCommTask extends AsyncTask<String, String,String> {
+
+        private SimWifiP2pSocket mCliSocket = null;
+        String peer;
+        public GetUserNameCommTask(String peer) {
+            this.peer = peer;
+
+        }
+
+        @Override
+        protected String doInBackground(String... msg) {
+            try {
+                Log.d("TAG", "the peer is " + peer);
+                mCliSocket = new SimWifiP2pSocket(peer,
+                        Integer.parseInt(context.getString(R.string.port)));
+
+
+                ObjectOutputStream out = new ObjectOutputStream(mCliSocket.getOutputStream());
+
+                Log.d(TAG,"writing 0161 ");
+                out.writeObject(0161);
+
+                ObjectInputStream in = new ObjectInputStream(mCliSocket.getInputStream());
+
+                String name = (String) in.readObject();
+                Log.d(TAG,"the name is " + name);
+
+                mCliSocket.close();
+
+                return name;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            mCliSocket = null;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d(TAG,"adding " + result + " to " + globalVariables.getUser().getName());
+            globalVariables.getMembersInGroup().add(new Member(result,peer,"qllrcoisa"));
+
+        }
+    }
+
 
     public void unregisterReceiver() {
         context.unregisterReceiver(mReceiver);
