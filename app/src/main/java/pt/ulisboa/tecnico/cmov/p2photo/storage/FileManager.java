@@ -4,14 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
@@ -43,9 +41,28 @@ public class FileManager {
         return userAlbums;
     }
 
+    public String createAlbum(String username, String albumName){
+
+        String filename = getAlbumFileName(username, albumName);
+        if(fileExists(filename))
+            return null;
+
+        return updateFile(filename, "");
+    }
     public String updateAlbum(String username, String albumName, String content){
-        //TODO: check file already exists
-        String filename = username + "_" + albumName;
+
+        String filename = getAlbumFileName(username, albumName);
+        if(!fileExists(filename))
+            return null;
+
+        return updateFile(filename, content);
+    }
+
+    private String getAlbumFileName(String username, String albumName) {
+        return username + "_" + albumName;
+    }
+
+    private String updateFile(String filename, String content) {
         if(writeFile(filename, content))
             return filename;
         return null;
@@ -62,6 +79,9 @@ public class FileManager {
     }
 
     public List<Photo> getAlbumPhotos(String filename){
+        if(!fileExists(filename))
+            return null;
+
         List<Photo> photos = new ArrayList<>();
         String fileContent = readFile(filename);
         if(fileContent != null){
@@ -76,6 +96,12 @@ public class FileManager {
             return photos;
         }
         return null;
+    }
+
+    private boolean fileExists(String fileName) {
+        String path = mContext.getFilesDir().getAbsolutePath() + "/" + fileName;
+        File file = new File(path);
+        return file.exists();
     }
 
     /**

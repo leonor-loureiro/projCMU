@@ -387,7 +387,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
     private void createP2PAlbum(String albumName) {
         Log.i(TAG, "Create P2P Album");
         String filename = globalVariables.getFileManager()
-                .updateAlbum(globalVariables.getUser().getName(), albumName, "");
+                .createAlbum(globalVariables.getUser().getName(), albumName);
         if(filename != null){
             createAlbumInServer(filename, null, albumName);
         }else{
