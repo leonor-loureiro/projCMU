@@ -4,11 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.SecretKey;
+
 public class Album implements Serializable{
     String name;
     List<String> groupMembership = new ArrayList<>();
     List<Member> members = new ArrayList<>();
     String fileID;
+    SecretKey secretKey;
 
     public Album(String name, String fileID) {
         this.name = name;
@@ -49,6 +52,14 @@ public class Album implements Serializable{
 
     public void setGroupMembership(List<String> groupMembership) {
         this.groupMembership = groupMembership;
+    }
+
+    public SecretKey getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(SecretKey secretKey) {
+        this.secretKey = secretKey;
     }
 
     public void addMember(Member member){

@@ -3,6 +3,7 @@ package pt.ulisboa.ist.cmu.p2photo.server.data;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.UserAlreadyHasAlbumException;
 
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,8 @@ public class User implements Serializable {
     private String username;
     // Hashed password
     private String password;
+    //Public key
+    private String publicKey;
     // User's albums
     private List<Album> albumsP2Peer = new ArrayList<Album>();
 
@@ -24,9 +27,10 @@ public class User implements Serializable {
         this.username = username;
     }
 
-    public User(String username, String password) {
+    public User(String username, String password, String publicKey) {
         this.username = username;
         this.password = password;
+        this.publicKey = publicKey;
     }
 
     public String getUsername() {
@@ -45,6 +49,13 @@ public class User implements Serializable {
         this.password = password;
     }
 
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
 
     public void addAlbumGoogle(Album album) throws UserAlreadyHasAlbumException {
         for(Album alb : this.getAlbumsGoogle())

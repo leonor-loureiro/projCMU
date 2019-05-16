@@ -6,7 +6,9 @@ import pt.ulisboa.ist.cmu.p2photo.server.data.User;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.*;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,14 +59,14 @@ public class P2PhotoServerManager {
      * @param password the secret password
      * @return the login token
      */
-    public String register(String username, String password) throws UserAlreadyExistsException {
+    public String register(String username, String password, String publicKey) throws UserAlreadyExistsException {
 
         printInfo("Registering " + username);
 
         if(userExists(username))
             throw new UserAlreadyExistsException(username);
 
-        users.add(new User(username, security.hashPassword(password)));
+        users.add(new User(username, security.hashPassword(password), publicKey));
 
         updateInformation();
 
@@ -136,12 +138,12 @@ public class P2PhotoServerManager {
     /**
      * @return the list of all users of this service
      */
-    public List<String> getUsers(String username) {
+    public Map<String, String> getUsers(String username) {
         printInfo("Getting all users.");
 
-        List<String> userIds = new ArrayList<>();
+        Map<String, String> userIds = new HashMap<>();
         for (User user: users)
-            userIds.add(user.getUsername());
+            userIds.put(user.getUsername(), user.getPublicKey());
 
         logOperation(new Operation("GetUsers", username));
         return userIds;
@@ -176,7 +178,8 @@ public class P2PhotoServerManager {
      * @throws UserNotExistsException If the user doesn't exist
      * @throws AlbumNotFoundException If the album name does not exist
      */
-    public void updateAlbum(String username, String albumName, String url, String fileID,String mode) throws UserNotExistsException, AlbumNotFoundException {
+    public void updateAlbum(String username, String albumName, String url, String fileID, String mode)
+            throws UserNotExistsException, AlbumNotFoundException {
 
         Album album = findAlbum(username, albumName,mode);
         album.updateForUser(username, url, fileID);
@@ -199,13 +202,13 @@ public class P2PhotoServerManager {
      * @throws UserNotExistsException if user does not exist
      * @throws AlbumNotFoundException if album does not exist
      */
-    public void shareAlbum(String username, String albumName, String username2,String mode) throws UserNotExistsException, AlbumNotFoundException, UserAlreadyHasAlbumException {
+    public void shareAlbum(String username, String albumName, String username2, String secretKey, String mode) throws UserNotExistsException, AlbumNotFoundException, UserAlreadyHasAlbumException {
         //Check if user2 exists
         User user2 = findUser(username2);
 
         Album album = findAlbum(username, albumName,mode);
 
-        album.addMember(username2, null, null);
+        album.addMember(username2, null, null, secretKey);
 
         if(mode.equals("true"))
             user2.addAlbumGoogle(album);
@@ -227,15 +230,17 @@ public class P2PhotoServerManager {
      * @param albumName album unique identifier
      * @throws UserNotExistsException if user doesn't exist
      */
-    public void createAlbum(String username, String albumName, String url, String fileID,String mode) throws UserNotExistsException, UserAlreadyHasAlbumException {
+    public void createAlbum(String username, String albumName, String url, String fileID, String secretKey, String mode)
+            throws UserNotExistsException, UserAlreadyHasAlbumException {
 
         printInfo("Creating album for " + username);
         User user = findUser(username);
         if(mode.equals("true"))
-            user.addAlbumGoogle(new Album(albumName, username, url, fileID));
+            user.addAlbumGoogle(new Album(albumName, username, url, fileID, secretKey));
         else
             user.addAlbumP2P(new Album(albumName, username, url, fileID));
         updateInformation();
+        System.out.println(new Operation("CreateAlbum", username, albumName, Boolean.parseBoolean(mode)).toString());
         logOperation(new Operation("CreateAlbum", username, albumName, Boolean.parseBoolean(mode)));
     }
 
@@ -277,6 +282,22 @@ public class P2PhotoServerManager {
         return album.findFileID(username);
     }
 
+    /**
+     * Finds the secret key corresponding to the user-album
+     * @param username the name of the user
+     * @param albumName the name of the album
+     * @return the secret key of the album, encrypted with the users public key
+     * @throws UserNotExistsException If the user does not exist
+     * @throws AlbumNotFoundException If the Album name does not exist
+     */
+    public String getSecretKey(String username, String albumName) throws UserNotExistsException, AlbumNotFoundException {
+
+        Album album = findAlbum(username, albumName,"true");
+
+        printInfo("Getting file ID for " + username);
+        logOperation(new Operation("GetSecretKey", username, albumName));
+        return album.findSecretKey(username);
+    }
 
 
 
@@ -345,9 +366,10 @@ public class P2PhotoServerManager {
      */
     private Album findAlbum(String username, String albumName,String mode) throws AlbumNotFoundException, UserNotExistsException {
         User user = findUser(username);
-
+        System.out.println("Find album: " + mode);
         if(mode.equals("true")) {
             for (Album album : user.getAlbumsGoogle()) {
+                System.out.println("Album: " + album.getName());
                 if (album.getName().equals(albumName))
                     return album;
             }

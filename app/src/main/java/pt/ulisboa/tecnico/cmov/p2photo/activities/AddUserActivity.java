@@ -16,11 +16,10 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-
-import javax.xml.transform.Result;
 
 import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
@@ -33,6 +32,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 public class AddUserActivity extends AppCompatActivity {
 
 
+    private static final String TAG = "AddUserActivity";
     MembersAdapter adapter;
 
     MembersAdapter adapterU;
@@ -40,8 +40,6 @@ public class AddUserActivity extends AppCompatActivity {
     ListView listViewMembers;
 
     ListView listViewAllUsers;
-
-    private EditText filterText;
 
     private Album album;
 
@@ -62,7 +60,6 @@ public class AddUserActivity extends AppCompatActivity {
         //Get album object
         Intent intent = getIntent();
         album = (Album) intent.getSerializableExtra("album");
-
 
 
         //Create adapter for the album members list
@@ -87,7 +84,8 @@ public class AddUserActivity extends AppCompatActivity {
         int id = findViewById(R.id.searchView).getContext()
                 .getResources()
                 .getIdentifier("android:id/search_src_text", null, null);
-        filterText = findViewById(R.id.searchView).findViewById(id);
+
+        EditText filterText = findViewById(R.id.searchView).findViewById(id);
 
         //Create text changed listener for search bar
         filterText.addTextChangedListener(new TextWatcher() {
@@ -123,12 +121,16 @@ public class AddUserActivity extends AppCompatActivity {
                 new JsonHttpResponseHandler() {
 
                     @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
+                            Log.i("ListPhotos", "Correctly got album information from server");
+
                             extractAllMembers(response);
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+
                     }
 
                     @Override
@@ -155,15 +157,16 @@ public class AddUserActivity extends AppCompatActivity {
      * parses the response from the server, and adds the Users in the system to the adapter
      * @param response
      */
-    private void extractAllMembers(JSONArray response) throws JSONException {
+    private void extractAllMembers(JSONObject response) throws JSONException {
 
         String currentUser = globalVariables.getUser().getName();
-        for(int i = 0;i < response.length();i++){
-                if(currentUser.equals(response.get(i)))
+        for(int i = 0;i < response.names().length();i++){
+            String username = response.names().getString(i);
+            String publicKey = response.getString(username);
+            Log.i(TAG, "User: " + username + "/" + publicKey);
+                if(currentUser.equals(username))
                     continue;
-
-                adapterU.add(new Member((String) response.get(i)));
-
+                adapterU.add(new Member(username, publicKey));
         }
     }
 

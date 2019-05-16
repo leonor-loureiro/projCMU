@@ -136,7 +136,7 @@ public class WifiDirectManager {
             //connectToPeer(device.getVirtIp());
 
             if(!membersInGroup.contains(new Member(deviceName))) {
-                membersInGroup.add(new Member(deviceName, device.getVirtIp()));
+                membersInGroup.add(new Member(deviceName, device.getVirtIp(),"qlqrcoisa"));
                 //send(device.getVirtIp(),"givemealbums");
             }
         }
@@ -225,8 +225,7 @@ public class WifiDirectManager {
                     }
                 } catch (IOException e) {
                     Log.d("Error socket:", e.getMessage());
-                    break;
-                    //e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
             return null;

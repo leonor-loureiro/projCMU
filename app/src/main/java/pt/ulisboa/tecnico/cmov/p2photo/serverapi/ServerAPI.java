@@ -61,12 +61,13 @@ public class ServerAPI {
      * Sends a register request to the server
      * @param responseHandler Handles the response from the server
      */
-    public void register(Context applicationContext, String username, String password,JsonHttpResponseHandler responseHandler) throws IOException, JSONException {
+    public void register(Context applicationContext, String username, String password, String publicKey, JsonHttpResponseHandler responseHandler) throws IOException, JSONException {
 
         HashMap<String,String> params = new HashMap<>();
 
         params.put("username",username);
         params.put("password",password);
+        params.put("key",publicKey);
         String json = generateJson(params);
 
         HttpUtils.post(applicationContext,"register", new StringEntity(json), responseHandler);
@@ -161,7 +162,7 @@ public class ServerAPI {
      */
 
     public void shareAlbum(Context applicationContext,
-                           String token, String username1, String username2, String albumName,String mode,
+                           String token, String username1, String username2, String albumName, String secretKey, String mode,
                            JsonHttpResponseHandler responseHandler)
             throws IOException, JSONException {
 
@@ -172,6 +173,7 @@ public class ServerAPI {
         params.put("username1", username1);
         params.put("username2", username2);
         params.put("albumName",albumName);
+        params.put("key", secretKey);
         params.put("mode",mode);
         String json = generateJson(params);
 
@@ -185,7 +187,8 @@ public class ServerAPI {
      */
 
     public void createAlbum(Context applicationContext,
-                            String token, String username, String name, String url, String fileID,String mode,
+                            String token, String username, String alumName,
+                            String url, String fileID, String secretKey, String mode,
                             JsonHttpResponseHandler responseHandler)
             throws IOException, JSONException {
 
@@ -193,9 +196,10 @@ public class ServerAPI {
 
         params.put("token",token);
         params.put("username", username);
-        params.put("albumName",name);
+        params.put("albumName",alumName);
         params.put("url",url);
         params.put("fileID",fileID);
+        params.put("key", secretKey);
         params.put("mode",mode);
 
         String json = generateJson(params);
@@ -207,7 +211,8 @@ public class ServerAPI {
     /**
      * Sends a updateAlbum request to the server
      */
-    public void updateAlbum(final Context applicationContext, String token, String username, String name, String url, String fileID,String mode) throws IOException, JSONException {
+    public void updateAlbum(final Context applicationContext, String token, String username, String name, String url, String fileID, String mode)
+            throws IOException, JSONException {
 
         HashMap<String, String> params = new HashMap<>();
 
@@ -249,7 +254,7 @@ public class ServerAPI {
 
 
     /**
-     * Sends a register request to the server
+     * Sends a get file ID request to the server
      * @param responseHandler Handles the response from the server
      */
 
@@ -265,6 +270,21 @@ public class ServerAPI {
         HttpUtils.get(applicationContext, "getFileID",  new StringEntity(json),responseHandler);
     }
 
+    /**
+     * Sends the server a request for the secret key
+     * @param responseHandler Handles the response from the server
+     */
+
+    public void getSecretKey(Context applicationContext, String token, String username, String albumName, JsonHttpResponseHandler responseHandler) throws JSONException, UnsupportedEncodingException {
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("token",token);
+        params.put("username", username);
+        params.put("albumName",albumName);
+        String json = generateJson(params);
+
+        HttpUtils.get(applicationContext, "getSecretKey",  new StringEntity(json),responseHandler);
+    }
 
     /**
      * generates a json based on a Map

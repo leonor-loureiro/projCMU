@@ -75,7 +75,7 @@ public class ListAlbumsAdapter extends ArrayAdapter<Album>{
         return false;
     }
 
-    public void getFileIDOfAlbums(){
+/*    public void getFileIDOfAlbums(){
         for( int i = 0;i < albums.size();i++){
             Log.d("fileid","getting id of file" + albums.get(i).getName());
             final int j = i;
@@ -113,7 +113,7 @@ public class ListAlbumsAdapter extends ArrayAdapter<Album>{
                 }
             }
 
-    }
+    } */
 
     public String getFileID(String album) {
 

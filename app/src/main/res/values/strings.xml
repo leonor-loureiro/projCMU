@@ -39,6 +39,6 @@
     <string name="server_log_sync">Server Log Synced</string>
     <string name="port">10001</string>
     <string name="inGroupButton">connect</string>
-    <string name="security_disabled"><![CDATA[Security feature disabled. Needs API >= 23]]></string>
+    <string name="security_disabled"><![CDATA[Security feature disabled. Needs API >= 23. Found]]></string>
 
 </resources>

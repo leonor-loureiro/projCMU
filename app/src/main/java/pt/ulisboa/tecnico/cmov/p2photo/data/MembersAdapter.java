@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +31,11 @@ import pt.ulisboa.tecnico.cmov.p2photo.activities.AddUserActivity;
 import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbumsActivity;
 import pt.ulisboa.tecnico.cmov.p2photo.activities.ListPhotosActivity;
 import pt.ulisboa.tecnico.cmov.p2photo.activities.LoginActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
+    private static final String TAG = "MembersAdapter";
     private MembersAdapter currentMemberAdapter;
     private List<Member> members;
     private Context mContext;
@@ -109,12 +112,22 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
      */
     private void addUserHandle(final Member member, final Button addUserButton) {
         try {
+            String cipheredKey = null;
+            if(globalVariables.google) {
+                //Get user's public key
+                PublicKey publicKey = SecurityManager.getPublicKeyFromString(member.getPublicKey());
+                //Encrypt the secret key
+                cipheredKey = SecurityManager.encryptRSA(publicKey, album.getSecretKey().getEncoded());
+                Log.i(TAG, "Ciphered key = " + cipheredKey);
+            }
             if(!currentMemberAdapter.contains(member))
                 ServerAPI.getInstance().shareAlbum(mContext,
                         globalVariables.getToken(),
                         globalVariables.getUser().getName(),
                         member.getName(),
-                        album.getName(),this.globalVariables.google + "",
+                        album.getName(),
+                        cipheredKey,
+                        this.globalVariables.google + "",
                         new JsonHttpResponseHandler() {
 
                         @Override

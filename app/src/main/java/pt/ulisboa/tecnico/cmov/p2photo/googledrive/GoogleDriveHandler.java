@@ -106,12 +106,12 @@ public class GoogleDriveHandler {
      * @param fileUrl download url
      * @return content as a list of strings
      */
-    public Task<List<String>> downloadFile(final String username, final String fileUrl) {
+    public Task<List<String>> downloadFile(final String fileUrl) {
         Callable<List<String>> callable = new Callable<List<String>>() {
             @Override
             public List<String> call() throws Exception {
 
-                StringBuilder contentsBuilder = new StringBuilder();
+                List<String> content = new ArrayList<>();
 
                 URL url = new URL(fileUrl);
                 //Create an url connection
@@ -123,26 +123,11 @@ public class GoogleDriveHandler {
                 //Read contents
                 String line;
                 while ((line = bufferedReader.readLine()) != null)
-                    contentsBuilder.append(line);
-                    //content.add(line);
+                    content.add(line);
+
                 bufferedReader.close();
-
-                String contentStr = contentsBuilder.toString();
-                if(contentStr.trim().length() == 0){
-                    return new ArrayList<>();
-                }
-                //Generate user's secret key, if it does not exist yet
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    contentStr = SecurityManager.decrypt(username, contentStr);
-                    if(contentStr == null)
-                        return null;
-                }else{
-                    Log.i(TAG, "Security feature disabled. Needs API >= 23. Found API " + Build.VERSION.SDK_INT);
-                }
-
-                Log.i(TAG, "Contents: " + contentStr);
-
-                return Arrays.asList(contentStr.split("\n"));
+                Log.i("Drive", "Contents: " + content.toString());
+                return content;
             }
         };
 
@@ -157,7 +142,7 @@ public class GoogleDriveHandler {
      * @param photoPath path of the photo to be uploaded in the device
      * @return photo download link
      */
-    public Task<String> addPhotoToAlbum(final String username, final String albumFileID, List<String> photos, final String photoPath){
+    public Task<String> addPhotoToAlbum(final String albumFileID, List<String> photos, final String photoPath){
 
         // Build contents
         final StringBuilder stringBuilder = new StringBuilder();
@@ -173,22 +158,8 @@ public class GoogleDriveHandler {
                 //Add photo's url to album catalog
                 stringBuilder.append(photoUrl);
 
-                String contents = stringBuilder.toString();
-
-                //Generate user's secret key, if it does not exist yet
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    contents = SecurityManager.encrypt(username, contents);
-                    if(contents == null){
-                        return null;
-                    }
-                }else{
-                    Log.i(TAG, "Security feature disabled. Needs API >= 23. Found API " + Build.VERSION.SDK_INT);
-                }
-
-                Log.i(TAG, "addPhotoToAlbum: " + contents);
-
                 //Update album catalog
-                updateFile(albumFileID, contents);
+                updateFile(albumFileID, stringBuilder.toString());
 
                 return photoUrl;
             }

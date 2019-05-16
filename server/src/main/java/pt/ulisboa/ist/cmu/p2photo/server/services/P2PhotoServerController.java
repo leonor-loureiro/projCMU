@@ -5,11 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pt.ulisboa.ist.cmu.p2photo.server.data.Album;
 import pt.ulisboa.ist.cmu.p2photo.server.data.Operation;
 import pt.ulisboa.ist.cmu.p2photo.server.exception.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +35,14 @@ public class P2PhotoServerController {
         // Extract params
         String username = credentials.get("username");
         String password = credentials.get("password");
+        String publicKey = credentials.get("key");
 
         // generate login token
         String[] stringtoreturn = null;
         String token = null;
         try {
             stringtoreturn = new String[1];
-            token = P2PhotoServerManager.getInstance().register(username, password);
+            token = P2PhotoServerManager.getInstance().register(username, password, publicKey);
             stringtoreturn[0] = token;
             return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
         } catch (UserAlreadyExistsException e) {
@@ -152,6 +151,36 @@ public class P2PhotoServerController {
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * finds the secret key of the album encrypted with the user's public key
+     *
+     * @param credentials must contain token, username, albumName
+     * @return the secret key for the user's catalog
+     */
+    @RequestMapping(value = "/getSecretKey")
+    public ResponseEntity<String[]> getSecretKey(@RequestBody Map<String, String> credentials) {
+
+        String token = credentials.get("token");
+        String username = credentials.get("username");
+        String albumName = credentials.get("albumName");
+
+
+        if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
+
+        try {
+            String[] stringtoreturn = new String[1];
+            stringtoreturn[0] = P2PhotoServerManager.getInstance().getSecretKey(username, albumName);
+            return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
+
+        } catch (UserNotExistsException | AlbumNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
 
     /**
      * lists all the users of the service
@@ -160,16 +189,15 @@ public class P2PhotoServerController {
      * @return list with all users
      */
     @RequestMapping(value = "/getUsers")
-    public ResponseEntity<String[]> getUsers(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<Map<String, String>> getUsers(@RequestBody Map<String, String> credentials) {
         String token = credentials.get("token");
         String username = credentials.get("username");
 
         if(!P2PhotoServerManager.getInstance().verifyTokenValidity(username, token))
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 
-        String[] users = P2PhotoServerManager.getInstance().getUsers(username).toArray(new String[0]);
+        return new ResponseEntity<>(P2PhotoServerManager.getInstance().getUsers(username), HttpStatus.OK);
 
-        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
 
@@ -223,6 +251,7 @@ public class P2PhotoServerController {
         String username1 = credentials.get("username1");
         String username2 = credentials.get("username2");
         String albumName = credentials.get("albumName");
+        String key = credentials.get("key");
         String mode = credentials.get("mode");
 
 
@@ -236,7 +265,7 @@ public class P2PhotoServerController {
         // Share Album
         try {
             stringtoreturn[0] = "Success";
-            P2PhotoServerManager.getInstance().shareAlbum(username1, albumName, username2,mode);
+            P2PhotoServerManager.getInstance().shareAlbum(username1, albumName, username2, key, mode);
             return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
@@ -263,6 +292,7 @@ public class P2PhotoServerController {
         String albumName = credentials.get("albumName");
         String url = credentials.get("url");
         String fileID = credentials.get("fileID");
+        String secretKey = credentials.get("key");
         String mode = credentials.get("mode");
 
 
@@ -274,7 +304,7 @@ public class P2PhotoServerController {
         // Create Album
         try {
             stringtoreturn[0] = "Success";
-            P2PhotoServerManager.getInstance().createAlbum(username, albumName, url, fileID,mode);
+            P2PhotoServerManager.getInstance().createAlbum(username, albumName, url, fileID, secretKey, mode);
 
             return new ResponseEntity<>(stringtoreturn, HttpStatus.OK);
 
@@ -316,7 +346,7 @@ public class P2PhotoServerController {
         // Update Album
         try {
             stringtosend[0] = "Success";
-            P2PhotoServerManager.getInstance().updateAlbum(username, albumName, url, fileID,mode);
+            P2PhotoServerManager.getInstance().updateAlbum(username, albumName, url, fileID, mode);
             return new ResponseEntity<>(stringtosend, HttpStatus.OK);
 
         } catch (UserNotExistsException | AlbumNotFoundException e) {
