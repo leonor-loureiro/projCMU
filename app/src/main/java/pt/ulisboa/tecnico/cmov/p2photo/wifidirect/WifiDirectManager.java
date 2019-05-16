@@ -41,6 +41,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
+import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoToSend;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class WifiDirectManager {
@@ -57,7 +58,7 @@ public class WifiDirectManager {
     private static SimWifiP2pSocketServer mSrvSocket = null;
     private static SimWifiP2pBroadcastReceiver mReceiver;
 
-    private static ArrayList<Photo> photos = null;
+    private static ArrayList<PhotoToSend> photos = null;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         // callbacks for service binding, passed to bindService()
@@ -200,17 +201,18 @@ public class WifiDirectManager {
 
                       ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
 
+
                       String fileID = adapter.getFileID(album);
-                      Log.d("fileID",fileID);
 
+                      List<Photo> photos = new ArrayList<>();
+                      if( (fileID != null) && !(fileID.equals("null")))
+                         photos = globalVariables.getFileManager().getAlbumPhotos(fileID);
 
-                      List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(fileID);
-
-                      ArrayList<Photo> photosToSend = new ArrayList<>();
+                      ArrayList<PhotoToSend> photosToSend = new ArrayList<>();
 
                       for(Photo photo : photos){
                           if (photo.getMine()){
-                              photosToSend.add(photo);
+                              //photosToSend.add(new PhotoToSend(photo.getUrl(),));
                           }
                       }
                       out.writeObject(photosToSend);
@@ -233,7 +235,7 @@ public class WifiDirectManager {
 
     }
 
-    public class SendCommTask extends AsyncTask<String, String, ArrayList<Photo>> {
+    public class SendCommTask extends AsyncTask<String, String, ArrayList<PhotoToSend>> {
 
         private final ListPhotosActivity context;
         private SimWifiP2pSocket mCliSocket = null;
@@ -248,7 +250,7 @@ public class WifiDirectManager {
         }
 
         @Override
-        protected ArrayList<Photo> doInBackground(String... msg) {
+        protected ArrayList<PhotoToSend> doInBackground(String... msg) {
             try {
                 mCliSocket = new SimWifiP2pSocket(peer,
                         Integer.parseInt(context.getString(R.string.port)));
@@ -259,7 +261,7 @@ public class WifiDirectManager {
 
                 ObjectInputStream in = new ObjectInputStream(mCliSocket.getInputStream());
 
-                photos = (ArrayList<Photo>)in.readObject();
+                photos = (ArrayList<PhotoToSend>)in.readObject();
 
                 Log.d("sizeofphotos",photos.size() + "");
 
@@ -276,7 +278,7 @@ public class WifiDirectManager {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Photo> result) {
+        protected void onPostExecute(ArrayList<PhotoToSend> result) {
             context.addPhotos(result);
 
 

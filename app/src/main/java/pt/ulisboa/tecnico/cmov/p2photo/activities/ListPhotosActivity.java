@@ -51,6 +51,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoAdapter;
+import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoToSend;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
@@ -768,10 +769,10 @@ public class ListPhotosActivity extends AppCompatActivity{
     }
 
 
-    public void addPhotos(ArrayList<Photo> result) {
-       for(Photo photo : result){
-           photo.setMine(false);
-           adapter.addPhoto(photo);
+    public void addPhotos(ArrayList<PhotoToSend> result) {
+       for(PhotoToSend photo : result){
+           //photo.setMine(false);
+           //adapter.addPhoto(new Photo(photo.getUrl(),));
        }
     }
 }

@@ -24,6 +24,7 @@ import java.io.IOException;
 import javax.crypto.SecretKey;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.conn.ConnectTimeoutException;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Constants;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
@@ -118,7 +119,6 @@ public class LoginActivity extends AppCompatActivity {
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
             }
-
 
 
         }

@@ -122,6 +122,6 @@ public class ListAlbumsAdapter extends ArrayAdapter<Album>{
                 return albums.get(i).getFileID();
         }
 
-        return "";
+        return null;
     }
 }

@@ -79,8 +79,11 @@ public class FileManager {
     }
 
     public List<Photo> getAlbumPhotos(String filename){
-        if(!fileExists(filename))
+        Log.d("filename",filename);
+        if(!fileExists(filename)) {
+            Log.d("Filenotexist","filenotexist");
             return null;
+        }
 
         List<Photo> photos = new ArrayList<>();
         String fileContent = readFile(filename);
@@ -95,6 +98,7 @@ public class FileManager {
             }
             return photos;
         }
+        Log.d("NofileContent","nofilecontent");
         return null;
     }
 
@@ -137,7 +141,7 @@ public class FileManager {
             fis.close();
             return sb.toString();
         } catch (IOException e) {
-            Log.i(TAG, "Read failed");
+            Log.i(TAG, "Read failed:" + " " + filename);
             e.printStackTrace();
         }
         return null;
