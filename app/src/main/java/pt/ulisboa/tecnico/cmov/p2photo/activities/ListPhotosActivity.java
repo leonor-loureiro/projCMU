@@ -391,6 +391,7 @@ public class ListPhotosActivity extends AppCompatActivity{
     private void handleMembers() {
         for(Member memberOfAlbum:album.getMembers()){
             for(Member member: membersInGroup){
+                Log.d(TAG,"i am " + globalVariables.getUser().getName() + " and i have " + member.getName() + " in my group");
                 if(memberOfAlbum.getName().equals(member.getName())){
                     Log.d("asking for photos",memberOfAlbum.getName());
                     askForPhotos(member);

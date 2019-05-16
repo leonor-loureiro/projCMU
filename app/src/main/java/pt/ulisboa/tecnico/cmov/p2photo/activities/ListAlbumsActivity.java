@@ -426,8 +426,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
 
     @Override
     public void onGroupInfoAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList, SimWifiP2pInfo simWifiP2pInfo) {
-        ArrayList<Member> currentMembers = this.globalVariables.getMembersInGroup();
-        this.globalVariables.setMembersInGroup(wifiManager.onGroupInfoAvailable(simWifiP2pDeviceList,simWifiP2pInfo,currentMembers));
+        wifiManager.onGroupInfoAvailable(simWifiP2pDeviceList,simWifiP2pInfo);
 
     }
 
