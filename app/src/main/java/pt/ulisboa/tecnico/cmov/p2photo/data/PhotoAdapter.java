@@ -52,6 +52,10 @@ public class PhotoAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public boolean contains(Photo photo){
+        return photos.contains(photo);
+    }
+
     @Override
     public View getView(int i, View convertView, ViewGroup viewGroup) {
         Photo photo = (Photo) getItem(i);

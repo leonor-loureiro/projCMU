@@ -24,7 +24,7 @@ public class GlobalVariables extends Application {
     //Logged in user
     private Member user;
     //Mode (Cloud / P2P)
-    public boolean google = false;
+    public boolean google = true;
     //Session token
     private String token;
     //Google Account
