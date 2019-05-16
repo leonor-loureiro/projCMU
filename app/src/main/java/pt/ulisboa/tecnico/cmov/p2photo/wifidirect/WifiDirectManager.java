@@ -11,13 +11,20 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
-import java.io.BufferedReader;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
+import cz.msebera.android.httpclient.Header;
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
 import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
@@ -29,9 +36,17 @@ import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketManager;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbumsActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.ListPhotosActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
+import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
+import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class WifiDirectManager {
 
+    private final ListAlbumsAdapter adapter;
+    private GlobalVariables globalVariables;
     private Context context;
     public static final String TAG = "msgsender";
 
@@ -41,6 +56,8 @@ public class WifiDirectManager {
     private static boolean mBound = false;
     private static SimWifiP2pSocketServer mSrvSocket = null;
     private static SimWifiP2pBroadcastReceiver mReceiver;
+
+    private static ArrayList<Photo> photos = null;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         // callbacks for service binding, passed to bindService()
@@ -56,18 +73,23 @@ public class WifiDirectManager {
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            Log.d("serviceDisconnected","disconnected");
             mService = null;
             mManager = null;
             mChannel = null;
             mBound = false;
         }
     };
+    private String fileID = "";
 
-    public WifiDirectManager(Context listAlbumsActivity) {
+    public WifiDirectManager(Context listAlbumsActivity, ListAlbumsAdapter adapter) {
         this.context= listAlbumsActivity;
+        this.adapter = adapter;
 
-        if(mReceiver != null)
+        if(mBound) {
             return;
+        }
+
 
         SimWifiP2pSocketManager.Init(context);
         // register broadcast receiver
@@ -80,34 +102,30 @@ public class WifiDirectManager {
         mReceiver = new SimWifiP2pBroadcastReceiver((ListAlbumsActivity) context);
         this.context.registerReceiver(mReceiver, filter);
 
+        this.globalVariables = (GlobalVariables) context.getApplicationContext();
+
     }
 
     public void initiateWifi() {
         if(mBound)
             return;
 
-        Intent intent = new Intent(context, SimWifiP2pService.class);
-        context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        mBound = true;
+        bindService();
 
         new IncommingCommTask().executeOnExecutor(
                 AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void requestGroupInfo(View v) {
-        if (mBound) {
+    public void requestGroupInfo() {
+        if (mBound)
             mManager.requestGroupInfo(mChannel, (SimWifiP2pManager.GroupInfoListener) context);
-        } else {
-            Toast.makeText(v.getContext(), "Service not bound",
-                    Toast.LENGTH_SHORT).show();
-        }
     }
 
-    public void send(String virtIp, String name) {
-        new SendCommTask(virtIp).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,name);
+    public void send(String virtIp, String albumName, ListPhotosActivity listPhotosActivity) {
+        new SendCommTask(virtIp,albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo) {
+    public ArrayList<Member> onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo, ArrayList<Member> membersInGroup) {
         // compile list of network members
         StringBuilder peersStr = new StringBuilder();
         for (String deviceName : groupInfo.getDevicesInNetwork()) {
@@ -115,7 +133,12 @@ public class WifiDirectManager {
             String devstr = "" + deviceName + " (" +
                     ((device == null)?"??":device.getVirtIp()) + ")\n";
             peersStr.append(devstr);
-            connectToPeer(device.getVirtIp());
+            //connectToPeer(device.getVirtIp());
+
+            if(!membersInGroup.contains(new Member(deviceName))) {
+                membersInGroup.add(new Member(deviceName, device.getVirtIp(),"qlqrcoisa"));
+                //send(device.getVirtIp(),"givemealbums");
+            }
         }
 
         // display list of network members
@@ -127,15 +150,34 @@ public class WifiDirectManager {
                     }
                 })
                 .show();
+
+
+
+        return membersInGroup;
     }
 
-    private void connectToPeer(String virtIp) {
-        this.send(virtIp,"sent");
+    public void bindService() {
+        Intent intent = new Intent(context, SimWifiP2pService.class);
+        context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        mBound = true;
+    }
+
+    public void unbindService(){
+        unregisterReceiver();
+        context.unbindService(mConnection);
+        try {
+            mSrvSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mBound = false;
 
     }
+
 
 
     public class IncommingCommTask extends AsyncTask<Void, String, Void> {
+
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -152,13 +194,32 @@ public class WifiDirectManager {
                 try {
                     SimWifiP2pSocket sock = mSrvSocket.accept();
                     try {
-                        BufferedReader sockIn = new BufferedReader(
-                                new InputStreamReader(sock.getInputStream()));
-                        String st = sockIn.readLine();
-                        publishProgress(st);
-                        sock.getOutputStream().write(("\n").getBytes());
+                      ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+
+                      String album = (String) in.readObject();
+
+                      ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
+
+                      String fileID = adapter.getFileID(album);
+                      Log.d("fileID",fileID);
+
+
+                      List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(fileID);
+
+                      ArrayList<Photo> photosToSend = new ArrayList<>();
+
+                      for(Photo photo : photos){
+                          if (photo.getMine()){
+                              photosToSend.add(photo);
+                          }
+                      }
+                      out.writeObject(photosToSend);
+
+
                     } catch (IOException e) {
                         Log.d("Error reading socket:", e.getMessage());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
                     } finally {
                         sock.close();
                     }
@@ -170,34 +231,44 @@ public class WifiDirectManager {
             return null;
         }
 
-        @Override
-        protected void onProgressUpdate(String... values) {
-            Log.d("received",values[0]);
-        }
     }
 
-    public class SendCommTask extends AsyncTask<String, String, Void> {
+    public class SendCommTask extends AsyncTask<String, String, ArrayList<Photo>> {
 
+        private final ListPhotosActivity context;
         private SimWifiP2pSocket mCliSocket = null;
         String peer;
+        String albumName;
 
-        public SendCommTask(String peer) {
+        public SendCommTask(String peer, String albumName, ListPhotosActivity listPhotosActivity) {
             this.peer = peer;
+            this.albumName = albumName;
+            this.context = listPhotosActivity;
+
         }
 
-
         @Override
-        protected Void doInBackground(String... msg) {
+        protected ArrayList<Photo> doInBackground(String... msg) {
             try {
-                Log.d("ip",peer);
                 mCliSocket = new SimWifiP2pSocket(peer,
                         Integer.parseInt(context.getString(R.string.port)));
-                mCliSocket.getOutputStream().write((msg[0] + "\n").getBytes());
-                BufferedReader sockIn = new BufferedReader(
-                        new InputStreamReader(mCliSocket.getInputStream()));
-                sockIn.readLine();
+
+                ObjectOutputStream out = new ObjectOutputStream(mCliSocket.getOutputStream());
+
+                out.writeObject(albumName);
+
+                ObjectInputStream in = new ObjectInputStream(mCliSocket.getInputStream());
+
+                photos = (ArrayList<Photo>)in.readObject();
+
+                Log.d("sizeofphotos",photos.size() + "");
+
                 mCliSocket.close();
+
+                return photos;
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
             mCliSocket = null;
@@ -205,11 +276,15 @@ public class WifiDirectManager {
         }
 
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(ArrayList<Photo> result) {
+            context.addPhotos(result);
+
+
         }
     }
 
     public void unregisterReceiver() {
         context.unregisterReceiver(mReceiver);
     }
+
 }

@@ -17,6 +17,8 @@ import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 public class GlobalVariables extends Application {
 
+    //members in group termite
+    private ArrayList<Member> membersInGroup = new ArrayList<>();
     //Logged in user
     private Member user;
     //Mode (Cloud / P2P)
@@ -114,4 +116,11 @@ public class GlobalVariables extends Application {
         operationsLog.add(operation);
     }
 
+    public ArrayList<Member> getMembersInGroup() {
+        return membersInGroup;
+    }
+
+    public void setMembersInGroup(ArrayList<Member> membersInGroup) {
+        this.membersInGroup = membersInGroup;
+    }
 }
