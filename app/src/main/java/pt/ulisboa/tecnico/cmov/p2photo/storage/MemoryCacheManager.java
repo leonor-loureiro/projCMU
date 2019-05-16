@@ -4,16 +4,20 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.provider.Contacts;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 
 /**
  * This class is responsible for reading/writing into cache
@@ -42,6 +46,43 @@ public class MemoryCacheManager {
         return sharedPref.getInt(mContext.getString(R.string.cache_size_pref), heapSize/4);
     }
 
+
+    /**
+     * Returns the list of albums photos added by the given user, stored in cache
+     * @param username user that added the photos
+     * @param albumName album name
+     * @return album photos from that user stored in cache
+     */
+    public List<Photo> getAlbumPhotos(String username, String albumName){
+        List<Photo> cachedPhotos = new ArrayList<>();
+        String prefix = getPrefix(username, albumName);
+        for(File file: cacheDir.listFiles()) {
+            if (file.getName().startsWith(prefix)) {
+                cachedPhotos.add(
+                        new Photo(file.getName().replaceFirst(prefix, ""),
+                                loadImageFromCache(file.getName()),
+                                false
+                        )
+                );
+            }
+        }
+        return cachedPhotos;
+    }
+
+    private String getPrefix(String username, String albumName) {
+        return albumName + "_" + username + "_";
+    }
+
+    public void addAlbumPhoto(String username, String albumName, Photo photo){
+        String filename = getPrefix(username, albumName) + photo.getUrl();
+        File file = new File(cacheDir.getAbsolutePath() + "/" + filename);
+        if(file.exists()){
+            Log.i(TAG, "File already in cache: " + filename);
+            return;
+        }
+        Log.i(TAG, "Add album photo: " + filename);
+        saveImageToCache(filename, photo.getBitmap());
+    }
     /**
      * Save image in cache
      */

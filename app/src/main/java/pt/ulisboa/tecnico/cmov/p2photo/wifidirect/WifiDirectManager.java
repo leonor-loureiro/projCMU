@@ -12,19 +12,12 @@ import android.os.IBinder;
 import android.os.Messenger;
 import android.util.Log;
 
-import com.loopj.android.http.JsonHttpResponseHandler;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.msebera.android.httpclient.Header;
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
 import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
@@ -43,7 +36,6 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoToSend;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
-import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class WifiDirectManager {
 
@@ -123,8 +115,8 @@ public class WifiDirectManager {
             mManager.requestGroupInfo(mChannel, (SimWifiP2pManager.GroupInfoListener) context);
     }
 
-    public void send(String virtIp, String albumName, ListPhotosActivity listPhotosActivity) {
-        new SendCommTask(virtIp,albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    public void send(String virtIp, String username, String albumName, ListPhotosActivity listPhotosActivity) {
+        new SendCommTask(virtIp, username, albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public ArrayList<Member> onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo, ArrayList<Member> membersInGroup) {
@@ -242,9 +234,11 @@ public class WifiDirectManager {
         private SimWifiP2pSocket mCliSocket = null;
         String peer;
         String albumName;
+        String username;
 
-        public SendCommTask(String peer, String albumName, ListPhotosActivity listPhotosActivity) {
+        public SendCommTask(String peer, String username, String albumName, ListPhotosActivity listPhotosActivity) {
             this.peer = peer;
+            this.username = username;
             this.albumName = albumName;
             this.context = listPhotosActivity;
 
@@ -280,7 +274,7 @@ public class WifiDirectManager {
 
         @Override
         protected void onPostExecute(ArrayList<PhotoToSend> result) {
-            context.addPhotos(result);
+            context.addPhotos(username, username, result);
 
 
         }

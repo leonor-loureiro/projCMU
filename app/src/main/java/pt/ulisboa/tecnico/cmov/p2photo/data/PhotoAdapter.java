@@ -43,11 +43,13 @@ public class PhotoAdapter extends BaseAdapter {
 
     }
 
-    public void addAllPhotos(List<Photo> allPhotos){
+    public void clear(){
         photos.clear();
+    }
+
+    public void addAllPhotos(List<Photo> allPhotos){
         photos.addAll(allPhotos);
         notifyDataSetChanged();
-        Log.i("PhotoAdapter", "Add all photos");
     }
 
     @Override

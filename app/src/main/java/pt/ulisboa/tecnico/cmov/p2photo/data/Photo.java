@@ -14,6 +14,12 @@ public class Photo implements Serializable {
         this.bitmap = bitmap;
     }
 
+    public Photo(String url, Bitmap bitmap, boolean mine) {
+        this.url = url;
+        this.bitmap = bitmap;
+        this.mine = mine;
+    }
+
     public String getUrl() {
         return url;
     }

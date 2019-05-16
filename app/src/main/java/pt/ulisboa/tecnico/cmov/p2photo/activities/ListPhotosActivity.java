@@ -56,6 +56,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
+import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
 import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 /**
@@ -209,6 +210,7 @@ public class ListPhotosActivity extends AppCompatActivity{
         if(album.getFileID() != null && !album.getFileID().equals("null")) {
             List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(album.getFileID());
             if (photos != null) {
+                adapter.clear();
                 adapter.addAllPhotos(photos);
             } else
                 getAlbumPhotosFailure();
@@ -392,22 +394,42 @@ public class ListPhotosActivity extends AppCompatActivity{
     }
 
     private void handleMembers() {
-        for(Member memberOfAlbum:album.getMembers()){
-            for(Member member: membersInGroup){
+        MemoryCacheManager cacheManager = globalVariables.getCacheManager();
+
+        for(Member memberOfAlbum : album.getMembers()){
+
+            int i = membersInGroup.indexOf(memberOfAlbum);
+            if(i != -1){
+                //Member in group: request photos
+                Log.d(TAG, "asking for photos " + memberOfAlbum.getName());
+                askForPhotos(membersInGroup.get(i));
+
+            }else{
+                //Member not in group: get cached photos
+                Log.i(TAG, "Get cached photos from: " + memberOfAlbum.getName());
+                List<Photo> cachedPhotos = cacheManager.getAlbumPhotos(memberOfAlbum.getName(), album.getName());
+                Log.i(TAG, "Add cached photos: " + cachedPhotos.size());
+                adapter.addAllPhotos(cachedPhotos);
+            }
+            /*for(Member member: membersInGroup){
                 if(memberOfAlbum.getName().equals(member.getName())){
                     Log.d("asking for photos",memberOfAlbum.getName());
                     askForPhotos(member);
 
+                }else{
+                    Log.i(TAG, "Get cached photos from: " + member.getName());
+                    List<Photo> cachedPhotos = cacheManager.getAlbumPhotos(member.getName(), album.getName());
+                    Log.i(TAG, "Add cached photos: " + cachedPhotos.size());
+                    adapter.addAllPhotos(cachedPhotos);
                 }
-
-            }
+            }*/
         }
 
     }
 
     private void askForPhotos(Member member) {
 
-        wifiManager.send(member.getIp(),album.getName(),this);
+        wifiManager.send(member.getIp(), member.getName(), album.getName(),this);
     }
 
     public void getSecretKey(){
@@ -772,11 +794,15 @@ public class ListPhotosActivity extends AppCompatActivity{
     }
 
 
-    public void addPhotos(ArrayList<PhotoToSend> result) {
-       for(PhotoToSend photo : result){
+    public void addPhotos(String username, String albumName, ArrayList<PhotoToSend> result) {
+        MemoryCacheManager cacheManager = globalVariables.getCacheManager();
+
+        for(PhotoToSend photo : result){
            Photo newPhoto = new Photo(photo.getUrl(),Utils.decodeBitmap(photo.getBitmap()));
            newPhoto.setMine(false);
            adapter.addPhoto(newPhoto);
-       }
+           cacheManager.addAlbumPhoto(username, albumName, newPhoto);
+        }
+        //Log.i(TAG, "cached photos: " + cacheManager.getAlbumPhotos(username, albumName).size());
     }
 }
