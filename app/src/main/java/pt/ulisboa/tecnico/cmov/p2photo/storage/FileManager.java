@@ -79,9 +79,9 @@ public class FileManager {
     }
 
     public List<Photo> getAlbumPhotos(String filename){
-        Log.d("filename",filename);
+        Log.d(TAG, "file: " + filename);
         if(!fileExists(filename)) {
-            Log.d("Filenotexist","filenotexist");
+            Log.d(TAG,"File does not exist.");
             return null;
         }
 
@@ -98,7 +98,7 @@ public class FileManager {
             }
             return photos;
         }
-        Log.d("NofileContent","nofilecontent");
+        Log.d(TAG,"File content = null");
         return null;
     }
 

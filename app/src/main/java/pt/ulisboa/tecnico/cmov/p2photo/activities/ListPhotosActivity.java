@@ -205,11 +205,14 @@ public class ListPhotosActivity extends AppCompatActivity{
     }
 
     private void loadP2PAlbum() {
-        List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(album.getFileID());
-        if(photos != null){
-            adapter.addAllPhotos(photos);
-        }else
-            getAlbumPhotosFailure();
+        Log.i(TAG, "Load P2P album: ");
+        if(album.getFileID() != null && !album.getFileID().equals("null")) {
+            List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(album.getFileID());
+            if (photos != null) {
+                adapter.addAllPhotos(photos);
+            } else
+                getAlbumPhotosFailure();
+        }
         progressDialog.dismiss();
     }
 
@@ -451,7 +454,7 @@ public class ListPhotosActivity extends AppCompatActivity{
             e.printStackTrace();
         }
     }
-    public void getFileID() throws UnsupportedEncodingException, JSONException {
+    /*public void getFileID() throws UnsupportedEncodingException, JSONException {
         Log.i(TAG, "File ID: " + album.getFileID());
         if(album.getFileID() != null)
             return;
@@ -484,7 +487,7 @@ public class ListPhotosActivity extends AppCompatActivity{
 
                     }
                 });
-    }
+    }*/
 
     /**
      * Updates the information of a album that was shared with user but not yet setted

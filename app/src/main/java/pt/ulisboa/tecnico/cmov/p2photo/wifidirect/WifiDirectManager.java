@@ -51,7 +51,7 @@ public class WifiDirectManager {
     private final ListAlbumsAdapter adapter;
     private GlobalVariables globalVariables;
     private Context context;
-    public static final String TAG = "msgsender";
+    public static final String TAG = "WifiDirectManager";
 
     private static SimWifiP2pManager mManager = null;
     private static SimWifiP2pManager.Channel mChannel = null;
@@ -252,6 +252,28 @@ public class WifiDirectManager {
                             out.writeObject(photosToSend);
 
                         }
+/*
+                        ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+                        String album = (String) in.readObject();
+                        ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
+
+                        String fileID = adapter.getFileID(album);
+
+                        List<Photo> photos = new ArrayList<>();
+                        if( (fileID != null) && !(fileID.equals("null")))
+                         photos = globalVariables.getFileManager().getAlbumPhotos(fileID);
+
+                        ArrayList<PhotoToSend> photosToSend = new ArrayList<>();
+
+                        for(Photo photo : photos){
+                              if (photo.isMine()){
+                                  photosToSend.add(new PhotoToSend(photo.getUrl(), Utils.encodeBitmap(photo.getBitmap())));
+                              }
+                        }
+
+                        Log.d(TAG, "photosToSend: " + photosToSend.toString());
+                        out.writeObject(photosToSend); */
+
 
 
                     } catch (IOException e) {
@@ -266,7 +288,7 @@ public class WifiDirectManager {
                     e.printStackTrace();
                 }
             }
-
+            Log.i(TAG, "IncommingCommTask: interrupted");
             return null;
 
         }
