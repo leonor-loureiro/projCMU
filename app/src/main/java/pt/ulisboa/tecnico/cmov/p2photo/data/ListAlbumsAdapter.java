@@ -9,20 +9,33 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import cz.msebera.android.httpclient.Header;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.ListPhotosActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class ListAlbumsAdapter extends ArrayAdapter<Album>{
     private List<Album> albums;
     private Context mContext;
 
-    public ListAlbumsAdapter(Context context, List<Album> data) {
+    private GlobalVariables globalVariables;
+
+
+    public ListAlbumsAdapter(Context context, List<Album> data, GlobalVariables globalVariables) {
         super(context, R.layout.album_item, data);
         Log.i("Album", "Start");
 
         albums = data;
         mContext = context;
+        this.globalVariables = globalVariables;
         Log.i("Albums", data.size() + "");
     }
 
@@ -60,5 +73,55 @@ public class ListAlbumsAdapter extends ArrayAdapter<Album>{
                 return true;
         }
         return false;
+    }
+
+    public void getFileIDOfAlbums(){
+        for( int i = 0;i < albums.size();i++){
+            Log.d("fileid","getting id of file" + albums.get(i).getName());
+            final int j = i;
+            final String name = albums.get(i).getName();
+                try {
+                    ServerAPI.getInstance().getFileID(mContext,
+                            globalVariables.getToken(),
+                            globalVariables.getUser().getName(),
+                            name, this.globalVariables.google + "",
+                            new JsonHttpResponseHandler() {
+
+                                @Override
+                                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                                    try {
+
+                                        albums.get(j).setFileID((response.get(0).toString()));
+                                        Log.i("fileid", "newFileID = " + (response.get(0).toString()));
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                    if (statusCode == 401)
+                                        ServerAPI.getInstance().tokenInvalid(mContext);
+
+                                }
+                            });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+
+    }
+
+    public String getFileID(String album) {
+
+        for(int i = 0; i < albums.size();i++){
+            if(albums.get(i).getName().equals(album))
+                return albums.get(i).getFileID();
+        }
+
+        return "";
     }
 }

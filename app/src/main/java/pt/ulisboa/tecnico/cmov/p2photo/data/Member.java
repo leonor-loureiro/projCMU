@@ -5,9 +5,17 @@ import java.io.Serializable;
 public class Member implements Serializable{
     String name;
 
+    String ip;
+
     public Member(String name){
         this.name = name;
     }
+
+    public Member(String name,String ip){
+        this.name = name;
+        this.ip = ip;
+    }
+
 
     public String getName() {
         return name;
@@ -15,6 +23,14 @@ public class Member implements Serializable{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     @Override

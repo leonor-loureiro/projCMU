@@ -9,6 +9,7 @@ import android.widget.Toast;
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
 import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbumsActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.activities.ListPhotosActivity;
 
 public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
 
@@ -53,6 +54,7 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
             ginfo.print();
             Toast.makeText(mActivity, "Network membership changed",
                     Toast.LENGTH_SHORT).show();
+            mActivity.userDetected();
 
 
         } else if (SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION.equals(action)) {

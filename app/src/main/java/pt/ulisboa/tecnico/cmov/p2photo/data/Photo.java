@@ -7,6 +7,7 @@ import java.io.Serializable;
 public class Photo implements Serializable {
     String url;
     Bitmap bitmap;
+    Boolean mine = true;
 
     public Photo(String url, Bitmap bitmap) {
         this.url = url;
@@ -27,5 +28,13 @@ public class Photo implements Serializable {
 
     public void setBitmap(Bitmap bitmap) {
         this.bitmap = bitmap;
+    }
+
+    public Boolean getMine() {
+        return mine;
+    }
+
+    public void setMine(Boolean mine) {
+        this.mine = mine;
     }
 }

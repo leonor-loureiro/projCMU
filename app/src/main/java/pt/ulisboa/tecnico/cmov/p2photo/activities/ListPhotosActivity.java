@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.api.services.drive.model.User;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -43,6 +44,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import cz.msebera.android.httpclient.Header;
+import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
+import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
+import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
@@ -52,11 +56,13 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
+import pt.ulisboa.tecnico.cmov.p2photo.storage.FileManager;
+import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 /**
  * This activity is responsible for showing the photos of an album
  */
-public class ListPhotosActivity extends AppCompatActivity {
+public class ListPhotosActivity extends AppCompatActivity{
 
     private static final int GALLERY = 1327;
     private static final int ADD_USER = 200;
@@ -85,7 +91,8 @@ public class ListPhotosActivity extends AppCompatActivity {
     private int nrPhotos = 0;
     private boolean errorDownload;
     private int nrCatalogs = 0;
-
+    private ArrayList<Member> membersInGroup;
+    private WifiDirectManager wifiManager;
 
 
     @Override
@@ -118,6 +125,7 @@ public class ListPhotosActivity extends AppCompatActivity {
 
         progressDialog= ProgressDialog.show(this, "",
                 "Loading photos...", true);
+
         getAlbumInfo();
 
         //Action buttons menu animation
@@ -133,6 +141,11 @@ public class ListPhotosActivity extends AppCompatActivity {
                     openActionMenu();
             }
         });
+
+        membersInGroup = this.globalVariables.getMembersInGroup();
+        wifiManager = this.globalVariables.getWifiDirectManager();
+
+
 
     }
 
@@ -344,6 +357,11 @@ public class ListPhotosActivity extends AppCompatActivity {
         album.setGroupMembership(catalogUrls);
         album.setMembers(albumMembers);
 
+
+        Log.d("MembersInRange",membersInGroup.size() + "");
+
+        handleMembers();
+
         //Get file ID, if already created
         if(mCatalogUrl != null)
             getFileID();
@@ -352,6 +370,25 @@ public class ListPhotosActivity extends AppCompatActivity {
             //Download album
             downloadAlbumCatalogs(album.getGroupMembership());
         }
+    }
+
+    private void handleMembers() {
+        for(Member memberOfAlbum:album.getMembers()){
+            for(Member member: membersInGroup){
+                if(memberOfAlbum.getName().equals(member.getName())){
+                    Log.d("asking for photos",memberOfAlbum.getName());
+                    askForPhotos(member);
+
+                }
+
+            }
+        }
+
+    }
+
+    private void askForPhotos(Member member) {
+
+        wifiManager.send(member.getIp(),album.getName(),this);
     }
 
     public void getFileID() throws UnsupportedEncodingException, JSONException {
@@ -364,7 +401,8 @@ public class ListPhotosActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                     try {
-                        album.setFileID((String) response.get(0));
+
+                        album.setFileID((response.get(0).toString()));
                         Log.i("ListPhotos", "newFileID = " + album.getFileID());
                         if(!globalVariables.google) {
                             loadP2PAlbum();
@@ -492,6 +530,8 @@ public class ListPhotosActivity extends AppCompatActivity {
                 return null;
             }
         }, null);
+      /*  if(!globalVariables.google)
+            wifiManager.unregister */
     }
 
     /**
@@ -661,4 +701,10 @@ public class ListPhotosActivity extends AppCompatActivity {
     }
 
 
+    public void addPhotos(ArrayList<Photo> result) {
+       for(Photo photo : result){
+           photo.setMine(false);
+           adapter.addPhoto(photo);
+       }
+    }
 }

@@ -40,6 +40,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
@@ -49,8 +50,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 
 
-public class ListAlbumsActivity extends AppCompatActivity
-        implements SimWifiP2pManager.PeerListListener, SimWifiP2pManager.GroupInfoListener {
+public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pManager.PeerListListener, SimWifiP2pManager.GroupInfoListener{
 
     private static final String TAG = "ListAlbumsActivity";
     ListAlbumsAdapter adapter;
@@ -60,6 +60,7 @@ public class ListAlbumsActivity extends AppCompatActivity
     private GlobalVariables globalVariables;
 
     private WifiDirectManager wifiManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +81,7 @@ public class ListAlbumsActivity extends AppCompatActivity
 
 
         //Set the adapter responsible for showing the list of albums
-        adapter = new ListAlbumsAdapter(this, new ArrayList<Album>());
+        adapter = new ListAlbumsAdapter(this, new ArrayList<Album>(),this.globalVariables);
         listView = findViewById(R.id.folders_list);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
@@ -91,44 +92,34 @@ public class ListAlbumsActivity extends AppCompatActivity
             }
         });
 
+        getAlbums();
+
         if(globalVariables.google)
             driveHandler = globalVariables.getGoogleDriveHandler();
         else {
-            wifiManager =  new WifiDirectManager(this);
+            //Create the internal storage file manager
+            globalVariables.setFileManager(new FileManager(this));
+
+            wifiManager =  new WifiDirectManager(this,adapter);
             globalVariables.setWifiDirectManager(wifiManager);
             // initialize the WDSim API
             wifiManager.initiateWifi();
 
-            //Create the internal storage file manager
-            globalVariables.setFileManager(new FileManager(this));
-
         }
-        Button connectButton = findViewById(R.id.idInGroupButton);
-        if(globalVariables.google){
+
+        //Button connectButton = findViewById(R.id.idInGroupButton);
+      /*  if(globalVariables.google){
             connectButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v){
                     wifiManager.requestGroupInfo(v);
                 }
-            });
-        }else{
+            }); */
+      /*  }else{
             connectButton.setVisibility(View.INVISIBLE);
-        }
-
-        getAlbums();
-
-
-    }
-
-    @Override
-    public void onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo) {
-      wifiManager.onGroupInfoAvailable(devices,groupInfo);
-    }
+        } */
 
 
 
-
-    @Override
-    public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
 
     }
 
@@ -199,6 +190,7 @@ public class ListAlbumsActivity extends AppCompatActivity
         for(int i = 0;i < response.length();i++){
             adapter.add(new Album((String)response.get(i)));
         }
+        adapter.getFileIDOfAlbums();
         /*
         //Dummy albums
         adapter.add(new Album("sebas"));
@@ -224,6 +216,8 @@ public class ListAlbumsActivity extends AppCompatActivity
     public void logout(MenuItem item) {
         Utils.openYesNoBox(this, "Are you sure you want to logout?", null,new Callable<Void>() {
             public Void call() {
+                if(!globalVariables.google)
+                    wifiManager.unbindService();
                 Intent intent = new Intent(ListAlbumsActivity.this, LoginActivity.class);
                 //Clears the activity stack
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -401,13 +395,23 @@ public class ListAlbumsActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    /*@Override
-    public void onPause() {
-        super.onPause();
-        if(!globalVariables.google)
-            wifiManager.unregisterReceiver();
-    }*/
+    @Override
+    public void onGroupInfoAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList, SimWifiP2pInfo simWifiP2pInfo) {
+        ArrayList<Member> currentMembers = this.globalVariables.getMembersInGroup();
+        this.globalVariables.setMembersInGroup(wifiManager.onGroupInfoAvailable(simWifiP2pDeviceList,simWifiP2pInfo,currentMembers));
 
+    }
+
+    @Override
+    public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
+
+    }
+
+
+    public void userDetected() {
+        wifiManager.requestGroupInfo();
+
+    }
 
 
 
