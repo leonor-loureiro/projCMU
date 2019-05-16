@@ -4,9 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import java.io.ByteArrayOutputStream;
 import java.util.concurrent.Callable;
 
 public class Utils {
@@ -102,5 +105,15 @@ public class Utils {
             cursor.close( );
         }
         return result;
+    }
+
+    public static byte[] encodeBitmap(Bitmap bitmap){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
+
+    public static Bitmap decodeBitmap(byte[] encodedBitmap){
+        return BitmapFactory.decodeByteArray(encodedBitmap, 0, encodedBitmap.length);
     }
 }
