@@ -137,7 +137,7 @@ public class AddUserActivity extends AppCompatActivity {
                     public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
 
                             Log.i("Get users", "FAILED: " + throwable.getMessage());
-                            Toast.makeText(AddUserActivity.this,
+                                Toast.makeText(AddUserActivity.this,
                                     AddUserActivity.this.getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_get_users),
                                     Toast.LENGTH_SHORT)
                                     .show();
