@@ -111,17 +111,6 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
 
         }
 
-        //Button connectButton = findViewById(R.id.idInGroupButton);
-      /*  if(globalVariables.google){
-            connectButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v){
-                    wifiManager.requestGroupInfo(v);
-                }
-            }); */
-      /*  }else{
-            connectButton.setVisibility(View.INVISIBLE);
-        } */
-
 
 
 
