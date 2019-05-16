@@ -29,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -162,15 +163,26 @@ public class ListAlbumsActivity extends AppCompatActivity
                         globalVariables.getUser().getName(),
                         globalVariables.getToken(),this.globalVariables.google + "",
                         new JsonHttpResponseHandler() {
+
                             @Override
-                            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                                Log.i("valueof", response.toString());
+                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                 try {
-                                    transformResults(response);
+                                    Log.i(TAG, "user albums response: " + response.toString());
+                                    if(response.length() != 0)
+                                        transformResults(response);
+
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
+
                             }
+                            /*@Override
+                            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                                try {
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }*/
 
                             @Override
                             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
@@ -199,10 +211,15 @@ public class ListAlbumsActivity extends AppCompatActivity
      * Add the albums received from the server to the list
      * @param response server response
      */
-    private void transformResults(JSONArray response) throws JSONException {
-        for(int i = 0;i < response.length();i++){
-            adapter.add(new Album((String)response.get(i)));
+    private void transformResults(JSONObject response) throws JSONException {
+        String albumName = null, fileID = null;
+        for(int i = 0;i < response.names().length();i++){
+            albumName = response.names().getString(i);
+            fileID = response.getString(albumName);
+            Log.i(TAG, "Album " + albumName + ": " + fileID);
+            adapter.add(new Album(albumName, fileID));
         }
+
         /*
         //Dummy albums
         adapter.add(new Album("sebas"));

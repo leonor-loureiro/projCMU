@@ -357,13 +357,16 @@ public class ListPhotosActivity extends AppCompatActivity {
         album.setMembers(albumMembers);
 
 
-        //Get file ID, if already created
-        if(mCatalogUrl != null)
+        /*//Get file ID, if already created
+        if(mCatalogUrl != null) {
             getFileID();
+        }*/
 
         if(globalVariables.google) {
             //Download album
             downloadAlbumCatalogs(album.getGroupMembership());
+        }else{
+            loadP2PAlbum();
         }
     }
 
@@ -411,6 +414,10 @@ public class ListPhotosActivity extends AppCompatActivity {
         }
     }
     public void getFileID() throws UnsupportedEncodingException, JSONException {
+        Log.i(TAG, "File ID: " + album.getFileID());
+        if(album.getFileID() != null)
+            return;
+
         ServerAPI.getInstance().getFileID(this,
                 globalVariables.getToken(),
                 globalVariables.getUser().getName(),

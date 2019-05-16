@@ -208,7 +208,7 @@ public class P2PhotoServerController {
      * @return a list will all the album's names that belong to the user
      */
     @RequestMapping(value = "/getUserAlbums")
-    public ResponseEntity<String[]> getUserAlbums(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<Map<String, String>> getUserAlbums(@RequestBody Map<String, String> credentials) {
 
         String token = credentials.get("token");
         String username = credentials.get("username");
@@ -220,14 +220,9 @@ public class P2PhotoServerController {
 
         // get albums
         try {
-            List<String> albumNames =  P2PhotoServerManager.getInstance().getUserAlbumsNames(username,mode);
-
-            String[] albumsNamesToSend = new String[albumNames.size()];
-            for(int i = 0;i < albumNames.size();i++) {
-                System.out.println(albumNames.get(i));
-                albumsNamesToSend[i] = albumNames.get(i);
-            }
-            return new ResponseEntity<>(albumsNamesToSend, HttpStatus.OK);
+            Map<String,String> albums =  P2PhotoServerManager.getInstance().getUserAlbumsNames(username,mode);
+            System.out.println(albums.toString());
+            return new ResponseEntity<>(albums, HttpStatus.OK);
 
         } catch (UserNotExistsException e) {
             e.printStackTrace();

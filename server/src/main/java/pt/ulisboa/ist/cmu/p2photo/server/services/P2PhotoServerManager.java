@@ -249,12 +249,17 @@ public class P2PhotoServerManager {
      * @param username the name of the use whose albums will be found
      * @return the list of album names
      */
-    public List<String> getUserAlbumsNames(String username,String mode) throws UserNotExistsException {
-        ArrayList<String> list = new ArrayList<>();
+    public Map<String, String> getUserAlbumsNames(String username,String mode) throws UserNotExistsException {
+        Map<String,String> list = new HashMap<>();
         List <Album> albums = getUserAlbums(username,mode);
 
         for (Album album : albums) {
-            list.add(album.getName());
+            try {
+                list.put(album.getName(), getFileID(username, album.getName(), mode));
+
+            } catch (AlbumNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         printInfo("getting names of all album of user " + username);
