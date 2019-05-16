@@ -29,7 +29,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.api.services.drive.model.User;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -46,9 +45,6 @@ import java.util.concurrent.Callable;
 import javax.crypto.SecretKey;
 
 import cz.msebera.android.httpclient.Header;
-import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
-import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
-import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
@@ -59,7 +55,6 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
-import pt.ulisboa.tecnico.cmov.p2photo.storage.FileManager;
 import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 /**
@@ -352,11 +347,14 @@ public class ListPhotosActivity extends AppCompatActivity{
                 url = SecurityManager.decryptAES(album.getSecretKey(), url);
 
             if(currentUser.equals(username)){
-                //If its cloud mode and user's url not yet defined, create slice and update it
-                if(globalVariables.google && (url == null || url.equals("null"))){
+                //If the user's catalog ID is not yet defined, create album and update sever
+                if(album.getFileID() == null || album.getFileID().equals("null")){
                     Log.i("ListPhotos", "updateAlbumInfo -> " + currentUser + " slice not initialize");
                     url = null;
-                    updateSharedAlbum(albumName, album.getSecretKey());
+                    if(globalVariables.google)
+                        updateSharedCloudAlbum(albumName, album.getSecretKey());
+                    else
+                        updateSharedP2PAlbum(albumName);
                 }
                 mCatalogUrl = url;
             }else{
@@ -378,6 +376,14 @@ public class ListPhotosActivity extends AppCompatActivity{
             loadP2PAlbum();
             Log.d("MembersInRange",membersInGroup.size() + "");
             handleMembers();
+        }
+    }
+
+    private void updateSharedP2PAlbum(String albumName) {
+        String filename = globalVariables.getFileManager()
+                .createAlbum(globalVariables.getUser().getName(), albumName);
+        if(filename != null){
+            updateSharedAlbumInServer(null, filename, albumName);
         }
     }
 
@@ -481,7 +487,7 @@ public class ListPhotosActivity extends AppCompatActivity{
     /**
      * Updates the information of a album that was shared with user but not yet setted
      */
-    private void updateSharedAlbum(String name, final SecretKey secretKey){
+    private void updateSharedCloudAlbum(String name, final SecretKey secretKey){
 
         final String albumName = name;
         final Task<Pair<String,String>> task = driveHandler.createAlbumSlice(name);
@@ -497,24 +503,11 @@ public class ListPhotosActivity extends AppCompatActivity{
             final String url = SecurityManager.encryptAES(secretKey, result.second);
             final String fileID = result.first;
 
-            GlobalVariables global = (GlobalVariables)getApplicationContext();
 
             Log.i("UpdateSharedAlbum", "fileID = " + fileID);
             Log.i("UpdateSharedAlbum", "url = " + url);
 
-            try {
-                //Send url and fileID to the server
-                ServerAPI.getInstance().updateAlbum(getApplicationContext(),
-                        globalVariables.getToken(),
-                        globalVariables.getUser().getName(),
-                        albumName,url,fileID, global.google + "");
-
-                //Set album file ID
-                album.setFileID(fileID);
-
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
+                updateSharedAlbumInServer(url, fileID, albumName);
             }
         });
 
@@ -528,6 +521,23 @@ public class ListPhotosActivity extends AppCompatActivity{
 
 
 
+    }
+
+    private void updateSharedAlbumInServer(String url, String fileID, String albumName) {
+        Log.i(TAG, "Update shared album " + albumName + ": " + fileID + "/" + url);
+        try {
+            //Send url and fileID to the server
+            ServerAPI.getInstance().updateAlbum(getApplicationContext(),
+                    globalVariables.getToken(),
+                    globalVariables.getUser().getName(),
+                    albumName,url,fileID, globalVariables.google + "");
+
+            //Set album file ID
+            album.setFileID(fileID);
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 
