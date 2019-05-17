@@ -74,7 +74,7 @@ public class ListPhotosActivity extends AppCompatActivity{
     FloatingActionButton addButton;
     RelativeLayout loadingBarLayout;
     boolean actionButtonExpanded = false;
-    ProgressDialog progressDialog;
+    //ProgressDialog progressDialog;
 
     private GlobalVariables globalVariables;
 
@@ -124,14 +124,8 @@ public class ListPhotosActivity extends AppCompatActivity{
         adapter = new PhotoAdapter(this, new ArrayList<Photo>());
         gridView.setAdapter(adapter);
 
-        progressDialog= ProgressDialog.show(this, "",
-                "Loading photos...", true);
-
-
-        if(globalVariables.google)
-            getSecretKey();
-        else
-            getAlbumInfo();
+        /*progressDialog= ProgressDialog.show(this, "",
+                "Loading photos...", true);*/
 
         //Action buttons menu animation
         shareButton = findViewById(R.id.share);
@@ -147,11 +141,17 @@ public class ListPhotosActivity extends AppCompatActivity{
             }
         });
 
+
+        showLoadingBar();
+
+        if(globalVariables.google)
+            getSecretKey();
+        else
+            getAlbumInfo();
+
+
         membersInGroup = this.globalVariables.getMembersInGroup();
         wifiManager = this.globalVariables.getWifiDirectManager();
-
-
-
     }
 
     /**
@@ -218,7 +218,7 @@ public class ListPhotosActivity extends AppCompatActivity{
             } else
                 getAlbumPhotosFailure();
         }
-        progressDialog.dismiss();
+        hideLoadingBar();
     }
 
     private void getAlbumPhotosFailure() {
@@ -239,11 +239,11 @@ public class ListPhotosActivity extends AppCompatActivity{
         Log.i("ListPhotos", "download album catalogs #" + urls.size());
         //If no catalog dismiss progress
         if(urls.isEmpty())
-            progressDialog.dismiss();
+            hideLoadingBar();
 
 
         for(final String url : urls){
-            if(url == null)
+            if(url == null || url.equals("null"))
                 continue;
 
             nrCatalogs++;
@@ -281,7 +281,7 @@ public class ListPhotosActivity extends AppCompatActivity{
     private void downloadCatalogsFinished() {
         nrCatalogs--;
         if(nrCatalogs == 0 && nrPhotos == 0) {
-            progressDialog.dismiss();
+            hideLoadingBar();
             if(errorDownload)
                 Toast.makeText(this,
                         getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_load_photos),
@@ -304,7 +304,9 @@ public class ListPhotosActivity extends AppCompatActivity{
             task.addOnSuccessListener(new OnSuccessListener<Bitmap>() {
                 @Override
                 public void onSuccess(Bitmap bitmap) {
-                    adapter.addPhoto(new Photo(url, bitmap));
+                    Photo photo = new Photo(url, bitmap);
+                    if(!adapter.contains(photo))
+                        adapter.addPhoto(photo);
                     photosDownloadFinished();
                 }
             });
@@ -323,7 +325,7 @@ public class ListPhotosActivity extends AppCompatActivity{
     private void photosDownloadFinished() {
         nrPhotos--;
         if(nrPhotos == 0) {
-            progressDialog.dismiss();
+            hideLoadingBar();
             if(errorDownload)
                 Toast.makeText(this,
                         getString(pt.ulisboa.tecnico.cmov.p2photo.R.string.failed_load_photos),
@@ -464,7 +466,6 @@ public class ListPhotosActivity extends AppCompatActivity{
                             try {
                                 Log.i(TAG, "Secret Key = " + response.get(0));
 
-                                //TODO: move private key to user global variables
                                 PrivateKey privateKey = SecurityManager.getPrivateKey( globalVariables.getUser().getName());
 
                                 //Decipher secret key
@@ -638,6 +639,8 @@ public class ListPhotosActivity extends AppCompatActivity{
     public void logout(MenuItem item) {
         Utils.openYesNoBox(this, "Are you sure you want to logout?", null,new Callable<Void>() {
             public Void call() {
+                if(!globalVariables.google)
+                    globalVariables.getWifiDirectManager().unbindService();
                 Intent intent = new Intent(ListPhotosActivity.this, LoginActivity.class);
                 //Clears the activity stack
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -826,5 +829,9 @@ public class ListPhotosActivity extends AppCompatActivity{
            cacheManager.addAlbumPhoto(username, albumName, newPhoto);
         }
         Log.i(TAG, "cached photos: " + cacheManager.getAlbumPhotos(username, albumName).size());
+    }
+
+    public void syncPhotos(MenuItem item) {
+        getAlbumInfo();
     }
 }

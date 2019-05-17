@@ -176,12 +176,14 @@ public class  WifiDirectManager {
      * unregisters the receiver, unbins the connection and closes the serversocket.
      */
     public void unbindService(){
-        unregisterReceiver();
-        context.unbindService(mConnection);
-        try {
-            mSrvSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(mBound) {
+            unregisterReceiver();
+            context.unbindService(mConnection);
+            try {
+                mSrvSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         mBound = false;
 

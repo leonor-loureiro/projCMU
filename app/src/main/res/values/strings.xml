@@ -12,6 +12,7 @@
     <string name="title_activity_list_albums">ListAlbums</string>
     <string name="create_album">Create album</string>
 
+    <string name="syncAlbuns">Sync</string>
     <string name="settings">Settings</string>
     <string name="logout">Logout</string>
     <string name="add_photo">Add photo</string>
@@ -42,5 +43,6 @@
     <string name="security_disabled"><![CDATA[Security feature disabled. Needs API >= 23. Found]]></string>
     <string name="app_log">App Log</string>
     <string name="appsync">Sync</string>
+    <string name="force_p2p">Google mode is unavailable for security reasons.</string>
 
 </resources>

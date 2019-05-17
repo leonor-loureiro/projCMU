@@ -47,4 +47,11 @@ public class Photo implements Serializable {
     public boolean isMine() {
         return getMine();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Photo)
+            return ((Photo) obj).getUrl().equals(url);
+        return false;
+    }
 }
