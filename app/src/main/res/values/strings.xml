@@ -44,5 +44,7 @@
     <string name="app_log">App Log</string>
     <string name="appsync">Sync</string>
     <string name="force_p2p">Google mode is unavailable for security reasons.</string>
+    <string name="invalid_album_name">Invalid album name</string>
+    <string name="invalid_album_regex">Must start with a letter and can only contain numbers and letters.</string>
 
 </resources>

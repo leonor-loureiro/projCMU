@@ -40,12 +40,6 @@ public class AppLogFragment extends Fragment {
 
         getAppLog();
 
-        view.findViewById(R.id.appsync).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getAppLog();
-            }
-        });
         return view;
     }
 

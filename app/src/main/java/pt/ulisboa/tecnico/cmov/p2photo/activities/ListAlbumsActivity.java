@@ -53,7 +53,8 @@ import pt.ulisboa.tecnico.cmov.p2photo.wifidirect.WifiDirectManager;
 
 
 
-public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pManager.PeerListListener, SimWifiP2pManager.GroupInfoListener{
+public class ListAlbumsActivity extends AppCompatActivity
+        implements SimWifiP2pManager.PeerListListener, SimWifiP2pManager.GroupInfoListener{
 
     private static final String TAG = "ListAlbumsActivity";
     ListAlbumsAdapter adapter;
@@ -269,7 +270,9 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
                     public void onClick(DialogInterface dialog, int which) {
                         String name = input.getText().toString().trim();
                         if(name.equals("")){
-                            Utils.openWarningBox(ListAlbumsActivity.this, null,"Invalid album name");
+                            return;
+                        }else if(!name.matches("[a-zA-Z][a-zA-Z0-9]*")){
+                            Utils.openWarningBox(ListAlbumsActivity.this, getString(R.string.invalid_album_name),getString(R.string.invalid_album_regex));
                             return;
                         }
                         createNewAlbum(name);
