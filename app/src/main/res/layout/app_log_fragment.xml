@@ -27,24 +27,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logTitle"
-        app:layout_constraintBottom_toTopOf="@id/appsync">
+        app:layout_constraintBottom_toBottomOf="@id/guidelineBottom">
     </ListView>
 
-    <Button
-        android:id="@+id/appsync"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        android:text="@string/appsync"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ApplogList"
-        app:layout_constraintBottom_toBottomOf="@id/guidelineBottom"
-        android:textAllCaps="false"
-        />
 
     <android.support.constraint.Guideline
         android:id="@+id/guidelineBottom"
