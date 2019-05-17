@@ -21,7 +21,7 @@
         tools:replace="android:icon"
         android:name="pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.ChooseActivity">
+        <activity android:name=".activities.ChooseModeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

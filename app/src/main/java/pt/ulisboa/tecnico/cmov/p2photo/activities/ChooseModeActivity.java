@@ -10,7 +10,7 @@ import android.widget.Button;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 
-public class ChooseActivity extends Activity {
+public class ChooseModeActivity extends Activity {
 
     Button GoogleButton;
 

@@ -171,13 +171,6 @@ public class ListAlbumsActivity extends AppCompatActivity
                                 }
 
                             }
-                            /*@Override
-                            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                                try {
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }*/
 
                             @Override
                             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
@@ -270,9 +263,13 @@ public class ListAlbumsActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int which) {
                         String name = input.getText().toString().trim();
                         if(name.equals("")){
+                            dialog.dismiss();
                             return;
                         }else if(!name.matches("[a-zA-Z][a-zA-Z0-9]*")){
-                            Utils.openWarningBox(ListAlbumsActivity.this, getString(R.string.invalid_album_name),getString(R.string.invalid_album_regex));
+                            Utils.openWarningBox(ListAlbumsActivity.this,
+                                    getString(R.string.invalid_album_name),
+                                    getString(R.string.invalid_album_regex));
+                            dialog.dismiss();
                             return;
                         }
                         createNewAlbum(name);

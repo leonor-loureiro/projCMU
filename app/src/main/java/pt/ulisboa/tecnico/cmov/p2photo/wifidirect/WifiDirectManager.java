@@ -177,10 +177,15 @@ public class  WifiDirectManager {
      */
     public void unbindService(){
         if(mBound) {
-            unregisterReceiver();
-            context.unbindService(mConnection);
+            try {
+                unregisterReceiver();
+                context.unbindService(mConnection);
+            }catch (IllegalArgumentException e){
+                Log.e(TAG, e.getMessage());
+            }
             try {
                 mSrvSocket.close();
+                mSrvSocket = null;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -212,6 +217,9 @@ public class  WifiDirectManager {
             }
             while (!Thread.currentThread().isInterrupted()) {
                 try {
+                    if(mSrvSocket == null){
+                        return null;
+                    }
                     SimWifiP2pSocket sock = mSrvSocket.accept();
 
                     ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
@@ -219,18 +227,10 @@ public class  WifiDirectManager {
                     Object value = in.readObject();
 
                     try {
-                        int check = (int) value;
-                        Log.d(TAG,"check if is int");
-                        isInt = true;
-                    } catch (ClassCastException e) {
-                        Log.d(TAG, "setting isint to " + isInt + "");
-                        isInt = false;
-                    }
-
-                    try {
-                        Log.d(TAG,"value of isINT is " + isInt + "");
-                        //if its an int, it means the user wants to know the user name.
-                        if (isInt) {
+                        String request =  (String) value;
+                        Log.d(TAG,"Request: " + request);
+                        //if its an "?", it means the user wants to know the user name.
+                        if (request.equals("?")) {
 
                             ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
                             Log.d(TAG,"writing the username to " + globalVariables.getUser().getName());
@@ -273,7 +273,6 @@ public class  WifiDirectManager {
                     }
                 } catch (IOException e) {
                     Log.d("Error socket:", e.getMessage());
-                    e.printStackTrace();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -369,7 +368,7 @@ public class  WifiDirectManager {
                 ObjectOutputStream out = new ObjectOutputStream(mCliSocket.getOutputStream());
 
                 Log.d(TAG,"writing 0161 ");
-                out.writeObject(0161);
+                out.writeObject("?");
 
                 ObjectInputStream in = new ObjectInputStream(mCliSocket.getInputStream());
 
