@@ -12,6 +12,8 @@ import java.util.Map;
 
 import javax.crypto.SecretKey;
 
+import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
+import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.storage.FileManager;
 import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
@@ -21,6 +23,10 @@ public class GlobalVariables extends Application {
 
     //members in group termite
     private ArrayList<Member> membersInGroup = new ArrayList<>();
+
+    private SimWifiP2pInfo simWifiP2pInfo;
+
+
     //Logged in user
     private Member user;
     //Mode (Cloud / P2P)
@@ -67,6 +73,7 @@ public class GlobalVariables extends Application {
     public void setGoogleDriveHandler(GoogleDriveHandler googleDriveHandler) {
         this.googleDriveHandler = googleDriveHandler;
     }
+
 
     public Member getUser() {
         return user;
@@ -132,5 +139,13 @@ public class GlobalVariables extends Application {
 
     public String getFileID(String album){
         return fileIDs.get(album);
+    }
+
+    public SimWifiP2pInfo getSimWifiP2pInfo() {
+        return simWifiP2pInfo;
+    }
+
+    public void setSimWifiP2pInfo(SimWifiP2pInfo simWifiP2pInfo) {
+        this.simWifiP2pInfo = simWifiP2pInfo;
     }
 }

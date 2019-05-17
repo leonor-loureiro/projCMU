@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -45,6 +47,8 @@ import java.util.concurrent.Callable;
 import javax.crypto.SecretKey;
 
 import cz.msebera.android.httpclient.Header;
+import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
+import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
@@ -406,15 +410,24 @@ public class ListPhotosActivity extends AppCompatActivity{
      * for their photos.
      */
     private void handleMembers() {
+
         MemoryCacheManager cacheManager = globalVariables.getCacheManager();
+
 
         for(Member memberOfAlbum : album.getMembers()){
 
             int i = membersInGroup.indexOf(memberOfAlbum);
             if(i != -1){
                 //Member in group: request photos
-                Log.d(TAG, "asking for photos " + memberOfAlbum.getName());
-                askForPhotos(membersInGroup.get(i));
+                if(globalVariables.getSimWifiP2pInfo().askIsConnectionPossible(membersInGroup.get(i).getDeviceName())){
+                    globalVariables.addOperation(new Operation("askedforphotos",memberOfAlbum.getName(),album.getName()).toString());
+                    askForPhotos(membersInGroup.get(i));
+                }
+                else {
+                    globalVariables.addOperation(new Operation("couldntaskforphotos",memberOfAlbum.getName(),album.getName()).toString());
+                    Toast.makeText(this, getString(R.string.force_p2p), Toast.LENGTH_SHORT).show();
+                }
+
 
             }else{
                 //Member not in group: get cached photos
@@ -834,4 +847,5 @@ public class ListPhotosActivity extends AppCompatActivity{
     public void syncPhotos(MenuItem item) {
         getAlbumInfo();
     }
+
 }

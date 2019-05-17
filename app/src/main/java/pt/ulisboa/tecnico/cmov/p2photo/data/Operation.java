@@ -97,7 +97,7 @@ public class Operation implements Serializable {
             Field[] fields = Operation.class.getDeclaredFields();
             for (Field field : fields) {
                 Object obj = field.get(this);
-                if (obj != null) {
+                if (obj != null && !field.getName().equals("serialVersionUID")) {
                     str.append(field.getName()).append(" = ").append(obj).append(";");
                 }
             }

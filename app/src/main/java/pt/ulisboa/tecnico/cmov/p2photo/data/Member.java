@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.p2photo.data;
 import java.io.Serializable;
 
 public class Member implements Serializable{
+    String deviceName;
     String name;
     String publicKey;
 
@@ -12,9 +13,10 @@ public class Member implements Serializable{
         this.name = name;
     }
 
-    public Member(String name,String ip,String qqlrcoisa){
+    public Member(String name,String ip,String deviceName){
         this.name = name;
         this.ip = ip;
+        this.deviceName = deviceName;
     }
 
 
@@ -45,6 +47,14 @@ public class Member implements Serializable{
 
     public void setPublicKey(String publicKey) {
         this.publicKey = publicKey;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     @Override

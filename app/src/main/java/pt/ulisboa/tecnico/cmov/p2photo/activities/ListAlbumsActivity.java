@@ -439,21 +439,17 @@ public class ListAlbumsActivity extends AppCompatActivity
 
     @Override
     public void onGroupInfoAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList, SimWifiP2pInfo simWifiP2pInfo) {
+        this.globalVariables.setSimWifiP2pInfo(simWifiP2pInfo);
         wifiManager.onGroupInfoAvailable(simWifiP2pDeviceList,simWifiP2pInfo);
 
     }
 
     @Override
     public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
-        //Necessary, but do nothing
     }
 
     public void userDetected() {
         wifiManager.requestGroupInfo();
     }
-
-
-
-
 
 }

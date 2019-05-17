@@ -13,6 +13,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoToSend;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
+import pt.ulisboa.tecnico.cmov.p2photo.storage.MemoryCacheManager;
 
 public class  WifiDirectManager {
 
@@ -134,7 +136,7 @@ public class  WifiDirectManager {
             SimWifiP2pDevice device = devices.getByName(deviceName);
 
             Log.d(TAG,"addingdevice" + device.getVirtIp());
-            addDeviceName(device.getVirtIp());
+            addDeviceName(device.getVirtIp(),deviceName);
 
         }
 
@@ -157,8 +159,9 @@ public class  WifiDirectManager {
      * Asks the device for his user name.
      * @param virtIp the virtual ip where the user is.
      */
-    private void addDeviceName(String virtIp) {
-        new GetUserNameCommTask(virtIp).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    private void addDeviceName(String virtIp,String deviceName) {
+        Log.d(TAG,"adding user with devicename" + deviceName + virtIp);
+        new GetUserNameCommTask(virtIp,deviceName).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
     }
@@ -193,6 +196,7 @@ public class  WifiDirectManager {
         mBound = false;
 
     }
+
 
 
 
@@ -327,9 +331,24 @@ public class  WifiDirectManager {
                 mCliSocket.close();
 
                 return photos;
-            } catch (IOException e) {
+
+            } catch (SocketException e){
+
+                Log.d(TAG,"the other device is offline");
+                MemoryCacheManager cacheManager = ((GlobalVariables) context.getApplicationContext()).getCacheManager();
+                List<Photo> cachedPhotos = cacheManager.getAlbumPhotos(username, albumName);
+                ArrayList<PhotoToSend> photosToSends = new ArrayList<>();
+                for(Photo photo : cachedPhotos){
+
+                    photosToSends.add(new PhotoToSend(photo.getUrl(),Utils.encodeBitmap(photo.getBitmap())));
+
+                }
+
+                return photosToSends;
+            }catch (IOException e) {
                 e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            }
+            catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
             mCliSocket = null;
@@ -350,10 +369,12 @@ public class  WifiDirectManager {
      */
     public class GetUserNameCommTask extends AsyncTask<String, String,String> {
 
+        private final String deviceName;
         private SimWifiP2pSocket mCliSocket = null;
         String peer;
-        public GetUserNameCommTask(String peer) {
+        public GetUserNameCommTask(String peer, String deviceName) {
             this.peer = peer;
+            this.deviceName = deviceName;
 
         }
 
@@ -392,7 +413,7 @@ public class  WifiDirectManager {
 
             //update the current members in group
             Log.d(TAG,"adding " + result + " to " + globalVariables.getUser().getName());
-            globalVariables.getMembersInGroup().add(new Member(result,peer,"qllrcoisa"));
+            globalVariables.getMembersInGroup().add(new Member(result,peer,deviceName));
 
         }
     }
