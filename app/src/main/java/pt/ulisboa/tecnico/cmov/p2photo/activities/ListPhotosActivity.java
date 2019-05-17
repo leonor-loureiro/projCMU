@@ -151,7 +151,6 @@ public class ListPhotosActivity extends AppCompatActivity{
 
         membersInGroup = this.globalVariables.getMembersInGroup();
         wifiManager = this.globalVariables.getWifiDirectManager();
-
     }
 
     /**

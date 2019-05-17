@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.p2photo.activities;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -98,6 +100,17 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
         }
 
 
+        if(globalVariables.google) {
+            //Check if API allows the security feature and if the device has the private key
+            //If not, force mode P2P
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M ||
+                SecurityManager.getPrivateKey(globalVariables.getUser().getName()) == null) {
+                globalVariables.google = false;
+                Toast.makeText(this, getString(R.string.force_p2p), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+
         getAlbums();
 
         if(globalVariables.google)
@@ -112,9 +125,9 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
             wifiManager.initiateWifi();
 
         }
+    }
 
-
-
+    private void forceP2PMode() {
 
     }
 
@@ -404,6 +417,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
         Album album = new Album(albumName, fileID);
         adapter.add(album);
         adapter.notifyDataSetChanged();
+        globalVariables.updateFileID(albumName, fileID);
 
 
         Toast.makeText(ListAlbumsActivity.this,

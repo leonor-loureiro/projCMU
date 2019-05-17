@@ -168,12 +168,14 @@ public class WifiDirectManager {
     }
 
     public void unbindService(){
-        unregisterReceiver();
-        context.unbindService(mConnection);
-        try {
-            mSrvSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(mBound) {
+            unregisterReceiver();
+            context.unbindService(mConnection);
+            try {
+                mSrvSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         mBound = false;
 

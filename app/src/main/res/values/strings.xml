@@ -41,5 +41,6 @@
     <string name="port">10001</string>
     <string name="inGroupButton">connect</string>
     <string name="security_disabled"><![CDATA[Security feature disabled. Needs API >= 23. Found]]></string>
+    <string name="force_p2p">Google mode is unavailable for security reasons.</string>
 
 </resources>
