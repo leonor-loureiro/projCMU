@@ -1,9 +1,7 @@
 package pt.ulisboa.tecnico.cmov.p2photo.wifidirect;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -17,7 +15,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
@@ -38,7 +35,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoToSend;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 
-public class WifiDirectManager {
+public class  WifiDirectManager {
 
     private final ListAlbumsAdapter adapter;
     private GlobalVariables globalVariables;
@@ -100,6 +97,10 @@ public class WifiDirectManager {
 
     }
 
+    /**
+     * initiate WifiDirect
+     */
+
     public void initiateWifi() {
         if(mBound)
             return;
@@ -116,25 +117,22 @@ public class WifiDirectManager {
     }
 
 
+
+
     public void send(String virtIp, String username, String albumName, ListPhotosActivity listPhotosActivity) {
-        //new SendCommTask(virtIp, username, albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         new GetPhotosCommTask(virtIp,username,albumName,listPhotosActivity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    /**
+     * Creates the new set of members available in the wifi direct group
+     * @param devices devices in group.
+     */
     public void onGroupInfoAvailable(SimWifiP2pDeviceList devices, SimWifiP2pInfo groupInfo) {
         // compile list of network members
-        StringBuilder peersStr = new StringBuilder();
         this.globalVariables.setMembersInGroup(new ArrayList<Member>());
         for (String deviceName : groupInfo.getDevicesInNetwork()) {
             SimWifiP2pDevice device = devices.getByName(deviceName);
-            String devstr = "" + deviceName + " (" +
-                    ((device == null)?"??":device.getVirtIp()) + ")\n";
-            peersStr.append(devstr);
 
-            /*if(!membersInGroup.contains(new Member(deviceName))) {
-                membersInGroup.add(new Member(deviceName, device.getVirtIp(),"qlqrcoisa"));
-
-            }*/
             Log.d(TAG,"addingdevice" + device.getVirtIp());
             addDeviceName(device.getVirtIp());
 
@@ -143,30 +141,40 @@ public class WifiDirectManager {
         Log.d(TAG,"size of members" + this.globalVariables.getMembersInGroup().size() + " should be " + groupInfo.getDevicesInNetwork().size());
 
         // display list of network members
-        new AlertDialog.Builder(context)
+     /*   new AlertDialog.Builder(context)
                 .setTitle("Devices in WiFi Network")
                 .setMessage(peersStr.toString())
                 .setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 })
-                .show();
+                .show(); */
 
 
     }
 
+    /**
+     * Asks the device for his user name.
+     * @param virtIp the virtual ip where the user is.
+     */
     private void addDeviceName(String virtIp) {
         new GetUserNameCommTask(virtIp).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
     }
 
+    /**
+     * Binds the service
+     */
     public void bindService() {
         Intent intent = new Intent(context, SimWifiP2pService.class);
         context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         mBound = true;
     }
 
+    /**
+     * unregisters the receiver, unbins the connection and closes the serversocket.
+     */
     public void unbindService(){
         unregisterReceiver();
         context.unbindService(mConnection);
@@ -181,6 +189,9 @@ public class WifiDirectManager {
 
 
 
+    /**
+     * Class used to receive messages from other devices.
+     */
     public class IncommingCommTask extends AsyncTask<Void, String, Void> {
 
 
@@ -216,12 +227,14 @@ public class WifiDirectManager {
 
                     try {
                         Log.d(TAG,"value of isINT is " + isInt + "");
+                        //if its an int, it means the user wants to know the user name.
                         if (isInt) {
 
                             ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
                             Log.d(TAG,"writing the username to " + globalVariables.getUser().getName());
                             out.writeObject(globalVariables.getUser().getName());
 
+                        //else it means the user wants to receive the photos from this device of a certain album
                         } else {
                             String album = (String) value;
 
@@ -233,11 +246,13 @@ public class WifiDirectManager {
 
 
                             List<Photo> photos = new ArrayList<>();
+                            //get the photos given a certain fileID
                             if ((fileID != null) && !(fileID.equals("null")))
                                 photos = globalVariables.getFileManager().getAlbumPhotos(fileID);
 
                             ArrayList<PhotoToSend> photosToSend = new ArrayList<>();
 
+                            //create a new list of objects PhotoToSend, because  bitmap needs to be encoded
                             for (Photo photo : photos) {
                                 Log.d(TAG,"photo: " + photo.getUrl() + " mine = " + photo.getMine());
                                 if (photo.isMine()) {
@@ -267,10 +282,19 @@ public class WifiDirectManager {
         }
     }
 
+    /**
+     * class used to ask a device for its photos of a certain album
+     */
     public class GetPhotosCommTask extends AsyncTask<String, String, ArrayList<PhotoToSend>> {
 
+        /*
+        context so we can update the UI
+         */
         private final ListPhotosActivity context;
         private SimWifiP2pSocket mCliSocket = null;
+        /*
+        adress of the device
+         */
         String peer;
         String albumName;
         String username;
@@ -313,11 +337,16 @@ public class WifiDirectManager {
 
         @Override
         protected void onPostExecute(ArrayList<PhotoToSend> result) {
+            //update the UI
             context.addPhotos(username, albumName, result);
 
 
         }
     }
+
+    /**
+     * class used to ask a device for its name
+     */
     public class GetUserNameCommTask extends AsyncTask<String, String,String> {
 
         private SimWifiP2pSocket mCliSocket = null;
@@ -359,6 +388,8 @@ public class WifiDirectManager {
 
         @Override
         protected void onPostExecute(String result) {
+
+            //update the current members in group
             Log.d(TAG,"adding " + result + " to " + globalVariables.getUser().getName());
             globalVariables.getMembersInGroup().add(new Member(result,peer,"qllrcoisa"));
 
@@ -366,6 +397,9 @@ public class WifiDirectManager {
     }
 
 
+    /*
+    unregisters the broadcastreceiver
+     */
     public void unregisterReceiver() {
         context.unregisterReceiver(mReceiver);
     }

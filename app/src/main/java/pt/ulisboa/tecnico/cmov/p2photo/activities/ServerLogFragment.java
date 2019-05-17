@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -48,7 +49,10 @@ public class ServerLogFragment extends Fragment {
                 android.R.layout.simple_list_item_1, android.R.id.text1, new ArrayList<String>());
 
         listView.setAdapter(adapter);
+
         getServerLog();
+
+
 
         view.findViewById(R.id.sync).setOnClickListener(new View.OnClickListener() {
             @Override

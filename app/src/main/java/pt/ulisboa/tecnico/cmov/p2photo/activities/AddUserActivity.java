@@ -27,6 +27,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
 import pt.ulisboa.tecnico.cmov.p2photo.data.MembersAdapter;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Operation;
 import pt.ulisboa.tecnico.cmov.p2photo.serverapi.ServerAPI;
 
 public class AddUserActivity extends AppCompatActivity {
@@ -75,6 +76,7 @@ public class AddUserActivity extends AppCompatActivity {
         //Get list of all users from server
         try {
             getAllMembers();
+
         } catch (UnsupportedEncodingException | JSONException e) {
             e.printStackTrace();
         }
@@ -114,6 +116,7 @@ public class AddUserActivity extends AppCompatActivity {
      */
 
     private void getAllMembers() throws UnsupportedEncodingException, JSONException {
+        globalVariables.addOperation(new Operation("getAllMembers",album.getName(),globalVariables.getUser().getName()).toString());
 
         ServerAPI.getInstance().getUsers(this.getApplicationContext(),
                 globalVariables.getToken(),

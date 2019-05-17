@@ -10,6 +10,7 @@ import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
 import pt.ulisboa.tecnico.cmov.p2photo.activities.ListAlbumsActivity;
 import pt.ulisboa.tecnico.cmov.p2photo.activities.ListPhotosActivity;
+import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 
 public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
 
@@ -25,9 +26,6 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (SimWifiP2pBroadcast.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
 
-            // This action is triggered when the Termite service changes state:
-            // - creating the service generates the WIFI_P2P_STATE_ENABLED event
-            // - destroying the service generates the WIFI_P2P_STATE_DISABLED event
 
             int state = intent.getIntExtra(SimWifiP2pBroadcast.EXTRA_WIFI_STATE, -1);
             if (state == SimWifiP2pBroadcast.WIFI_P2P_STATE_ENABLED) {
@@ -40,9 +38,6 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
 
         } else if (SimWifiP2pBroadcast.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
 
-            // Request available peers from the wifi p2p manager. This is an
-            // asynchronous call and the calling activity is notified with a
-            // callback on PeerListListener.onPeersAvailable()
 
             Toast.makeText(mActivity, "Peer list changed",
                     Toast.LENGTH_SHORT).show();
@@ -54,8 +49,8 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
             ginfo.print();
             Toast.makeText(mActivity, "Network membership changed",
                     Toast.LENGTH_SHORT).show();
+            //a change in the group was detected need to update the current group of members
             mActivity.userDetected();
-
 
         } else if (SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION.equals(action)) {
 

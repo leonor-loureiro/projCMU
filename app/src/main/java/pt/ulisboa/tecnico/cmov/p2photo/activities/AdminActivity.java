@@ -9,10 +9,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import pt.ulisboa.tecnico.cmov.p2photo.R;
+import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 
 public class AdminActivity extends AppCompatActivity {
 
     private PageAdapter adapterViewPager;
+    private GlobalVariables globalVariables;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,9 @@ public class AdminActivity extends AppCompatActivity {
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorAccent));
 
         vpPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+
+        this.globalVariables = (GlobalVariables)getApplicationContext();
+
 
 
 
@@ -48,7 +53,7 @@ public class AdminActivity extends AppCompatActivity {
                 case 0:
                     return new ServerLogFragment();
                 case 1: // Fragment # 0 - This will show FirstFragment different title
-                    return new ServerLogFragment();
+                    return new AppLogFragment();
                 case 2: // Fragment # 1 - This will show SecondFragment
                     return new CacheSettingsFragment();
                 default:

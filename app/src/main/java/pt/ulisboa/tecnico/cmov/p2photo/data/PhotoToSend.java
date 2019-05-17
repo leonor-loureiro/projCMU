@@ -1,9 +1,10 @@
 package pt.ulisboa.tecnico.cmov.p2photo.data;
 
-import android.graphics.Bitmap;
-
 import java.io.Serializable;
 
+/*
+class used to send a photo via socket, because the bitmap needs to be enconded
+ */
 public class PhotoToSend implements Serializable {
     String url;
     byte[] bitmap;

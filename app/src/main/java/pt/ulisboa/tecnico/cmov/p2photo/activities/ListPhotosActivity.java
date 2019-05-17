@@ -49,6 +49,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.R;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Operation;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Photo;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.PhotoToSend;
@@ -205,7 +206,9 @@ public class ListPhotosActivity extends AppCompatActivity{
 
     }
 
-    private void loadP2PAlbum() {
+    private void loadP2PAlbum()
+    {
+        globalVariables.addOperation(new Operation("loadP2PAlbum",globalVariables.getUser().getName(),album.getName(),globalVariables.google).toString());
         Log.i(TAG, "Load P2P album: ");
         if(album.getFileID() != null && !album.getFileID().equals("null")) {
             List<Photo> photos = globalVariables.getFileManager().getAlbumPhotos(album.getFileID());
@@ -231,6 +234,7 @@ public class ListPhotosActivity extends AppCompatActivity{
      * @param urls list of catalogs to download
      */
     public void downloadAlbumCatalogs(List <String> urls){
+        globalVariables.addOperation(new Operation("downloadAlbumCatalogs",globalVariables.getUser().getName(),album.getName(),globalVariables.google).toString());
 
         Log.i("ListPhotos", "download album catalogs #" + urls.size());
         //If no catalog dismiss progress
@@ -378,6 +382,7 @@ public class ListPhotosActivity extends AppCompatActivity{
         if(globalVariables.google) {
             //Download album
             downloadAlbumCatalogs(album.getGroupMembership());
+
         }else{
             loadP2PAlbum();
             Log.d("MembersInRange",membersInGroup.size() + "");
@@ -386,6 +391,7 @@ public class ListPhotosActivity extends AppCompatActivity{
     }
 
     private void updateSharedP2PAlbum(String albumName) {
+        globalVariables.addOperation(new Operation("updateSharedP2PAlbum",globalVariables.getUser().getName(),albumName,globalVariables.google).toString());
         String filename = globalVariables.getFileManager()
                 .createAlbum(globalVariables.getUser().getName(), albumName);
         if(filename != null){
@@ -393,6 +399,10 @@ public class ListPhotosActivity extends AppCompatActivity{
         }
     }
 
+    /**
+     * When we update an album we must check if any users in the current wifidirect group, have any of the albums we possess so we can ask
+     * for their photos.
+     */
     private void handleMembers() {
         MemoryCacheManager cacheManager = globalVariables.getCacheManager();
 
@@ -431,6 +441,10 @@ public class ListPhotosActivity extends AppCompatActivity{
 
     }
 
+    /**
+     * Ask a device for its photos of a certain album
+     * @param member
+     */
     private void askForPhotos(Member member) {
 
         wifiManager.send(member.getIp(), member.getName(), album.getName(),this);
@@ -518,6 +532,9 @@ public class ListPhotosActivity extends AppCompatActivity{
      * Updates the information of a album that was shared with user but not yet setted
      */
     private void updateSharedCloudAlbum(String name, final SecretKey secretKey){
+
+        globalVariables.addOperation(new Operation("updateSharedCloudAlbum",globalVariables.getUser().getName(),album.getName(),globalVariables.google).toString());
+
 
         final String albumName = name;
         final Task<Pair<String,String>> task = driveHandler.createAlbumSlice(name);

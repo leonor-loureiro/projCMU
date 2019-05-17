@@ -45,6 +45,7 @@ import pt.ulisboa.tecnico.cmov.p2photo.data.Album;
 import pt.ulisboa.tecnico.cmov.p2photo.data.GlobalVariables;
 import pt.ulisboa.tecnico.cmov.p2photo.data.ListAlbumsAdapter;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Member;
+import pt.ulisboa.tecnico.cmov.p2photo.data.Operation;
 import pt.ulisboa.tecnico.cmov.p2photo.data.Utils;
 import pt.ulisboa.tecnico.cmov.p2photo.googledrive.GoogleDriveHandler;
 import pt.ulisboa.tecnico.cmov.p2photo.security.SecurityManager;
@@ -133,8 +134,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
      * Send the server request to retrieve the list of the user albums
      */
     private void getAlbums() {
-
-        Log.d("gettingUserAlbums","gettingThemAll");
+        globalVariables.addOperation(new Operation("getAlbums",globalVariables.getUser().getName(),globalVariables.google).toString());
 
         /*if(!globalVariables.google){
             adapter.clear();
@@ -208,11 +208,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
             globalVariables.updateFileID(albumName, fileID);
         }
 
-        /*
-        //Dummy albums
-        adapter.add(new Album("sebas"));
-        adapter.add(new Album("andre"));
-        adapter.add(new Album("leonor"));*/
+
 
     }
 
@@ -277,6 +273,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
                 });
         alertDialog.show();
 
+
     }
 
     /**
@@ -298,12 +295,14 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
 
         if(!globalVariables.google) {
             createP2PAlbum(albumName);
+
         } else {
             createCloudAlbum(albumName);
         }
     }
 
     private void createCloudAlbum(final String albumName) {
+        globalVariables.addOperation(new Operation("createAlbum",globalVariables.getUser().getName(),albumName,globalVariables.google).toString());
         Log.i(TAG, "Create Cloud Album");
 
         final Task<Pair<String, String>> task = driveHandler.createAlbumSlice(albumName);
@@ -393,6 +392,7 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
     }
 
     private void createP2PAlbum(String albumName) {
+        globalVariables.addOperation(new Operation("createAlbum",globalVariables.getUser().getName(),albumName,globalVariables.google).toString());
         Log.i(TAG, "Create P2P Album");
         String filename = globalVariables.getFileManager()
                 .createAlbum(globalVariables.getUser().getName(), albumName);
@@ -440,11 +440,11 @@ public class ListAlbumsActivity extends AppCompatActivity implements SimWifiP2pM
 
     }
 
-
     public void userDetected() {
         wifiManager.requestGroupInfo();
-
     }
+
+
 
 
 

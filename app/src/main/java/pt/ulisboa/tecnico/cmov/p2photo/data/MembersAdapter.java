@@ -135,6 +135,8 @@ public class MembersAdapter extends ArrayAdapter<Member> implements Filterable {
                             Log.i("MembersAdapter","SUCCESS: addUserHandle " + member.getName());
                             currentMemberAdapter.add(member);
                             addUserButton.setEnabled(false);
+                            globalVariables.addOperation(new Operation("addUser",globalVariables.getUser().getName(),album.getName(),globalVariables.google).toString());
+
 
                         }
 

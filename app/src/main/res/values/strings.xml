@@ -40,5 +40,7 @@
     <string name="port">10001</string>
     <string name="inGroupButton">connect</string>
     <string name="security_disabled"><![CDATA[Security feature disabled. Needs API >= 23. Found]]></string>
+    <string name="app_log">App Log</string>
+    <string name="appsync">Sync</string>
 
 </resources>

@@ -107,7 +107,6 @@ public class GlobalVariables extends Application {
     public void setWifiDirectManager(WifiDirectManager wifiDirectManager) {
         this.wifiDirectManager = wifiDirectManager;
     }
-
     public List<String> getOperationsLog() {
         return operationsLog;
     }
