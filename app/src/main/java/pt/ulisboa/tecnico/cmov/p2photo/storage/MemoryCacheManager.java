@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.provider.Contacts;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,6 +13,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -54,15 +57,17 @@ public class MemoryCacheManager {
      * @param albumName album name
      * @return album photos from that user stored in cache
      */
-    public List<Photo> getAlbumPhotos(String username, String albumName){
+    public List<Photo> getAlbumPhotos(String username, String albumName, boolean mode){
         List<Photo> cachedPhotos = new ArrayList<>();
-        String prefix = getPrefix(username, albumName);
+        String prefix = getPrefix(username, albumName, mode);
         Log.i(TAG, "Get cached album photos: " + prefix);
         for(File file: cacheDir.listFiles()) {
             Log.i(TAG, "Cached file: " + file.getName());
             if (file.getName().startsWith(prefix)) {
+                String url = file.getName().replaceFirst(prefix, "");
+                Log.i(TAG, "URL: " + url);
                 cachedPhotos.add(
-                        new Photo(file.getName().replaceFirst(prefix, ""),
+                        new Photo(url,
                                 loadImageFromCache(file.getName()),
                                 false
                         )
@@ -72,13 +77,15 @@ public class MemoryCacheManager {
         return cachedPhotos;
     }
 
-    private String getPrefix(String username, String albumName) {
+    private String getPrefix(String username, String albumName, boolean mode) {
         Log.i(TAG, "Prefix: " + albumName + "_" + username);
-        return albumName + "_" + username + "_";
+        return mode + "_" + albumName + "_" + username + "_";
     }
 
-    public void addAlbumPhoto(String username, String albumName, Photo photo){
-        String filename = getPrefix(username, albumName) + photo.getUrl();
+    public void addAlbumPhoto(String username, String albumName, Photo photo, boolean mode){
+
+        String filename = getPrefix(username, albumName, mode) + photo.getUrl();
+
         File file = new File(cacheDir.getAbsolutePath() + "/" + filename);
         if(file.exists()){
             Log.i(TAG, "File already in cache: " + filename);
@@ -94,7 +101,14 @@ public class MemoryCacheManager {
     public void saveImageToCache(String fileName, Bitmap bitmap){
         File imageFile = new File(cacheDir, fileName);
 
+
+
         try {
+            if(!imageFile.exists()) {
+                Log.i(TAG, "Creating new file: " + fileName);
+                imageFile.createNewFile();
+            }
+
             FileOutputStream fos = new FileOutputStream(imageFile);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.close();

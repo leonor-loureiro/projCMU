@@ -116,4 +116,5 @@ public class Utils {
     public static Bitmap decodeBitmap(byte[] encodedBitmap){
         return BitmapFactory.decodeByteArray(encodedBitmap, 0, encodedBitmap.length);
     }
+
 }

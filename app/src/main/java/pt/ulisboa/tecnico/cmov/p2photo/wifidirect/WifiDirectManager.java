@@ -336,7 +336,7 @@ public class  WifiDirectManager {
 
                 Log.d(TAG,"the other device is offline");
                 MemoryCacheManager cacheManager = ((GlobalVariables) context.getApplicationContext()).getCacheManager();
-                List<Photo> cachedPhotos = cacheManager.getAlbumPhotos(username, albumName);
+                List<Photo> cachedPhotos = cacheManager.getAlbumPhotos(username, albumName, false);
                 ArrayList<PhotoToSend> photosToSends = new ArrayList<>();
                 for(Photo photo : cachedPhotos){
 

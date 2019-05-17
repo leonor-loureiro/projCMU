@@ -238,6 +238,7 @@ public class ListPhotosActivity extends AppCompatActivity{
      * @param urls list of catalogs to download
      */
     public void downloadAlbumCatalogs(List <String> urls){
+        getCachedCloudPhotos(album);
         globalVariables.addOperation(new Operation("downloadAlbumCatalogs",globalVariables.getUser().getName(),album.getName(),globalVariables.google).toString());
 
         Log.i("ListPhotos", "download album catalogs #" + urls.size());
@@ -282,6 +283,18 @@ public class ListPhotosActivity extends AppCompatActivity{
         }
     }
 
+    private void getCachedCloudPhotos(Album album) {
+        MemoryCacheManager cacheManager = globalVariables.getCacheManager();
+
+        List<Photo> cachedPhotos = cacheManager.getAlbumPhotos("", album.getName(), globalVariables.google);
+
+        for(Photo photo : cachedPhotos){
+            if(!adapter.contains(photo))
+                adapter.addPhoto(photo);
+        }
+        Log.i(TAG, "Cloud cached photos = " + cachedPhotos.size());
+    }
+
     private void downloadCatalogsFinished() {
         nrCatalogs--;
         if(nrCatalogs == 0 && nrPhotos == 0) {
@@ -299,6 +312,7 @@ public class ListPhotosActivity extends AppCompatActivity{
      * @param urls list of photo's to download
      */
     public void downloadPhotos(List<String> urls) {
+        final MemoryCacheManager cacheManager = globalVariables.getCacheManager();
 
         nrPhotos += urls.size();
         Log.i("ListPhotos", "downloading photos from google drive");
@@ -308,9 +322,12 @@ public class ListPhotosActivity extends AppCompatActivity{
             task.addOnSuccessListener(new OnSuccessListener<Bitmap>() {
                 @Override
                 public void onSuccess(Bitmap bitmap) {
-                    Photo photo = new Photo(url, bitmap);
+                    String id = Uri.parse(url).getQueryParameter("id");
+                    Photo photo = new Photo(id, bitmap);
                     if(!adapter.contains(photo))
                         adapter.addPhoto(photo);
+
+                    cacheManager.addAlbumPhoto("", album.getName(), photo, globalVariables.google);
                     photosDownloadFinished();
                 }
             });
@@ -432,31 +449,15 @@ public class ListPhotosActivity extends AppCompatActivity{
             }else{
                 //Member not in group: get cached photos
                 Log.i(TAG, "Get cached photos from: " + memberOfAlbum.getName());
-                List<Photo> cachedPhotos = cacheManager.getAlbumPhotos(memberOfAlbum.getName(), album.getName());
+                List<Photo> cachedPhotos = cacheManager.getAlbumPhotos(memberOfAlbum.getName(), album.getName(), globalVariables.google);
                 Log.i(TAG, "Add cached photos: " + cachedPhotos.size());
                 adapter.addAllPhotos(cachedPhotos);
             }
-            /*for(Member member: membersInGroup){
-
-        for(Member memberOfAlbum:album.getMembers()){
-            for(Member member: membersInGroup){
-                Log.d(TAG,"i am " + globalVariables.getUser().getName() + " and i have " + member.getName() + " in my group");
-                if(memberOfAlbum.getName().equals(member.getName())){
-                    Log.d("asking for photos",memberOfAlbum.getName());
-                    askForPhotos(member);
-
-                }else{
-                    Log.i(TAG, "Get cached photos from: " + member.getName());
-                    List<Photo> cachedPhotos = cacheManager.getAlbumPhotos(member.getName(), album.getName());
-                    Log.i(TAG, "Add cached photos: " + cachedPhotos.size());
-                    adapter.addAllPhotos(cachedPhotos);
-                }
-            }*/
         }
 
     }
 
-    /**
+      /**
      * Ask a device for its photos of a certain album
      * @param member
      */
@@ -507,40 +508,6 @@ public class ListPhotosActivity extends AppCompatActivity{
             e.printStackTrace();
         }
     }
-    /*public void getFileID() throws UnsupportedEncodingException, JSONException {
-        Log.i(TAG, "File ID: " + album.getFileID());
-        if(album.getFileID() != null)
-            return;
-
-        ServerAPI.getInstance().getFileID(this,
-                globalVariables.getToken(),
-                globalVariables.getUser().getName(),
-                album.getName(),this.globalVariables.google + "",
-                new JsonHttpResponseHandler() {
-
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                    try {
-
-                        album.setFileID((response.get(0).toString()));
-                        Log.i("ListPhotos", "newFileID = " + album.getFileID());
-                        if(!globalVariables.google) {
-                            loadP2PAlbum();
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        if(statusCode == 401)
-                            ServerAPI.getInstance().tokenInvalid(ListPhotosActivity.this);
-
-                    }
-                });
-    }*/
 
     /**
      * Updates the information of a album that was shared with user but not yet setted
@@ -839,9 +806,8 @@ public class ListPhotosActivity extends AppCompatActivity{
            Photo newPhoto = new Photo(photo.getUrl(),Utils.decodeBitmap(photo.getBitmap()));
            newPhoto.setMine(false);
            adapter.addPhoto(newPhoto);
-           cacheManager.addAlbumPhoto(username, albumName, newPhoto);
+           cacheManager.addAlbumPhoto(username, albumName, newPhoto, globalVariables.google);
         }
-        Log.i(TAG, "cached photos: " + cacheManager.getAlbumPhotos(username, albumName).size());
     }
 
     public void syncPhotos(MenuItem item) {

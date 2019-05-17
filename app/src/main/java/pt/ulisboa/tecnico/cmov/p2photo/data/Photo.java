@@ -1,8 +1,12 @@
 package pt.ulisboa.tecnico.cmov.p2photo.data;
 
 import android.graphics.Bitmap;
+import android.util.Base64;
+import android.util.Log;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class Photo implements Serializable {
     String url;
@@ -50,8 +54,16 @@ public class Photo implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof Photo)
+        if(obj instanceof Photo) {
+            Log.i("Equals", url + "-" + ((Photo) obj).getUrl());
             return ((Photo) obj).getUrl().equals(url);
+        }
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        return url.hashCode();
+    }
+
 }
