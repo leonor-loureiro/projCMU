@@ -758,9 +758,10 @@ public class ListPhotosActivity extends AppCompatActivity{
      */
     public void addPhotoSuccess(String url, Uri photoUri) {
         try {
+            String id = Uri.parse(url).getQueryParameter("id");
             //Display photo
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(ListPhotosActivity.this.getContentResolver(), photoUri);
-            adapter.addPhoto(new Photo(url, bitmap));
+            adapter.addPhoto(new Photo(id, bitmap));
 
             Log.i(TAG, "Add photo: " + url);
             Log.i(TAG, mCatalogContent.toString());
